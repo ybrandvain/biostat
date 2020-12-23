@@ -1,3 +1,37 @@
+.rmdcaution, .rmdimportant, .rmdnote, .rmdtip, .rmdwarning {
+  padding: 1em 1em 1em 4em;
+  margin-bottom: 10px;
+  background: #f5f5f5 5px center/3em no-repeat;
+}
+.rmdcaution {
+  background-image: url("https://raw.githubusercontent.com/rstudio/bookdown/master/inst/examples/images/caution.png");
+}
+.rmdimportant {
+  background-image: url("https://raw.githubusercontent.com/rstudio/bookdown/master/inst/examples/images/important.png");
+}
+.rmdnote {
+  background-image: url("https://raw.githubusercontent.com/rstudio/bookdown/master/inst/examples/images/note.png");
+}
+.rmdtip {
+  background-image: url("https://raw.githubusercontent.com/rstudio/bookdown/master/inst/examples/images/tip.png");
+}
+.rmdwarning {
+  background-image: url("https://raw.githubusercontent.com/rstudio/bookdown/master/inst/examples/images/warning.png");
+}
+
+
+.rmddef {
+  padding: 1em 1em 1em 2em;
+  margin-bottom: 10px;
+  background: #f2e6ff 5px center/3em no-repeat;
+}
+
+.rmdcode {
+  padding: 1em 1em 1em 2em;
+  margin-bottom: 10px;
+  background: #FFDAC8 5px center/3em no-repeat;
+}
+
 p.caption {
   color: #777;
   margin-top: 10px;

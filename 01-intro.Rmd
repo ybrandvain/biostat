@@ -1,21 +1,239 @@
-# Introduction {#intro}
+# Introduction to Stats {#intro}
 
-You can label chapter and section titles using `{#label}` after them, e.g., we can reference Chapter \@ref(intro). If you do not manually label them, there will be automatic labels anyway, e.g., Chapter \@ref(methods).
 
-Figures and tables with captions will be placed in `figure` and `table` environments, respectively.
 
-```{r nice-fig, fig.cap='Here is a nice figure!', out.width='80%', fig.asp=.75, fig.align='center'}
-par(mar = c(4, 4, .1, .1))
-plot(pressure, type = 'b', pch = 19)
+```{r, echo = FALSE, message=FALSE}
+library(knitr)
+library(blogdown)
+library(tweetrmd)
+library(tufte)
+library(emo)
+library(here)
 ```
 
-Reference a figure by its code chunk label with the `fig:` prefix, e.g., see Figure \@ref(fig:nice-fig). Similarly, you can reference tables generated from `knitr::kable()`, e.g., see Table \@ref(tab:nice-tab).
 
-```{r nice-tab, tidy=FALSE}
-knitr::kable(
-  head(iris, 20), caption = 'Here is a nice table!',
-  booktabs = TRUE
-)
+
+```{block2, type='rmdnote'}
+These notes accompany Chapter 1 --- Statistics and samples --- of our textbook. **The reading below is required**, @whitlock2020 is not, but is encouraged.    
 ```
 
-You can w
+<span style="color: red"> YB TDO: videos, add advanced material about RMarkdown, projects</span>
+
+<span style="color: Blue;font-size:22px;">   Motivating scenario:  </span>  <span style="color: Black;font-size:18px;">You have seen or heard about statistics, but you don't rally know what people are getting at. You hear words like "p-value", "statistically significant", "effect size", "bias", or "nonindependent" but can't pinpoint exactly what they mean? </span> 
+
+**Learning goals: By the end of this chapter you should be able to**    
+
+
+- Get a sense of what motivates statisticians.  
+- Be able to explain the difference between a population and a sample, a parameter and an estimate, the relationship between these four concepts, and the things which can make a sample deviate from a population.   
+- Have a sense of why statisticians, why we must consider the type of data and variables in building models.  
+- Understand the differences in motivation and what we can get out of an observational and experimental study.
+
+```{r, fig.cap = 'Intro to this chapter (1 min and 05 sec).', echo = FALSE, out.extra= 'allowfullscreen'}
+include_url("https://www.youtube.com/embed/1sBX_GzIO8k")
+```
+
+
+
+```{block2, type='rmdwarning'}
+The other assignment for class is to read pages 38-44 and 104-112 [available here](https://drive.google.com/uc?export=download&id=1auP6kzHJUj_ltnfmWUav1Fas_iiXuOiv) of Calling Bullshit [@bergstrom2020].
+```
+
+## Goals of (Bio)stats
+Statistics claims to be obsessed with the TRUTH. It's meant to be a way of understanding the world. It's meant to describe and differentiate, and ideally, to tease apart causation from correlation. These three goals    
+
+1. Estimation   
+2. Hypothesis testing, and  
+3. Causal inference, 
+
+Are the beams of light we, as statisticians, try to shine on questions. That is -- this is what you call a statistician to do.
+
+My goal is to enable you to unleash these powers. But also to realize that on their own, estimation, hypothesis testing, and even causal inference are of pretty limited utility --- we could go around estimating useless trivia, or testing hypotheses that have little to do with our motivating questions, or separating between unlikely or non-exclusive causes. As such, in BIOSTATS our goals are more ambitious --- **we constantly ask:**
+
+- What is the motivating biological question?  
+- What experiments can I do/have been done and/or data can I collect to address this question?  
+- How can I design this experiment and/or collect these data in a way that will map cleanly onto both a statistical model and my motivating idea?  
+- Do results support an interesting conclusion?   
+- What are the shortcomings of statistical models and causal frameworks in the analysis?  
+- How do I best communicate my results (including estimates, visualizations, conclusions, and caveats)?  
+  
+```{r, echo=FALSE}
+tweet_embed("https://twitter.com/bryan_howie/status/1073054519808876544")
+```
+
+```{r, fig.cap = 'The goals of stats (2 min and 33 sec).', echo = FALSE, out.extra= 'allowfullscreen'}
+include_url("https://www.youtube.com/embed/4W1py-VB37U")
+```
+
+
+
+## Sampling from Populations
+
+To a statistician the TRUTH is a **population** -- *a collection of all individuals of a circumscribed type* (e.g. all grasshoppers in North America), or a process for generating these individuals (see note below). We characterize a population by its **parameters** (e.g. its TRUE mean, or its TRUE variance).
+
+
+
+However, it is often impractical or impossible to study every individual in a population. As such, we often deal with a **sample** -- *a subset of a population*. We characterize a sample by taking an **estimate** of population parameters.
+
+So a major goal of a statistical analysis is how to go from conclusions about a sample which we can measure and observe, to the population(s) we care about. In doing so we must worry about random differences between a sample and a population (known as [Sampling Error](#samplingError), as well as any systematic issues in our sampling or measuring procedure which will cause estimates to reliably differ from the population (known as [Sampling Bias](#samplingBias)).
+
+
+```{block2, type='rmdnote'}
+Sometimes we think of a population as a process generating our data. For example, when we compare binomial outcomes to the flip of a fair coin, we do not think about all coins flipped in the world. Rather we think about what we would expect to observe from the process of flipping a fair coin.
+```
+
+### Sampling Error {#samplingError -}
+
+
+Estimates of any sample will differ somewhat from population parameters by chance sampling and/or imprecise measurement. This is why we always consider and report uncertainty in estimates and note that chance can contribute to any result. Much of this course focuses on acknowledging and accommodating sampling error. We can reliably decrease sampling error by increasing the sample size. Note that despite its name, **sampling error does not imply that the researcher made a mistake**. 
+
+*I therefore think it's more appropriate to call this chance deviation of estimates away from parameters* **"The First Law of sampling"** *rather than sampling error.*
+
+### Sampling Bias {#samplingBias -} 
+
+```{r, echo=FALSE,fig.cap ='Image from [xkcd](https://xkcd.com/1999/)', out.width='30%', out.extra='style="float:right; padding:10px"'}
+include_graphics("https://imgs.xkcd.com/comics/selection_effect_2x.png")
+```  
+
+There are many ways for samples to systematically deviate from the population.
+
+For example, non-randomly selected individuals will likely differ from the population in important ways. e.g. students who raise their hand in class are perhaps more likely to know the answer than a randomly chosen student, or brightly colored individuals are more likely to be spotted than drab individuals. Such phenomena are known as **volunteer bias**.
+
+
+
+Another devious form of bias is known as **survivorship bias**, in which survivors differ from a population in critical ways. For example, students at the University of Minnesota likely had higher high school GPAs than a random sample of individuals from across the twin cities of the same age.
+
+
+```{r, echo=FALSE,fig.cap ='Image from [wikipedia](https://en.wikipedia.org/wiki/Survivorship_bias)', out.width='30%', out.extra='style="float:right; padding:10px"'}
+include_graphics("https://upload.wikimedia.org/wikipedia/commons/thumb/9/98/Survivorship-bias.png/256px-Survivorship-bias.png")
+```  
+
+A classic example of survivorship bias is this distribution of gunshots holes in airplanes returning from WWII --- the army initially reacted to the prevalence of holes in the wings and tail by suggesting that such parts of the plain be reinforced. However, Abraham Wald pointed out that airplanes that did not return were the ones who needed more help and these where likely shot where we don't see holes.
+
+```{block2, type='rmdwarning'}
+This is a good time to remember to read pages 38-44 and 104-112 [available here](https://drive.google.com/uc?export=download&id=1auP6kzHJUj_ltnfmWUav1Fas_iiXuOiv) of Calling Bullshit [@bergstrom2020].
+```
+
+
+### (Non) independence  {-}  
+Most (intro) stats assumes that samples are independent. If observations in a sample are *independent of on another, the probability that one individual is studied is unrelated to the probability that any other individual is studied*. While this is desirable, it is sometimes impossible, so we address methods for accommodating non-independence later in the term.
+
+
+```{r, fig.cap = 'Sampling -- what could go wrong? (7 min and 45 sec)', echo = FALSE, out.extra= 'allowfullscreen'}
+include_url("https://www.youtube.com/embed/aL_feXB7nG0")
+```
+
+##  Models and Hypothesis Testing
+
+### Statistical Models {-}
+
+While statisticians claim to be interested in TRUTH and POPULATIONS, they quickly give up on this. Rather than characterizing a population in full, or describing the complex processes such as metabolism, meiosis, gene expression that generate data, statisticians build simple models to abstract away the biological complexity and make questions approachable. As such, rather than fully describing a distribution from a population, statisticians often use well characterized statistical distributions to approximate and model the actual biological process.
+
+So, while we use statistics to search for truth, we must always remember this underlying fiction. As we conduct our statistics always consider the relationship between our biological models/phenomena and the stats model we use to approximate it. If our statistical model is inappropriate for our biological question, we cannot reasonably take home much from the result. That said, we're doing statistics not physiology, and so our goal is to make use of appropriate statistical abstractions, not to reconstruct the whole biological system (even if we're doing statistics on physiology).
+
+> "All models are wrong, but some are useful."
+>
+> `r tufte::quote_footer('--- Attributed to statistician George Box')`
+
+### Hypothesis Testing  {-}
+ 
+A common use of statistics --- especially the statistics we focus on this term --- is hypothesis testing. Here, we use our estimates from samples to ask if data come from populations with different parameters. This approach often relies on statistical models BUT SEE CHAPTER XXX
+
+##  Types of Variables and Data
+
+As we build and evaluate statistical models, a key consideration is the type of data and the process that generates these data. Variables are things which differ among individuals (or sampling units) of our study. So, for example, height, or eye color, or the type of fertilizer applied to a site, or the number of insect species per hectare are all variables.
+
+### Explanatory and Response variables {-}
+We often care to distinguish between **explanatory variables**, which *we think underlie or are associated with the biological process of interest*, from **response variables**, *the outcome we aim to understand*. This distinction helps us build and consider our statistical model and relate the results to our biological motivation.
+
+The difference between an explanatory and response variable often depends on the motivation and/or study design. For example if we where interested to know if fertilizer type had an (?indirect?) impact on insect deversity, the type of fertilizer would be the explanatory variable and he number of insect species per hectare would be the response variable.
+
+### Types of Data {-}  
+
+Data can come in different flavors. it is important to understand these, as they should direct our model building and data summaries, interpretation and data visualization.
+
+
+
+```{r, echo=FALSE, out.width='40%', out.extra='style="float:right; padding:10px"'}
+include_graphics("https://github.com/allisonhorst/stats-illustrations/raw/master/other-stats-artwork/continuous_discrete.png")
+```  
+
+
+#### Flavors of numeric variables. {-}
+
+
+
+**Numeric variables** are *quantitative and have magnitude*, and come in a few sub-flavors. As we will see soon, these guide our modeling approaches:    
+
+- **Discrete variables** *come in chunks*. For example the number of individuals is an integer, we don't have 1/2 people.   
+- **Continuous variables** *can take any value within some reasonable range*. For example, height, weight, temperature, etc. are classic continuous variables. Some variables are trickier -- for example, age is continuous, but we often analyze it as if it's discrete. In practice, these tricky cases rarely present a serious problem for our analyses (except in the rare cases in which they do).
+
+**Not all numbers are numeric.** For example, gene ID is a number but it is an arbitrary marker and is not quantitative.  
+
+
+```{r, echo=FALSE, out.width='60%', out.extra='style="float:right; padding:10px"'}
+include_graphics("https://github.com/allisonhorst/stats-illustrations/raw/master/other-stats-artwork/nominal_ordinal_binary.png")
+```  
+
+#### Flavors of categorical variables. {-}
+
+
+
+**Categorical variables** are *qualitative*, and include,  
+
+- **Nominal variables** which *cannot be ordered and have names* -- like sample ID, species, hair color etc...  
+- **Binary variables** are special types of nominal variables, which *have only two options* (or for which we only consider two options. Alive/dead, pass/fail, on/off are classic binary variables).  
+
+- **Ordinal variables** *can be ordered, but do not correspond to a magnitude*. For example, no medal, bronze, silver and gold medals in the Olympics are ranked from best to worst, but first isn't some reliable distance away from second or third etc... .
+
+
+
+
+```{r, fig.cap = 'Types of variables (2 min and 15 sec).', echo = FALSE, out.extra= 'allowfullscreen'}
+include_url("https://www.youtube.com/embed/JVo19zqq5cs")
+```
+
+
+##  Types of Studies
+
+The third major goal of statistics (in addition to estimation and hypothesis testing) is inferring causation. When hoping to do so, we must consider the type of study.
+
+A **randomized control experiment**, in which *treatments are randomly assigned to individuals* is considered the gold-standard for establishment of causation. If neither the subjects nor the experimenters know the treatment, a randomized control study can allow us to infer causation. However, some caution is warranted here -- a causal relationship in a controlled experiment under specified settings may not imply a causal relationship in nature. For example, exceptionally high doses of a pesticide may cause squirrels to die, but this does not mean that the smaller dose of insecticide found around farm fields is responsible for squirrel death.
+
+Additionally, randomized control experiments are often unfeasible, impractical, and/or impossible. As such, scientists often rely on **observational studies** in which *treatments are not randomly assigned to individuals*. In observational studies, **confounding variables** -- *unmodelled variables which distort the relationship between explanatory and response variables -- can bias our interpretation*. We therefore must show extreme caution when attempting to learn about causation from observational studies. However, the rapidly developing field of causal inference is establishing a set of approaches that can help us disentangle correlation and causation.
+
+Remember: the distinction between an experimental and an observational experimental study is not about the equipment used or the lab vs. the field. For example, comparing patterns of methylation between live bearing and egg laying species of fish is an observation, not an experiment, as we did not randomly assign live-bearing or egg-laying to fish in this study.
+
+
+```{r, fig.cap = 'Types of variables (4 min and 15 sec).', echo = FALSE, out.extra= 'allowfullscreen'}
+include_url("https://www.youtube.com/embed/loAKxnepIHU")
+```
+
+
+
+## Quiz
+
+```{r, echo=FALSE}
+knitr::include_app('https://brandvain.shinyapps.io/01-introqs/', height = '500px')
+```
+
+## Definitions
+
+```{block2, type='rmddef'}
+
+**Population** A collection of all individuals of a circumscribed type, or a generative process from which we can generate samples.   
+**Sample** A subset of a population -- individuals we measure.   
+
+**Parameter** A true measure of a population.  
+**Estimate** A guess at a parameter that made from a finite sample.  
+
+**Sampling error** describes the deviation between parameter and estimate attributable to the finite process of sampling.  
+**Sampling bias describes the deviation between parameter and estimate attributable to non representative sampling.  
+**Independence** Samples are independent if the probability that one individual is studied is unrelated to the probability that any other individual is studied.  
+
+**Explanatory variables** are variable we think underlie or are associated with the biological process of interest.   
+**Response variables** are the outcome we aim to understand.
+
+**Categorical variables** are qualitative -- they cannot be assigned a meaningful value on the number line.    
+**Numeric variables** are quantitative -- they can be assigned a meaningful value on the number line.
+```

@@ -1,36 +1,120 @@
 --- 
-title: "A Minimal Book Example"
-author: "Yihui Xie"
+title: "Applied Biostats"
+author: "Yaniv Brandvain"
 date: "`r Sys.Date()`"
 site: bookdown::bookdown_site
-output: bookdown::gitbook
+output: bookdown::html_book
 documentclass: book
-bibliography: [book.bib, packages.bib]
+bibliography: [book.bib]
 biblio-style: apalike
 link-citations: yes
 github-repo: rstudio/bookdown-demo
-description: "This is a minimal example of using the bookdown package to write a book. The output format for this example is bookdown::gitbook."
+description: "Course notes for applied Biostats."
 ---
 
-# Prerequisites
 
-This is a _sample_ book written in **Markdown**. You can use anything that Pandoc's Markdown supports, e.g., a math equation $a^2 + b^2 = c^2$.
-
-The **bookdown** package can be installed from CRAN or Github:
-
-```{r eval=FALSE}
-install.packages("bookdown")
-# or the development version
-# devtools::install_github("rstudio/bookdown")
+```{r, echo = FALSE, message=FALSE}
+library(knitr)
+library(tidyverse)
+library(blogdown)
+library(tweetrmd)
+library(tufte)
+library(emo)
+library(here)
 ```
 
-Remember each Rmd file contains one and only one chapter, and a chapter is defined by the first-level heading `#`.
+# Preface {-}
 
-To compile this example to PDF, you need XeLaTeX. You are recommended to install TinyTeX (which includes XeLaTeX): <https://yihui.name/tinytex/>.
+## A book of (com)passion {-}
 
-```{r include=FALSE}
-# automatically create a bib database for R packages
-knitr::write_bib(c(
-  .packages(), 'bookdown', 'knitr', 'rmarkdown'
-), 'packages.bib')
+I begin this writing in early Sept 2020, and am thinking about you, my students for the fall 2021 term. Currently much is uncertain — we are beginning a term in the wake of George Floyd's murder [among many others], which has resulted in protests, uprisings, rioting and armed confrontation between protestors, armed citizens and police. We are in the midst of an uncertain economy, and a vicious presidential election. Most of us feel isolated as COVID has pushed most of us home, some of us are sick and/or have had family members fall ill. Who knows if classes will be happening in person or not in 2021? Global climate change is threatening our future etc. etc. etc.. You get it, there's just **so much happening**, and so much uncertainty about the future of this class, the University of Minnesota, the United States, and the World.
+
+*Mid sept update:* Now much of the west coast is ablaze.
+
+**Why do I bring this up?** Well I know you're dealing with a lot. Every year students are dealing with a lot -- from jobs, to supporting family, to the everyday of being in college and living life, and this year there's even more. I too have a lot -- A 14 month-old daughter, research and life pressures, teaching etc. Yet, we are all trying to make the most of life in this era. We want to teach, learn, and grow.
+
+What's more, I believe this content is more important now than it has ever been, statistics is obsessed with the critical evaluation of claims in the face of data, and is therefore particularly useful in uncertain times. Given this focus, and given that you all have different energies, motivations and backgrounds, I am restructuring this course slightly from previous years. The biggest change is a continued de-emphasis on math and programming -- that doesn't mean I'm eliminating these features, but rather that I am streamlining the required math and programming to what I believe are the essentials. For those who want more mathematical and/or computational details (either because you want to push yourself or you need this to make sense of things), I am including a bunch of optional content and support.
+
+**I LOVE TEACHING THIS COURSE** -- the content is very important to me. I also care deeply about you. I want to make sure you get all you can / all you need from this course, while recognizing the many challenges we are all facing. One tangible thing I leave you with is this book, which I hope you find useful as you go on in your life. Another thing I leave you with is my concern for your well-being and understanding -- please contact me with any suggestions about the pace / content / you of this course and/or any life updates which may change how and when you can complete the work.
+
+## Course philosophy / goals {-}
+
+
+```{r, echo=FALSE}
+tweet_embed("https://twitter.com/LucyStats/status/1086757516674039813")
 ```
+
+My motivating goal for this course is to empower you to produce, present, and critically evaluate statistical evidence — especially as applied to biological topics. You should know that stats models are only models and that models are imperfect abstractions of reality. Yu should be able to think about jhow a biological question could be formulated as a statistical question, present graphs which show how data speak to this question, be aware of any shortcomings of that model, and how statistical analysis of a data set can be brought back into our biological discussion.
+
+*"By the end of this course...*  
+
+- *Students should be statistical thinkers.* Students will recognize that data are comprised of observations that partially reflect chance sampling, & that a major goal of statistics is to incorporate this idea of chance into our interpretation of observations. Thinking this way can be challenging because it is a fundamentally new way to think about the world. Once this is mastered, much of the material follows naturally. Until then, it's more confusing.  
+
+- *Students should think about probability quantitatively.* That chance influences observations is CRITICAL to statistics (see above). Quantitatively translating these probabilities into distributions and associated statistical tests allows for mastery of the topic.   
+
+- *Students should recognize how bias can influence our results.* Not only are results influenced by chance, but factors outside of our focus can also drive results. Identifying subtle biases and non-independence is key to conducting and interpreting statistics.   
+
+- *Students should become familiar with standard statistical tools / approaches and when to use them.* Recognize how bias can influence our results. What is the difference between Bayesian and frequentist thinking? How can data be visualized effectively? What is the difference between statistical and real-world significance? How do we responsibly present/ interpret statistical results? We will grapple with & answer these questions over the term.   
+
+- *Students should have familiarity with foundational statistical values and concepts.* Students will gain an intuitive feel for the meaning of stats words like *variance, standard error, p-value, t-statistic, and F-statistic*, and will be able to read and interpret graphs, and how to translate linear models into sentences.  
+
+- Students should be able to conduct the entire process of data analysis in R. Students will be able to utilize the statistical language, R, to summarize, analyze, and combine data to make appropriate visualizations and to conduct appropriate statistical tests.
+
+ 
+### `R`, `RStudio`, and the `tidyverse` {-}
+
+```{r, fig.cap = 'This image comes with permissions from Allison Horst, who makes tremendous aRt. If you appreciate her work, she would appreciate your support for [Data for Black Lives](https://d4bl.org/)', echo=FALSE}
+include_graphics("https://github.com/allisonhorst/stats-illustrations/blob/master/rstats-artwork/monster_support.jpg?raw=true")
+```
+
+
+We will be using R in this course, in the RStudio environment. My goal is to have you empowered to make figures, run analyses, and be well positioned for future work in R, with as much fun and as little pain as possible. RStudio is an environment and the tidyverse is a set of R packages that makes R's powers more accessible without the need to learn a bunch of computer programming.
+
+Some of you might have experience with R and some may not. Some of this experience might be in tidyverse or not. There will be ups and downs — the frustration of not understanding and/or it not working and the joy of small successes. Remember to be patient, forgiving and kind to yourself, your peers, and me. Ask for help from the internet, your friends, Anna, and Yaniv.
+
+```{block2, type='rmdwarning'}
+<span style="color:red"> We will using R version 4.0.0 or above, and tidyverse version 1.3.0 or above.</span>  
+
+You can download these onto your computer (Make sure the `R` is version 4.0.0).  
+
+1. Download/update R from [here](https://www.r-project.org/).  
+2. Next download/update RStudio from [here](https://rstudio.com/products/rstudio/download/#download).  
+3. Finally open RStudio and type `install.packages("tidyverse")` and then `library(tidyverse)` to ensure this worked.  
+
+Alternatively you can simply join the course via RStudioCloud. This could be desirable if you do not want to or have trouble doing this. YB ADD DETAILS
+```
+
+
+## What is this 'book' and how will we use it? {-}
+
+This 'book' functions as an extensive syllabus and course notes. I will embed youtube videos, app-based demonstrations and class exercises. As noted above, there are some things I will include that will not be necessary for everyone, and I will clearly mark these sections.
+
+
+I hope that this book provides clear and useful background for the course, and I advise you to regularly go through each book 'chapter' for the relevant week. **Be sure you get familiar with the content BEFORE class.**
+
+Note that this 'book' is not the entirety of the course content, and is not an original piece of my own effort -- in addition from lifting from a few other course online (with attribution), I also make heavy use of these texts:  
+
+- *The Analysis of Biological Data Third Edition [@whitlock2020]:* This is the official book of this course, and is a standard biostats textbook, with many [useful resources](https://whitlockschluter3e.zoology.ubc.ca/) available online. The writing is great, as are the examples. Most of my material originates here (although I occasionally do things a bit differently). This book is officially optional, but students consistently ell me that it is extremely helpful. So, I highly recommend buying it. You can get the newest edition [here](https://www.macmillanlearning.com/college/us/product/Analysis-of-Biological-Data/p/131922623X), but any edition will be pretty useful.   
+
+- *Calling Bullshit [@bergstrom2020]:* This book is not technical, but points to the big picture concerns of statisticians. It is very practical and well written. I will occasionally assign readings from this book, and/or point you to videos on their [website](https://www.callingbullshit.org/videos.html). All readings will be made available for you, but you might want to [buy a physical copy](https://www.penguinrandomhouse.com/books/563882/calling-bullshit-by-carl-t-bergstrom-and-jevin-d-west/).      
+
+- *Fundamentals of Data Visualization [@wilke2019]:* This book is [free online](https://clauswilke.com/dataviz/), and is very helpful for thinking about graphing data. In my view, graphing is among the most important skills in statistical reasoning, so I reference it regularly.  
+
+- *R for Data Science [@grolemund2018]:* This book is [free online](https://r4ds.had.co.nz/), and is very helpful for doing the sorts of things we do in R regularly. This is a great resource.
+
+I will introduce other resources as we go.
+
+## How will this term work / look? {-}
+
+```{r, fig.cap = 'Its a mystery', echo=FALSE}
+include_graphics("https://media.giphy.com/media/KZdaJU4SPaNzA3VPMF/giphy.gif")
+```
+
+**Nobody knows! But I have a vision.**  I aim to have a majority of the course content available before the term begins. As such you can plan around your likely conflicts.  
+
+- Prep for 'class'. This class is flipped with asynchronous content delivery and synchronous meetings.  
+- Be sure to look over the assigned readings and/or videos, and complete the short low-stakes homework BEFORE each course.  
+- During class time, I will address questions make announcements, and get you started on in-class work. Anna & I will bounce around your breakout rooms to provide help and check-in. If you cannot make the class, you could do this on your own time without help, but we do not recommend this as a class strategy.
+- The help of your classmates and the environment they create is one of the best parts of this class. Help each other.  
+- In addition to low stakes work before and in class, there will be a few more intense assignments, some collaborative projects and a summative project as the term ends. There will be no 'high-stakes' in class timed tests.
+

@@ -1,0 +1,567 @@
+# Visualizing data in R – An intro to ggplot {#viz1}  
+
+```{r, echo = FALSE, message=FALSE}
+library(knitr)
+library(tidyverse)
+library(blogdown)
+library(tweetrmd)
+library(tufte)
+library(cowplot)
+library(emo)
+```
+
+
+YB TDO: videos, assignment, cheatsheet
+
+
+```{block2, type='rmdnote'}
+These notes accompany portions of Chapter 2 — Displaying Data — of our textbook, which we revisit in Section 9. The reading below is required, @whitlock2020 is not.
+```
+
+
+
+<span style="color: Blue;font-size:22px;">   Motivating scenarios:  </span>  <span style="color: Black;font-size:18px;"> Motivating scenarios: you have a fresh new data set and want to check it out. How do you go about looking into it? </span> 
+
+
+**Learning goals: By the end of this chapter you should be able to:**    
+
+- Build a simple ggplot.  
+- Explain the idea of mapping data onto aesthetics, and the use of different geoms.  
+- Match common plots to common data type.   
+- Use geoms in ggplot to generate the common plots (above).  
+
+
+```{block2, type='rmdwarning'}
+There is no external reading for this chapter, but watch the embedded vidoes, and complete all embedded learnRexcercises. Then go to canvas to fill out the evaluation.  
+```
+
+##  A quick intro to data visualization.  
+
+Recall that as bio-statisticians, we bring data to bear on critical biological questions, and communicate these results to interested folks. A key component of this process is visualizing our data.
+
+
+### Exploratory and explanatory visualizations
+
+```{r fig.cap='', out.width='40%', echo=FALSE, out.extra='style="float:right; padding:10px"'}
+include_graphics("https://github.com/allisonhorst/stats-illustrations/raw/master/rstats-blanks/ggplot2_exploratory_blank.png")
+```
+
+
+We generally think of two extremes goals of data visualization  
+
+- In **exploratory visualizations** we aim to identify any interesting patterns in the data, we also conduct quality control to see if there are patterns indicating mistakes or biases in our data, and to think about appropriate transformations of data. On the whole, our goal in exploratory data analysis is to understand the stories in the data.    
+
+```{r fig.cap='', out.width='40%', echo=FALSE, out.extra='style="float:right; padding:10px"'}
+include_graphics("https://github.com/allisonhorst/stats-illustrations/raw/master/rstats-blanks/ggplot2_blank.png")
+```
+
+- In **explanatory visualizations** we aim to communicate our results to a broader audience. Here are goals are communication and persuasion. When developing explanatory plots we consider our audience (scientists? consumers? experts?) and how we are communicating (talk? website? paper?).
+
+
+The `ggplot2` package in `R` is well suited for both purposes. **Today we focus on exploratory visualization in ggplot2 because**  
+
+1. They are the starting point of all statistical analyses.      
+2. You can do them with less `ggplot2` knowledge.   
+3. They take less time to make than explanatory plots.    
+
+Later in the term we will show how we can use `ggplot2` to make high quality explanatory plots.
+
+
+### Centering plots on biology
+
+Whether developing an exploratory plot, you should think hard about the biology you hope to convey before jumping into a plot. Ask yourself   
+
+- What do you hope to learn from this plot?  
+- Which is the response variable (we usually place that on the y-axis)?  
+- Are data numeric or categorical?     
+     - If they are categorical are they ordinal, and if so what order should they be in?   
+
+The answers to these questions should guide our data visualization strategy, as this is a key step in our statistical analysis of a dataset. The best plots should evoke an immediate understanding of the (potentially complex) data. Put another way, a plot (be it exploratory of explanatory) should highlight both the biological question and its answer.
+
+**Before jumping into making a plot in R, it is often useful to take this step back, think about your main biological question, and take a pencil and paper to sketch some ideas and potential outcomes.** I do this to prepare my mind to interpret different results, and to ensure that I’m using R to answer my questions, rather than getting sucked in to so much Ring that I forget why I even started. With this in mind, we're ready to get introduced to `ggplot`ing!
+
+
+```{r, echo=FALSE}
+tweetrmd::tweet_embed("https://twitter.com/webbshasta/status/1263894431268106241?s=20")
+```
+
+
+## The idea of `ggplot`   
+
+
+```{r fig.cap = "Watch [this video](https://www.youtube.com/watch?v=cqcQT44mJTM) about getting started with ggplot2 (7 min and 17 sec), from STAT 545", echo=FALSE, out.extra= 'allowfullscreen'}
+include_url("https://www.youtube.com/embed/cqcQT44mJTM")
+```
+
+
+`ggplot` is built on a framework for building plots called the grammar of graphics. A major idea here is that plots are made up of data that we map onto aesthetic attributes.
+
+Lets unpack this sentence, because there's a lot there. Say we wanted to make a very simple plot e.g. observations for categorical data, or a simple histogram for a single continuous variable. Here we are mapping this variable onto a single aesthetic attribute – the x-axis.
+
+```{block2, type='rmdnote'}
+There’s way more nuance / awesomeness / power / ideas behind ggplot2 which we will reveal *just in time* over the term, but here we get going with the essential concepts. If you want to learn more about `ggplot` in one place, check out the [ggplot2 book](https://ggplot2-book.org/) [@wickham2016] and/or the [socviz book](https://socviz.co/) [@healy2018].
+```
+
+
+### Our first ggplot
+So, let's do this with a data set [`msleep`](https://ggplot2.tidyverse.org/reference/msleep.html) built in to tidyverse, which contains interesting information about a bunch of mammals. One question we might have is - how much variability is there in mammal brain size, and what explains this variation? Let’s look to find out...
+
+
+#### Data prep and transformation {-} 
+
+Before making these plots, we'll use the [`mutate()`]() function 
+to $log_{10}$  transform `brainwt` and `bodywt`. For this data set, this makes patterns easier to see. Later we’ll see when this is a good or bad idea and how to do this while we are plotting, but let's hold off on that for now.
+
+
+```{r}
+msleep <- msleep %>%
+  mutate(log10_brainwt = log10(brainwt), 
+         log10_bodywt  = log10(bodywt))
+
+```
+
+#### Mapping aesthetics to variables  {-} 
+
+
+So first we need to think of the variables we hope to map onto an aesthetic. Here, the only variable from the data set we are considering is how many hours an organism is awake per day. This is a continuous variable, which we hope to map on to the x-axis. We do so like this:
+
+```{r, fig.height=1, fig.cap ="Uhh ohhh"}
+msleep_plot1 <- ggplot(data = msleep, aes(x = log10_brainwt)) # save plot
+plot(msleep_plot1)                                             #
+```
+
+So, that didn’t go as expected :( — there just a blank grey background. But look more closely, what do you notice?      
+
+```{r, echo=FALSE}
+include_app("https://brandvain.shinyapps.io/aes01/")
+```
+
+**We make a more useful plot by adding a `geom` layer.**
+
+#### Adding geom layers {-}
+`geoms` explain to R what we want to see: points, lines, histograms etc.. In chapter YANIV ADD we will see how to add data summaries and trendlines. As we discuss below, a histogram is a great way to visualize variability, so lets add that as a `geom``.
+
+
+```{r first-fig, fig.cap = 'Our first ggplot!', fig.width=3, fig.height=1.7, warning=FALSE}
+msleep_histogram <- msleep_plot1 +
+  geom_histogram(bins =10, color = "white")
+
+plot(msleep_histogram)
+```
+
+Yay! OK - we're off. Below we explore a bunch more geom and how they relate to the type of variables we’re interested in! But first, one more awesome feature of `ggplot` -- faceting.
+
+#### Adding facets
+
+In the bible of data visualization, the Visual Display of Quantitative Information, @tufte1983, introduced the idea of "small multiples" as a way to efficiently visualize data in many dimensions, by making many small graphs for different values of categorical variables. 
+
+> Small multiples are economical: once viewers understand the design of one [chart], they have immediate access to the data in all the other [charts]. [...] as the eye moves from one [chart] to the next, the constancy of the design allows the viewer to focus on changes in the data rather than on changes in graphical design.
+> `r tufte::quote_footer('--- Edward Tufte')`
+
+In `ggplot` we can build small multiples as facets, with the [`facet_wrap()`](https://ggplot2.tidyverse.org/reference/facet_wrap.html) and [`facet_grid()`](https://ggplot2.tidyverse.org/reference/facet_grid.html) functions.  
+
+```{r, fig.width=8, fig.cap = 'Our first ggplot!', fig.height=3, warning=FALSE}
+msleep_histogram +
+  facet_wrap(~vore, ncol =3) 
+```
+
+#### An aside -- saving and adding to plots   
+
+Above, we built a ggplot one component at a time, saving each move and visualizing it with the plot function. This isn’t necessary — we can recreate Fig. \@ref(fig:first-fig) as follows:
+
+```{r, eval=FALSE}
+ggplot(data = msleep, aes(x = log10_brainwt)) +
+  geom_histogram(bins =10, color = "white")                            +
+  facet_wrap(~vore, ncol =3) 
+```
+
+It is up to you if you want to save intermediate efforts in a plot.
+
+
+### `ggplot2` primer   
+
+To get more of a sense of how to use ggplot, complete the [Primer on Data Visualization Basics primer](https://rstudio.cloud/learn/primers/1.1) embedded below. This will get you a solid foundation in R which we will build off in this lecture and in the coming weeks.
+
+```{r, primer11, fig.cap = 'The RSutdio [Primer on Data Visualization Basics primer](https://rstudio.cloud/learn/primers/1.1)', echo=FALSE}
+include_app("https://rstudio.cloud/learn/primers/1.1")
+```
+
+
+
+
+## Common types of plots   
+
+As we saw in the section, [Centering plots on biology], we want our biological questions and the structure of the data to guide our plotting choices. **So, before we get started on making plots, we should think about our data.**     
+
+- What are the variable names?  
+- What are the types of variables?  
+- What are our motivating questions and how do the data map onto these questions?  
+- Etc...    
+
+Using the [`msleep`](https://ggplot2.tidyverse.org/reference/msleep.html) data set below, we briefly work through a rough guide on how the structure of our data can translate into a plot style, and how we translate that into a geom in ggplot. So the first step you should look at the data – either with the [`view()`](https://tibble.tidyverse.org/reference/view.html) function, or a quick [`glimpse()`](https://tibble.tidyverse.org/reference/glimpse.html) and reflect on your questions before plotting. This also helps us remember the name and data type of each variable.
+
+```{r}
+glimpse(msleep)
+```
+
+
+Now we're nearly ready to get started, but first, some caveats  
+
+1. These are vey preliminary exploratory plots -- and you may need more advanced plotting R talents to make plots that better help you see patterns. We will cover these in Chapters YB ADD, where we focus on explanatory plots.    
+
+2. There are not always cookie cutter solutions, with more complex data you may need more complex visualizations.     
+
+
+That said, the simple visualization and R tricks we learn below are the essential building blocks of most data presentation. So, let’s get started!
+
+```{block2, type='rmdwarning'}
+There is a lot of stuff below. We will revisit all of it again and again over the term, so you don’t need to master it now – think of this as your first exposure. You’ll get more comfortable and this will become more natural over time.
+```
+
+
+
+### One variable   
+
+With one variable, we use plots to visualize the relative frequency (on the y-axis) of the values it takes (on the x-axis).
+
+gg-plotting one variable We map our one variable of interest onto x `aes(x = <x_variable>)`, where we replace `<x_variable>` with our x-variable. The mapping of frequency onto the y happens automatically.
+
+#### One categorical variable {-}   
+
+Say we wanted to know how many carnivores, herbivores, insectivores, and omnivores in the [`msleep`](https://ggplot2.tidyverse.org/reference/msleep.html) data set. From the output of the [`glimpse()`](https://tibble.tidyverse.org/reference/glimpse.html) function above, we know that vore is a categorical variable, so we want a simple bar plot, which we make with [`geom_bar()`](https://ggplot2.tidyverse.org/reference/geom_bar.html).
+
+```{r barplot, fig.cap = 'Classic barplot', fig.height=1.5,fig.width=2.4}
+ggplot(data = msleep, aes(x = vore)) +
+  geom_bar()
+```
+
+We can also pipe data into `ggplot` argument after doing stuff to the data. For example, the code below remove `NA` values from our plot.
+
+```{r, fig.cap = 'A barplot, like the one above, but with `NA` values removed.', fig.height=1.5,fig.width=2.4}
+msleep                 %>%
+  filter(!is.na(vore)) %>%
+  ggplot(aes(x = vore)) +
+  geom_bar()
+```
+
+
+If the same data where presented as one categorical variable for vore (with each vore once) and another, `n`, for counts.
+
+```{r}
+count(msleep, vore)
+```
+
+
+We could recreate figure \@ref(fig:barplot) with [`geom_col()`](https://ggplot2.tidyverse.org/reference/geom_bar.html). again mapping vore to the x-aesthetic, and now mapping count to the y aesthetic, by as follows:
+
+```{r, fig.height=1.5,fig.width=2}
+count(msleep, vore) %>%
+  ggplot(aes(x = vore, y = n))+
+  geom_col()
+```
+
+
+#### One continuous variable {-}   
+
+We are often interested to know how variable our data is, and to think about the shape of this variability. Revisiting our data on mammal sleep patterns, we might be interested to evaluate the variability in how long mammals sleep.    
+
+- Do all species sleep roughly the same amount?    
+- Is the data bimodal (with two humps)?    
+- Do some species sleep for an extraordinarily long or short amount of time?    
+
+We can look into this with a histogram or a density plot.
+
+##### **One continuous variable: A histogram** {-}
+
+We use the histogram geom, [`geom_histogram()`](https://ggplot2.tidyverse.org/reference/geom_histogram.html), to make a histogram in R.
+
+```{r, fig.height=1.5,fig.width=2}
+ggplot(msleep, aes(x = log10_brainwt))+
+  geom_histogram(bins = 10, color  = "white") # Bins tells R we want 10 bins, and color = white tells R we want white lines between our bins
+```
+
+
+In a **histogram**, *each value on the x represents some interval of values of our categorical variable* (in this case, we had 10 bins, but we could have, for example, looked at sleeep in one hour with `binwidth = 1`), while *y-values show how many observations correspond to an interval on the x*. 
+
+See this [excellent write up](https://tinlizzie.org/histograms/) if you want to learn more about histograms. 
+
+When making a histogram it is worth exploring numerous binwidths to ensure you're not fooling yourself
+
+
+##### **One continuous variable: A density plot** {-}  
+
+We use the density geom, [`geom_density()`](https://ggplot2.tidyverse.org/reference/geom_density.html), to make a histogram in R.
+
+```{r, fig.height=1.5,fig.width=2, warning = FALSE}
+ggplot(msleep, aes(x = log10_brainwt))+
+  geom_density(fill = "blue") 
+```
+
+Sometimes we prefer a smooth density plot to a histogram, as this can allow us to not get too distracted by a few bumps (on the other hand, we can also miss important variability, so be careful). We again map total_sleep onto the x aesthetic, but now use [`geom_density()`](https://ggplot2.tidyverse.org/reference/geom_density.html).
+
+### Two variables 
+
+With two variables, we want to highlight the association between them. In the plots below, we show that how this is presented can influence our biological interpretation and take-home messages.
+
+#### Two categorical variables {-}  
+
+With two categorical variables, we usually add color to a barplot to identify the second group. We can choose to  
+
+- Stack bars (stacked barplot, the default behavior of [`geom_bar()`](https://ggplot2.tidyverse.org/reference/geom_bar.html) ) [Fig. \@ref(fig:stacked)],     
+- Have them next to one another (grouped barplot, add `position = position_dodge(preserve = "single")` to [`geom_bar()`](https://ggplot2.tidyverse.org/reference/geom_bar.html)) [Fig. \@ref(fig:grouped)], or      
+- Standardize them by proportion (add `position = "fill"` to [`geom_bar()`](https://ggplot2.tidyverse.org/reference/geom_bar.html)) [Fig. \@ref(fig:filled)].   
+
+
+```{block2, type='rmdwarning'}
+Below, we’ll make one of each of these graphs to look at this for the association between mammal order and diet, limiting our view to orders with five or more species with data. Which of these you choose depends on the message, story and details. For example, a filled barplot is nice because we can see proportions, but a bummer because we don’t get to see counts. The book advocates for mosaic plots, which I really like but skip here because they are a bit esoteric. Look into the [ggmosaic package](https://cran.r-project.org/web/packages/ggmosaic/), and its [vignette](https://cran.r-project.org/web/packages/ggmosaic/vignettes/ggmosaic.html) if you want to make one.
+```
+
+First, we process our data, making use of the tricks we learned in 
+[Handling data in `R`](#rdata). To do so, we [`filter()`](https://dplyr.tidyverse.org/reference/filter) for not `NA` diets, [`add_count()`](https://dplyr.tidyverse.org/reference/tally) to see how many species we have in each order, and [`filter()`](https://dplyr.tidyverse.org/reference/filter) for orders with five or more species with diet data.
+
+
+```{r}
+# Data processing
+msleep_data_ordervore <- msleep  %>%
+    filter(!is.na(vore))         %>%  # Only cases with data for diet
+    add_count(order)             %>%  # Find counts for each order
+    filter(n >= 5)                    # Lets only hold on to orders with 5 or more species with data
+```
+
+##### **Two categorical variables: A stacked bar plot** {-}
+
+```{r, stacked, fig.cap= 'A stacked bar chart.',  fig.height=2,fig.width=4, warning = FALSE}
+ggplot(data = msleep_data_ordervore, aes(x = order,  fill= vore))+
+  geom_bar()
+```
+
+Stacked barplots are best suited for cases when we’re primarily interested in total counts (e.g. how many species do we have data for in each order), and less interested in comparing the categories going into these counts. Rarely is this the best choice, so don’t expect to make too many stacked barplots.
+
+#####  **Two categorical variables: A grouped bar plot** {-}
+
+```{r, grouped, fig.cap= 'A grouped bar chart.',  fig.height=2,fig.width=4, warning = FALSE}
+ggplot(data = msleep_data_ordervore, aes(x = order,  fill= vore))+
+  geom_bar(position = position_dodge(preserve = "single"))
+```
+
+Grouped barplots are best suited for cases when we're primarily interested in comparing the categories going into these counts. This is often the best choice, as we get to see counts. However the total number in each group is harder to see in a grouped than a stacked barplot (e.g. it's easy to see that we have the same number of primates and carnivores in Fig. \@ref(fig:stacked), while this is harder to see in Fig. \@ref(fig:grouped)).
+
+##### **Two categorical variables: A filled bar plot** {-}  
+
+```{r, filled, fig.cap= 'A filled bar chart.',  fig.height=2,fig.width=4, warning = FALSE}
+ggplot(data = msleep_data_ordervore, aes(x = order,  fill= vore))+
+  geom_bar(position = "fill")
+```
+
+Filled barplots are much stacked barplots standardized to the same height. In other words, they are like stacked bar plots without their greatest strength. This is rarely a good idea, except for cases with only two or three options for each of numerous categories.
+
+
+####   One categorical and one continuous variable.  
+
+#####  **One categorical and one continuous variable: Multiple histograms** {-}
+
+
+
+A straightforward way to show the continuous values for different categories is to make a separate histogram for each numerous distributions is to make separate histograms for each category using the [`geom_histogram()`](https://ggplot2.tidyverse.org/reference/geom_histogram.html) and [`facet_wrap()`](https://ggplot2.tidyverse.org/reference/facet_wrap.html) functions in `ggplot`.
+
+```{r MultHist1, fig.cap="Multiple histograms", warning=FALSE, fig.width=2, fig.height=3.4, out.extra='style="float:right; padding:10px"'}
+msleep_data_ordervore_hist <- ggplot(msleep_data_ordervore, aes(x= log10_bodywt))+ 
+  geom_histogram(bins = 10)
+
+msleep_data_ordervore_hist +
+  facet_wrap(~order, ncol = 1)
+```
+
+
+When doing this, be sure to aid visual comparisons simple by ensuring there’s only one column. Note how Figure \@ref(fig:MultHist1) makes it much easier to compare distributions than does Figure \@ref(fig:MultHist2).   
+
+
+```{r MultHist2, fig.cap="Multiple histograms revisited", warning=FALSE, fig.width=4, fig.height=1.3}
+msleep_data_ordervore_hist +
+  facet_wrap(~order, nrow = 1)
+```
+
+##### **One categorical and one continuous variable: Density plots** {-}
+
+```{r, density, warning=FALSE, fig.cap = 'A density plot',fig.width=4, fig.height=1.75, out.extra='style="float:right; padding:10px"'}
+ggplot(msleep_data_ordervore, aes(x= bodywt, fill = order))+ 
+  geom_density(alpha = .3)+ 
+  scale_x_continuous(trans = "log10")
+```
+
+While many histograms can be nice, they can also take up a lot of space. Sometime we can more succinctly show distributions for each group with numerous density plots ([`geom_density()`](https://ggplot2.tidyverse.org/reference/geom_density.html)). While this can be succinct, it can also get too crammed, so have a look and see which display is best for your data and question.
+
+#####  **One categorical and one continuous variable: Boxplots, jitterplots etc..**   {-}
+Histograms and density plots communicate the shapes of distributions, but we often hope to compare means and get a sense of variability.   
+
+- **Boxplots** (Figure \@ref(fig:jitterbox)A) summarize distributions by showing all quartiles -- often showing outliers with points. e.g. `ggplot(aes(x = order, y = bodywt)) +` [`geom_boxplot()`](https://ggplot2.tidyverse.org/reference/geom_boxplot.html).   
+
+- **Jitterplots** (Figure \@ref(fig:jitterbox)B) show all data points, spreading them out over the x-axis. e.g. `ggplot(aes(x = order, y = bodywt)) +` [`geom_jitter()`](https://ggplot2.tidyverse.org/reference/geom_hitter.htm).      
+- We can combine both to get the best of both worlds (Figure \@ref(fig:jitterbox)C). e.g. `ggplot(aes(x = order, y = bodywt)) + geom_boxplot() + geom_jitter()`.   
+
+
+```{r jitterbox, fig.cap = 'Boxplots, jitterplots and a combination', echo=FALSE, fig.height=2, fig.width=9}
+boxplt <- ggplot(msleep_data_ordervore, aes(x = order, 
+                                  y = log10_bodywt, 
+                                  color = order)) + 
+  geom_boxplot(show.legend = FALSE) 
+
+jitterplt <- ggplot(msleep_data_ordervore, aes(x = order, 
+                                  y = log10_bodywt, 
+                                  color = order)) + 
+  geom_jitter(show.legend = FALSE) 
+
+jitterbox<- ggplot(msleep_data_ordervore, aes(x = order, 
+                                  y = log10_bodywt, 
+                                  color = order)) + 
+  geom_boxplot(show.legend = FALSE) + 
+  geom_jitter(show.legend = FALSE)
+
+plot_grid(boxplt,jitterplt,jitterbox, labels = letters[1:3], ncol=3)
+```
+
+
+#### Two continuous variables
+
+```{r, scatter, fig.cap="A scatterplot.", fig.width=2.3, warning=FALSE, fig.height=1.75, out.extra='style="float:right; padding:10px"'}
+ggplot(msleep_data_ordervore, aes(x = log10_bodywt, y = log10_brainwt))+ 
+  geom_point()
+```
+
+
+With two continuous variables, we want a graph that visually display the association between them. A scatterplot displays the explanatory variable n the x-axis, and the response variable on the y-axis. The scatterplot in figure \@ref(fig:scatter), shows a clear increase in brain size with body size across mammal species when both are on  $log_{10}$ scales.
+
+
+### More dimensions
+
+```{r, fig.cap = 'Colored scatterplot', fig.width=3.5, warning=FALSE, fig.height=2.5, out.extra='style="float:right; padding:10px"'}
+ggplot(msleep_data_ordervore, 
+       aes(x = log10_bodywt, y = log10_brainwt, color = vore, shape = order))+ 
+  geom_point()
+```
+
+
+What if we wanted to see even more? Like let's say we wanted to know if we found a similar relationship between brain weight and body weight across orders and/or if this relationship was mediated by diet. We can pack more info into these plots.
+
+⚠️ Beware, sometimes shapes are hard to differentiate.⚠️
+Facetting might make these patterns stand out.
+
+```{r, fig.height=1.75, fig.width= 6, warning=FALSE}
+ggplot(msleep_data_ordervore, aes(x = log10_bodywt, y = log10_brainwt, color = vore))+ 
+  geom_point()+
+  facet_wrap(~order, nrow = 1)
+```
+
+
+
+### Interactive plots with the plotly package  
+
+Often when I get a fresh data set I want to know a bit more about the data points (to e.g. identify outliers or make sense of things). The plotly package is super useful for this, as it makes interactive graphs that we can explore.
+
+```{r, message=FALSE,warning=FALSE}
+# install.packages("plotly") first install plotly, if it's not installed yet
+library(plotly) # now tell R you want to use plotly
+# Click on the plot below to explore the data!
+
+big_plot <- ggplot(msleep_data_ordervore,
+          aes(x = log10_bodywt, y = log10_brainwt, 
+              color = vore, shape = order, label = name))+
+  geom_point()
+
+ggplotly(big_plot)
+```
+
+
+#### Decoration vs information {-}   
+
+```{r, scatterplot2, fig.cap = 'A new scatterplot',  fig.width=2.3, warning=FALSE, fig.height=1.75, out.extra='style="float:right; padding:10px"'}
+ggplot(msleep_data_ordervore, aes(x = log10_bodywt, y = log10_brainwt))+ 
+  geom_point(color = "firebrick", size = 3, alpha = .5)
+```
+
+
+We have used the `aes()` argument to provide information. For example, in Figure 5.15 we used color to show a diet by typing aes(..., color = vore). But what if we just want a fun color for data points. We can do this by specifying color outside of the aes argument. Same goes for other attributes, like size etc, or transparency (alpha)…
+
+
+
+## ggplot2 review / reference   
+
+### ggplot2: cheat sheet   
+
+There is no need to memorize anything, check out [this handy cheat sheet](https://rstudio.com/wp-content/uploads/2015/03/ggplot2-cheatsheet.pdf)!
+
+```{r echo=FALSE}
+
+include_graphics("https://d33wubrfki0l68.cloudfront.net/21d683072b0c21cbd9b41fc0e37a587ad26b9525/cbf41/wp-content/uploads/2018/08/data-visualization-2.1.png")
+```
+
+
+
+#### ggplot2: common functions, aesthetics, and geoms
+
+#####  The ggplot() function {-}     
+
+- Takes arguments `data =` and `mapping =`.   
+- We usually leave these implied and type e.g. `ggplot(my.data, aes(...)`) rather than `ggplot(data = my.data, mapping = aes(...)`).      
+- We can pipe data into the `ggplot()` function, so my.data %>% ggplot(aes(...)) does the same thing as ggplot(my.data, aes(...)).
+
+#####  Arguments for aes() function {-}  
+
+The [`aes()`](https://ggplot2.tidyverse.org/reference/aes.html) function takes many potential arguments each of which specifies the aesthetic we are mapping onto a variable:
+
+###### x, y, and label:      {-}  
+
+```{block2, type='rmdcode'}
+- x: What is shown on the x-axis.     
+
+- y: What is shown on the y-axis.    
+
+- label: What is show as text in plot (when using geom_text())  
+```
+
+###### Color related aesthetics:      {-}  
+
+```{block2, type='rmdcode'}
+
+- [`color =`](https://ggplot2.tidyverse.org/reference/aes_colour_fill_alpha.html): What is shown by color, where color refers to the color of a point or a line (e.g. lines around a histogram).   
+
+- [`fill =`](https://ggplot2.tidyverse.org/reference/aes_colour_fill_alpha.html): What is shown by fill, where fill refers to the color of an area (e.g. area inside a histogram).     
+
+- [`alpha =`](https://ggplot2.tidyverse.org/reference/aes_colour_fill_alpha.html): What is shown by the transparency of a line or point or area.
+```
+
+
+###### Differentiation related aesthetics: linetype, size, shape   {-}
+
+```{block2, type='rmdcode'}   
+- [`shape =`](https://ggplot2.tidyverse.org/reference/aes_linetype_size_shape.html): What is shown by the shape of our points.  
+
+- [`linetype `](https://ggplot2.tidyverse.org/reference/aes_linetype_size_shape.html)=: What is shown by the linetype (e.g. dashed, dotted, etc…).   
+
+- [`size =`](https://ggplot2.tidyverse.org/reference/aes_linetype_size_shape.html): What is shown by the size of a line or point.  
+```
+
+
+#####  Commonly used geoms {-}  
+
+See [Section 3.1 of the ggplot2 book](https://ggplot2-book.org/individual-geoms.html)  for more [@grolemund2018].  
+
+```{block2, type='rmdcode'}
+- [`geom_histogram()`](https://ggplot2.tidyverse.org/reference/geom_histogram.html): Makes a histogram.     
+- [`geom_density()`](https://ggplot2.tidyverse.org/reference/geom_density.html): Makes a density plot.  
+- [`geom_point()`](https://ggplot2.tidyverse.org/reference/geom_point.html): Makes points - ideal for a scatterplot.  
+- [`geom_jitter()`](https://ggplot2.tidyverse.org/reference/geom_jitter.html): Maks jittered points - ideal for showing data when x is catgorical or discrete.    
+- [`geom_col()`](https://ggplot2.tidyverse.org/reference/geom_bar.html): or  [`geom_bar()`](https://ggplot2.tidyverse.org/reference/geom_bar.html): Makes a barplot from count data `geom_col()`, or from all observations `geom_bar()`.    
+- [`geom_line()`](https://ggplot2.tidyverse.org/reference/geom_path.html): Connect observations with a line.   
+```
+
+
+#####  Faceting {-}
+
+Faceting allows us to use the concept of small multiples [@tufte1983] to highlight patterns.
+
+```{block2, type='rmdcode'}
+For one facetted variable: `facet_wrap(~ <var>, nocl = )`  
+
+For two facetted variable: `facet_grid(<var1>~ <var2>)`, where one is shown by rows, and is shown by columns.  
+```

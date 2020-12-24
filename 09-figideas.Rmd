@@ -1,4 +1,4 @@
-#  Data presentation and visualization. Goals, considerations, and best practices
+#  Data presentation and visualization. Goals, considerations, and best practices {goodfigs}
 
 ```{r, echo = FALSE, warning=FALSE, message=FALSE}
 library(tidyverse)

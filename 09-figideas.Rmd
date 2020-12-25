@@ -452,7 +452,13 @@ Making figures accessible for all tends to make them better for everyone. Consid
 We have already highlighted a few good practices -- for example, describing results of a figure in words can make figures more accessible to blind readers, while direct labeling can make colors visible to colorblind readers. These examples highlight the benefit of universal design – as they make figures better all readers.
 
 #### Color  
-Picking colors is hard. Be sure that your colors are easy to distinguish, especially if printed in black and white or viewed by a colorblind reader. There are numerous R tools, including the [ColorBrewer package](https://rdrr.io/cran/RColorBrewer/man/ColorBrewer.html) which can help. In particular, I suggest the [colorblindr](https://github.com/clauswilke/colorblindr) package which renders plots as they would look to people with various forms of colorblindness.    
+Picking colors is hard. Be sure that your colors are easy to distinguish, especially if printed in black and white or viewed by a colorblind reader. There are numerous R tools, including the [ColorBrewer package](https://rdrr.io/cran/RColorBrewer/man/ColorBrewer.html) which can help. In particular, I suggest putting figures through a color vision [deficiency emulator](http://hclwizard.org/cvdemulator/) to see how your plots would look to readers with a color vision deficiency.
+
+<a href="https://bookdown.org/ybrandvain/Applied-Biostats/images/overplot-1.png" download>
+  <img src="https://bookdown.org/ybrandvain/Applied-Biostats/images/overplot-1.png" alt="W3Schools">
+</a>
+
+http://hclwizard.org/cvdemulator/
 
 #### Size
 Make sure everything can be read even by people with poor eyesight. Always err on the side of larger text.   

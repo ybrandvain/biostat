@@ -1,4 +1,4 @@
-#  Data presentation and visualization. Goals, considerations, and best practices {goodfigs}
+#  Data presentation and visualization. Goals, considerations, and best practices {#goodfigs}
 
 ```{r, echo = FALSE, warning=FALSE, message=FALSE}
 library(tidyverse)
@@ -452,13 +452,15 @@ Making figures accessible for all tends to make them better for everyone. Consid
 We have already highlighted a few good practices -- for example, describing results of a figure in words can make figures more accessible to blind readers, while direct labeling can make colors visible to colorblind readers. These examples highlight the benefit of universal design – as they make figures better all readers.
 
 #### Color  
-Picking colors is hard. Be sure that your colors are easy to distinguish, especially if printed in black and white or viewed by a colorblind reader. There are numerous R tools, including the [ColorBrewer package](https://rdrr.io/cran/RColorBrewer/man/ColorBrewer.html) which can help. In particular, I suggest putting figures through a color vision [deficiency emulator](http://hclwizard.org/cvdemulator/) to see how your plots would look to readers with a color vision deficiency.
+Picking colors is hard. Be sure that your colors are easy to distinguish, especially if printed in black and white or viewed by a colorblind reader. There are numerous R tools, including the [ColorBrewer package](https://rdrr.io/cran/RColorBrewer/man/ColorBrewer.html) which can help. In particular, I suggest putting figures through a color vision deficiency emulator (I suggest http://hclwizard.org/cvdemulator/) to see how your plots would look to readers with a color vision deficiency.
 
-<a href="https://bookdown.org/ybrandvain/Applied-Biostats/images/overplot-1.png" download>
-  <img src="https://bookdown.org/ybrandvain/Applied-Biostats/images/overplot-1.png" alt="W3Schools">
-</a>
 
-http://hclwizard.org/cvdemulator/
+```{r, fig.cap = '**ASSIGNMENT**: Download <a href="https://github.com/ybrandvain/biostat/blob/master/images/homglobin4comp.png?raw=true" download="hemoglobin"> this figure  </a> showing human hemoglobin levels by population -- which is meant to understand the basis of high altitude adaptation in the Andes, Ethiopia, Tibet, and  USA (as a control population that has not adapted to high elevation), upload it to http://hclwizard.org/cvdemulator/ (embedded below)  and see how these different figures are viewed under different color vision deficiencies.', echo = FALSE}
+include_app("http://hclwizard.org/cvdemulator/")
+```
+
+
+
 
 #### Size
 Make sure everything can be read even by people with poor eyesight. Always err on the side of larger text.   

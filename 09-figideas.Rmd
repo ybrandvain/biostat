@@ -155,10 +155,23 @@ We tell stories to an audience, not a wall. And when we tell stories, we need to
 
 - What is their subject matter expertise? Do they have a background in science? In statistics?  
 - Are they familiar with interpreting the plots we're making or do they need guidance?  
-- How are they looking at our plots? Printed paper (and if so, may it be in black and white)? A slide? A poster? The internet etc...?  
+- What is our method of presentation -- that is, how is the experiencing our plots? Printed paper? A slide? A poster? The internet etc...?    
 For most of this term your audience will be you, me, and sometimes a few peers. So you should make clear plots for people with some background in stats, who will be reading your plot on a computer.
 
 **As you read the guidence below, consider how would you change plots based on audience.**
+
+#### **Tailoring presentations to their method of presentation**   {-}
+
+Science is communicated in many ways. The most common presentations that include the visual display of data are: books/papers, public talks,  internet. While the basic principles of  making a good plot are always the same, you should customize your explanatory plots to the method of communication.  
+
+- **Books / Papers:** Here plots are static, and while we can write about them in  the text, there's no guaranteed the audience will read it. So, plot for papers and books should be self-contained such that the readers get the figure's main point  from image and caption alone. If a figure can be misinterpreted by looking at it, this should be fixed in the figure (or less ideally, the figure caption), not the text of the manuscript.    
+- **Public Talks:** When telling stories to a captive audience in a public talk, you control the flow of information. 
+    - You can build up figures one slide of a time to bring our audience along.  
+    - But be sure the text is big enough to be visible from the back of the room.   
+- **Digital:** When your work is online, you can include gifs, and make interactive plots to better engage and empower your readers.   
+
+
+
 
 ### The goal   
 People often spend hours or even days on perfecting a plot for publication or an important presentation. You should not spend this long on most plots in this class.   

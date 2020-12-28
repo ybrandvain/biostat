@@ -1,0 +1,283 @@
+#  Making betteR figures
+
+```{r, echo = FALSE, warning=FALSE, message=FALSE}
+library(tidyverse)
+library(DT)
+library(knitr)
+library(blogdown)
+library(beyonce, warn.conflicts=F, quietly=T)
+library(stringr)
+library(tweetrmd)
+library(emo)
+library(tufte)
+library(cowplot)
+library(lubridate)
+library(ggthemes)
+library(ggforce)
+library(datasauRus)
+library(ggridges)
+library(randomNames)
+library(infer)
+```
+
+
+```{block2, type='rmdnote'}
+This chapter helps us achieve some of the issues discusses in Chapter 2 of @whitlock2020.
+```
+
+<span style="color: Blue;font-size:22px;">   Motivating scenarios:  </span>  <span style="color: Black;font-size:18px;">   You know what figure you want to make but need the R skills to go beyond the basics. </span> 
+ 
+ 
+**Learning goals: By the end of this chapter you should be able to:**   
+
+- Make figures look like you want them to look.     
+- Deepen your appreciation and understanding of ggplot.
+
+
+```{block2, type='rmdwarning'}
+**How to read this chapter:** I tried to provide a lot here so that you can make the figures you want to. There is no need to memorize anything here, or read too carefully. Peruse to see how you can improve your plots for the assignment due Monday. 
+
+Also -- while there is A LOT in this chapter, it does not show you how to do everything you may want to do. That would take numerous books. The best of those books are 
+Other useful resources are [The R Graphics Cookbook](https://r-graphics.org/) [@chang2020], [ggplot2: Elegant Graphics for Data Analysis](https://ggplot2-book.org/) [@wickham2016], and [Data Visualization: A Practical Introduction](https://socviz.co/) [@healy2018].
+```
+
+
+## How to implement best practices and make fun and attractive plots    
+
+In chapter \@ref(viz1) we introduced ggplot as a way to make figures, and in chapter \@ref(goodfigs) we talked about what makes a good plot. **So now you might b a bit frustrated as you know how to make plots in R, and you know what makes a good plot, but you can't make a good plot in R.** I have two answers:    
+
+1. Choosing  the right plot for your data can get you  far in making a nice exploratory plot,  which will be about 95% of the plots you make. So most plots will only require one or two small quick R tricks.     
+
+2. This chapter is here to help you begin with the rest. (See [The R Graphics Cookbook](https://r-graphics.org/) [@chang2020], [ggplot2: Elegant Graphics for Data Analysis](https://ggplot2-book.org/) [@wickham2016], and [Data Visualization: A Practical Introduction](https://socviz.co/) [@healy2018] for more help.)  
+
+
+## Review -- what makes a good plot
+
+- Good plots come together to tell the data's story.   
+- Good plots are attuned to the audience and method of presentation.    
+- Good plots are Honest, Transparent, Clear, and Accessible.        
+
+We work through these below, spending the most time on making honest, transparent. and clear plots as this is where you'll have the most R customization.  
+
+
+
+```{block2, type='rmdnote'}
+**Datasets below:** To minimize  the information you need to process, I will stick to very few datasets.   
+
+- `daphnia_resist`: Is [available](https://whitlockschluter3e.zoology.ubc.ca/Data/chapter15/chap15q17DaphniaResistance.csv) from our textbook and shows the resistance of the crustacean Daphnia to a poisonous cyanobacteria across years with high, medium and low concentrations of cyanobacteria. This address the question - can Daphnia evolve to resist poison?
+```
+
+```{r, message=FALSE}
+daphnia_resist <- read_csv("https://whitlockschluter3e.zoology.ubc.ca/Data/chapter15/chap15q17DaphniaResistance.csv")
+```
+
+## Combining plots to tell a story.   
+
+
+
+Most analyses require a few graphs to tell the story.  Some of these graphs will be spread across a document, while others will be combined in a multi-panel figure.    
+
+Always be sure to keep visual metaphors consistent across figures (e.g. colors and shapes should mean the same thing in different figures). This can often be pretty challenging, and we'll come back to this soon,   
+
+Here I focus on making multi-panel figures. There are a bunch of ways to do this in ggplot, but my favorite uses the [`plot_grid()`](https://wilkelab.org/cowplot/articles/plot_grid.html) function in the [cowplot](https://wilkelab.org/cowplot/index.html) package. You do this by saving plots and combining them with   `plot_grid()`.   I show a quick example below and urge you to go the [help page]((https://wilkelab.org/cowplot/articles/plot_grid.html)) for more complex issues. 
+
+```{r, fig.cap = 'Combining plots with [`plot_grid()`](https://wilkelab.org/cowplot/articles/plot_grid.html) function in the [cowplot](https://wilkelab.org/cowplot/index.html) package. Look at the [help page]((https://wilkelab.org/cowplot/articles/plot_grid.html)) for more customization.', fig.height=3, fig.width=6}
+# If you have not installed cowplot, you will need to!
+library(cowplot)  # After cowplot is installed you still need to load it with the library function  
+
+p1 <- ggplot(daphnia_resist, aes(x = resistance , fill = cyandensity))  +  geom_density(alpha = .4)
+p2 <- ggplot(daphnia_resist, aes(x = cyandensity, y = resistance))  +  geom_point()
+
+plot_grid(p1,  p2, labels = c("a","b"))
+```
+
+
+```{block2, type='rmdnote'}
+I really like the [`plot_grid`]() function in cowplot - especially because it allows us to use just one legend (see [`get_legend()`](https://wilkelab.org/cowplot/reference/get_legend.html)). But I sometime get weird errors that go away if I do the exact same thing another time.  
+
+The [`gridExtra`](https://cran.r-project.org/web/packages/gridExtra/vignettes/arrangeGrob.html) and [patchwork](https://patchwork.data-imaginist.com/) packages provide different ways to make multi-panel figures. Check them out if you like.
+```
+
+
+## Making plots attuned to the audience and method of presentation.    
+
+### Considering your method of presentation   
+
+We [previously](#presentation) noted that most results are presnted in press, in speach, in a poster or online. Most of this chapter and course focusses on presentation in press, but here I have a few resources for alternative modes of presentations.  
+
+- **For online documents**, you can make a shinyapp with the [shiny package](https://shiny.rstudio.com/), or a gif with [gganimate](https://gganimate.com/index.html) to further engage your audience. We may cover this near the end of term, and you might want it in your final project, but for now know that these options exists.     
+
+```{r, echo=FALSE, out.extra='style="float:right"'}
+include_graphics("images/isotype.jpeg")
+```
+
+- **For posters**, the [ggtextures](https://github.com/clauswilke/ggtextures) package allows you to experiment with isotype plots. 
+
+- **For talks** you will need to mess with the `theme` function to get change text and label size. I address this common challenge below.   
+
+
+
+### Considering your method of presentation: Adjusting text size   {- #textsize}
+
+You will need to change your text size for different modes of presentation -- e.g. text should be very large for posters and talks. Mastering the [`theme()`](https://ggplot2.tidyverse.org/reference/theme.html) function allows us to customize our plots. Most importantly we can change the size of text with the [`element_text(size = ...)`](https://ggplot2.tidyverse.org/reference/element.html) function, which we use after specifying what element we want to change (Fig. \@ref(fig:theme1)). 
+
+```{r theme1, fig.cap = 'Changing font size by specifying [`element_text()`](https://ggplot2.tidyverse.org/reference/element.html) in [`theme()`](https://ggplot2.tidyverse.org/reference/theme.html). The colors are very bad, and are meant to help you connect our R to the output - you should stay away from doing silly things to your font color.', fig.height=1.8, fig.width=4}
+ggplot(daphnia_resist, aes(x = cyandensity, y = resistance, color = cyandensity))  +  
+  geom_point()+
+  theme(axis.title.x = element_text(size = 20, color = "orange"),
+        axis.text.x  = element_text(size = 15),
+        axis.text.y  = element_text(size = 15, color = "firebrick"),
+        legend.text  = element_text(color = "purple"),
+        legend.title = element_text(size = 30, color = "gold"))
+```
+
+
+```{block2, type='rmdtip'}
+Beyond these quick tricks  [`theme()`](https://ggplot2.tidyverse.org/reference/theme.html)  function is super complicated and frustrating. **I strongly recommend the [`ggThemeAssist package`](https://github.com/calligross/ggthemeassist/)`**, as this provides a GUI that lets us point and click our way to our desired figure and then returns the R code (Fig. \@ref(fig:ggthemeassist)). Also, in the past years I have gotten way better at using the [`theme()`](https://ggplot2.tidyverse.org/reference/theme.html) function without `ggThemeAssist` because that package gave me a sense of which arguments to use. 
+```
+
+```{r ggthemeassist, fig.cap = "An example of how to use the `ggThemeAssist` package from the `ggThemeAssist` [website](https://github.com/calligross/ggthemeassist/). Be nice to yourself and get use this package.", echo = FALSE}
+include_graphics(path = "https://github.com/calligross/ggthemeassist/blob/master/examples/ggThemeAssist2.gif?raw=true")
+```
+
+
+## Making Honest, Transparent, Clear,  Accessible,  and Fun plots
+
+In section \@ref(goodplot) we said good plots are   
+
+- Honest  
+- Transparent  
+- Clear   
+- Accessible  
+
+Here I add Fun to the list too! So how do we translate these ideas into R plots? Check out these tips and tricks below!!!
+
+```{block2, type='rmdwarning'}
+Making and critiquing plots is one of my favorite parts of science -- I love it!!!! **But I know it can be a huge time suck**, and we dont want that. Here are  my tips to avoid spending too much time on every figure.   
+
+
+- Know if you are making an explanatory or exploratory figure -- and do not try to perfect an exploratory figure.   
+- Come up with a few standard themes and color schemes that you use most of the time and copy and paste them so that you can make nice plots that you like without customizing each one.   
+- Get familiar with the most common stuff you will do in ggplot and keep the [ggplot cheat sheet](https://rstudio.com/wp-content/uploads/2015/03/ggplot2-cheatsheet.pdf), other resources (perhaps figure out which of the additional resources I highlighted here is best for you), and the google nearby.  
+- If you are making an explanatory plot wait until the last minute to add specific customizations that you do with complex and specific code (e.g. annotation).  
+```
+
+### Making honest figures  
+
+Be sure that your figures do not deceive. 
+
+- Do not let yourself be deceived by your exploratory figures -- you will just waste a lot of your time and energy.  
+
+- Do not deceive your audience with your explanatory figures, you will lose their trust.  
+
+The most common ways figures deceive is with inappropriate limits, nonlinear (or nonsensical) axis scales, or changing data. Here I show how you can use ggplot to prevent these deceptions.
+
+
+
+#### Making Honest figures: Set your limits {- #lim}   
+
+
+The data on daphnia resistance to cyanobacteria is rported a s a porpotion, which are often best presented on a sale from zero to one. However a simple plot with `geom_point()` spans the range of the data, and does no go from zero to one. Set `limits` in the [`scale_y_continuous()`](https://ggplot2.tidyverse.org/reference/scale_continuous.html) function to change this
+
+
+```{r scaleycont, fig.cap='Set x or y limits in the [`scale_x_continuous()`](https://ggplot2.tidyverse.org/reference/scale_continuous.html) or [`scale_y_continuous()`](https://ggplot2.tidyverse.org/reference/scale_continuous.html) functions. *Note* there are other ways to set limits, but this is the way I do it.', fig.height= 2, fig.width=3, message=FALSE}
+ggplot(daphnia_resist, aes(x = cyandensity, y = resistance))  + 
+  geom_point() + 
+  scale_y_continuous(limits = c(0,1))
+```
+
+
+#### Making Honest figures: Ordering ordinals  {- #lim}   
+
+The explanatory variable in the daphnia data, on the x axis is the density of cyanobacteria, as `high`, `low`, or `medium`. This order on the x could confuse readers and might deceive them if they did not  look carefully. Ordering these from low to medium to high is more natural and would minimize the opportunity for deception.
+
+The [`forcats`](https://forcats.tidyverse.org/index.html) package loaded with tidyverse has tools `for cat`egorical variables. For example, we can use the [`fct_relevel`](https://forcats.tidyverse.org/reference/fct_relevel.html) function, followed by our categories in our desired order to fix this. *NOTE* this alters our data before plotting so we do this via the [`mutate`](https://dplyr.tidyverse.org/reference/mutate.html) function.
+
+
+```{r xordin, fig.cap='Set the order of levels with the [`fct_relevel`](https://forcats.tidyverse.org/reference/fct_relevel.html) function.   Be sure to do this inside [`mutate`](https://dplyr.tidyverse.org/reference/mutate.html), and save this modification.', fig.height= 2, fig.width=3, message=FALSE}
+daphnia_resist <- daphnia_resist %>% 
+  mutate(cyandensity = fct_relevel(cyandensity, "low","med", "high")) 
+
+ggplot(daphnia_resist, aes(x = cyandensity, y = resistance))  + 
+  geom_point() + 
+  scale_y_continuous(limits = c(0,1))
+```
+
+#### Making Honest figures: Do not let `jitter` deceive  {- #honestjitter}   
+
+Below, we will  see  that we often want to spread out our data with the `jitter` function to [avoid overplotting](#nooverplotting). **But a simple jitter can deceive  by:**       
+
+- Giving the impression that an ordinal is continuous and    
+- Changing continuous response values.  
+
+To prevent such deception, I narrow the width of the jitter, make the height zero, and color the data points by category. Because this coloring is redundant, and does not contain additional information we do not need to show a legend.  
+
+
+
+```{r lyingjittr, fig.cap = 'jittering can deceive (**a**), but reasonable precautions prevent this deception (**b**).', fig.height=2, fig.width=5}
+dishonest_jitter <- ggplot(daphnia_resist, aes(x = cyandensity, y = resistance))  + 
+  geom_jitter()+
+  labs(title = "dishonest jitter")
+
+honest_jitter <- ggplot(daphnia_resist, aes(x = cyandensity, y = resistance, color =  cyandensity))  + 
+  geom_jitter(height = 0, width = .2, show.legend = FALSE)+
+  labs(title = "honest jitter")
+
+plot_grid(dishonest_jitter, honest_jitter, labels = c("a","b"))
+```
+
+#### Making Honest figures: Show when you are logging   
+
+Now let us take a look at variability in mammal lifespan across species as a function of the specie's bodyweight. As we will see below, log-transforming these data can help reveal a pattern, but we should go out of our way to inform the reader that the data are presented on a log scale, so that they do not quickly look at a plot and interpret relationships linearly. The [`annotation_logticks`]( https://ggplot2.tidyverse.org/reference/annotation_logticks.html) can help alert readers to the fact that we're in logscale.  Note that we make this *log=log* plot with the [`scale_x_continuous()`](https://ggplot2.tidyverse.org/reference/scale_continuous.html) and [`scale_y_continuous()`](https://ggplot2.tidyverse.org/reference/scale_continuous.html) functions to retain linear numbers but show the data on a log scale.
+
+
+
+```{r message=FALSE, fig.height=2, fig.width=3}
+mammal_sleep <- read_tsv("http://www.statsci.org/data/general/sleep.txt") # because it is tab delimitted 
+  
+ggplot(mammal_sleep , aes(x= BodyWt, y = LifeSpan, ))+
+  geom_point()+
+  scale_x_continuous(trans = "log10")+
+  scale_y_continuous(trans = "log10")+
+  annotation_logticks(sides = "bl",base = 10) # put log ticks on bottom and left 
+```
+
+
+  filter(Species %in%c("Bigbrownbat", "Wateropossum","Littlebrownbat", "Giantarmadillo"))
+
+
+
+
+
+coord_flip
+
+themes: some default options, ggthemeassist. font size, legend placement etc
+
+color and fill. svcale manual, colorbrewer, beyonc new wilke one, wes anderson. ref wilke book
+
+alpha
+annotation
+geom_text / geom_text_repel
+shape mapping
+size mapping
+stat_summary
+
+labs()
+
+labeller = label_both or paste things before show mapg
+
+9.4.2 Be transparent
+9.4.2.1 Show your data / Allow the reader to interrogate your claims
+9.4.2.2 Avoid overplotting
+
+9.4.3.1 Help readers focus on patterns. annotate. geom_vline(). nudge Bring out important comparisons/ Consider how people process images [position]
+
+9.4.3.2 Make labels informative, easy to digest, and readable. coord_flip. lablez_both
+9.4.3.3 Be consistent
+9.4.3.4 Order categories sensibly
+9.4.3.5 Use direct labeling
+9.4.3.6 Avoid distractions: Consider theme Don’t use 3D, animation, etc. unnecessarily, What the duck? Stay away from “glass slippers”. Avoid chartjunk
+9.4.4 Consider Accessibility and Universal Design
+9.4.4.1 Color
+9.4.4.2 Size
+9.4.4.3 Redundant coding

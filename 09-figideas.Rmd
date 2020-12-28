@@ -160,14 +160,15 @@ For most of this term your audience will be you, me, and sometimes a few peers. 
 
 **As you read the guidence below, consider how would you change plots based on audience.**
 
-#### **Tailoring presentations to their method of presentation**   {-}
+#### **Tailoring presentations to their method of presentation**   {- #presentation}
 
-Science is communicated in many ways. The most common presentations that include the visual display of data are: books/papers, public talks,  internet. While the basic principles of  making a good plot are always the same, you should customize your explanatory plots to the method of communication.  
+Science is communicated in many ways. The most common presentations that include the visual display of data are: books/papers, public talks, posters, internet. While the basic principles of  making a good plot are always the same, you should customize your explanatory plots to the method of communication.  
 
 - **Books / Papers:** Here plots are static, and while we can write about them in  the text, there's no guaranteed the audience will read it. So, plot for papers and books should be self-contained such that the readers get the figure's main point  from image and caption alone. If a figure can be misinterpreted by looking at it, this should be fixed in the figure (or less ideally, the figure caption), not the text of the manuscript.    
 - **Public Talks:** When telling stories to a captive audience in a public talk, you control the flow of information. 
     - You can build up figures one slide of a time to bring our audience along.  
-    - But be sure the text is big enough to be visible from the back of the room.   
+    - But be sure the text is big enough to be visible from the back of the room.     
+- **Poster sessions:** Large conference halls are filled with posters. Stunning images and catch visualizations are important in this medium because we want people to pay attention to us and engage, rather than walking on by.    
 - **Digital:** When your work is online, you can include gifs, and make interactive plots to better engage and empower your readers.   
 
 
@@ -182,7 +183,7 @@ Then for your final project, senior thesis, scientific papers etc, you will be i
 
 **As you read the guidance below, consider what you would put in early exploratory plot drafts (e.g. for yourself, homework or advisors), vs what you would only add in a version that would be read by a larger audience (e.g. for senior theses, publications, presentations).**  
 
-##  Making a good plot   
+##  Making a good plot   {#goodplot}
 All bad plots are bad in their own way, but all good plots are the same. All good plots are:  
 
 - Honest  
@@ -208,7 +209,7 @@ Here are some things to consider to avoid misleading yourself and/or your audien
 
 #### Don’t mislead with axes
 
-##### **Misleading y-axes** {-}   
+##### **Misleading y-axes** {- #misy}   
 
 
 When we see a filled area, our mind naturally thinks in ratios. So, if a reader is not looking carefully at the y-axis they would think that Af student to teacher ratios in Af (Africa), are on average four times higher than in As (Asia), even though in reality it is closer to a two-fold difference (compare a and b in Fig. \@ref(fig:stillbad)).
@@ -314,7 +315,7 @@ Barplots are not uniformly bad. While we should not report means in a barplot, b
 
 The most transparent data are cully reproducible – that is people should be able to download your code and your data, and redo your analysis, and understand the data well enough to run a different analysis on it. This is becoming the standard for scientific papers, and I will revisit these ideas throughout the term, but this is more relevant to Honors and Grad students than the rest of the class. Check out [this paper](https://journals.plos.org/ploscompbiol/article?id=10.1371/journal.pcbi.1003285) by @sandve2013 for an introduction to reproducible research.    
 
-#### Avoid overplotting   
+#### Avoid overplotting  {#nooverplotting}  
 Sometimes showing all your data actually hides patterns. Figure 9.15a demonstrates this issue, and Figures \@ref(fig:overplotting)offer some ways to overcome overplotting.  
 
 
@@ -444,7 +445,7 @@ include_graphics("https://media.springernature.com/full/springer-static/image/ar
 - Another day you may get carried away with making a pretty figure. While eye catching / memorable graphics are great, do not let the look of figure take  precedence over its message.   
 
 ##### **Stay away from "glass slippers"** {-}
-@bergstrom describes a new form of data visualization malfeasance in which one specialized and appropriate visualization technique is co-opted for other visualizations. These are rarely successful, as the initial visualization was not built for the new data. This [optional video](https://www.youtube.com/watch?v=59teS0SUHtI) calls this a "glass slipper" as something nice is forced upon an unintended form, and will not fit. Like ducks, glass slippers distract the reader and take their attention away from the data. See the tweet below for an example of a glass slipper.
+@bergstrom2020 describes a new form of data visualization malfeasance in which one specialized and appropriate visualization technique is co-opted for other visualizations. These are rarely successful, as the initial visualization was not built for the new data. This [optional video](https://www.youtube.com/watch?v=59teS0SUHtI) calls this a "glass slipper" as something nice is forced upon an unintended form, and will not fit. Like ducks, glass slippers distract the reader and take their attention away from the data. See the tweet below for an example of a glass slipper.
 
 ```{r, echo=FALSE}
 include_tweet("https://twitter.com/callin_bull/status/1106259105377705985")
@@ -454,10 +455,17 @@ include_tweet("https://twitter.com/callin_bull/status/1106259105377705985")
 
 Unncessary elabortations that distract a reader from the point of a plot aree known as chartjunk. These include eye-catvchign background colors, data viz ducks, glass slippers, 3D charts etc.
 
+
+
+
 ```{block2, type='rmdnote'}
-Not all elaborations are junk. [Elements that are both fun and help with comprehension can make a figure memorable and effective](https://clauswilke.com/dataviz/telling-a-story.html#make-your-figures-memorable). For example, if each data point is a species, you might wat to replace data points with silhouettes of the species See the [rphylopic package](https://github.com/sckott/rphylopic).
+The figure below demonstrates that not all elaborations are junk. [Elements that are both fun and help with comprehension can make a figure memorable and effective](https://clauswilke.com/dataviz/telling-a-story.html#make-your-figures-memorable). For example, if each data point is a species, you might wat to replace data points with silhouettes of the species See the [rphylopic package](https://github.com/sckott/rphylopic).
 ```
 
+
+```{r, echo=FALSE}
+include_graphics("images/chartjunkvsfun.jpeg")
+```
 
 ### Consider Accessibility and Universal Design
 Making figures accessible for all tends to make them better for everyone. Consider the diversity of folks that may look at your figure -- for example it could be read by colorblind people, people with poor eyesight, people who print it in black and white etc. A good figure would be interpretable by all of these people.

@@ -19,14 +19,14 @@ These notes accompany Chapter 1 --- Statistics and samples --- of our textbook. 
 
 <span style="color: red"> YB TDO: videos, add advanced material about RMarkdown, projects</span>
 
-<span style="color: Blue;font-size:22px;">   Motivating scenario:  </span>  <span style="color: Black;font-size:18px;">You have seen or heard about statistics, but you don't rally know what people are getting at. You hear words like "p-value", "statistically significant", "effect size", "bias", or "nonindependent" but can't pinpoint exactly what they mean? </span> 
+<span style="color: Blue;font-size:22px;">   Motivating scenario:  </span>  <span style="color: Black;font-size:18px;">You have seen or heard about statistics, but you don't really know what people are getting at. You hear words like "p-value", "statistically significant", "effect size", "bias", or "nonindependent" but can't pinpoint exactly what they mean? </span> 
 
 **Learning goals: By the end of this chapter you should be able to**    
 
 
 - Get a sense of what motivates statisticians.  
 - Be able to explain the difference between a population and a sample, a parameter and an estimate, the relationship between these four concepts, and the things which can make a sample deviate from a population.   
-- Have a sense of why statisticians, why we must consider the type of data and variables in building models.  
+- Have a sense of why as statisticians, we must consider the type of data and variables in building models.  
 - Understand the differences in motivation and what we can get out of an observational and experimental study.
 
 ```{r, fig.cap = 'Intro to this chapter (1 min and 05 sec).', echo = FALSE, out.extra= 'allowfullscreen'}

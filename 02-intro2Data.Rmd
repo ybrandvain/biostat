@@ -12,7 +12,7 @@ library(emo)
 
 <span style="color: red"> YB TDO: videos, add advanced material about RMarkdown, projects</span>
 
-<span style="color: Blue;font-size:22px;">   Motivating scenario:  </span>  <span style="color: Black;font-size:18px;"> We start at the beginning a study -- how do we set up a good way to keep track of data that will allow us to focus on understanding and analyzing our data, not reorganizing and rearranging it? </span> 
+<span style="color: Blue;font-size:22px;">   Motivating scenario:  </span>  <span style="color: Black;font-size:18px;"> We start at the beginning of a study -- how do we set up a good way to keep track of data that will allow us to focus on understanding and analyzing our data, not reorganizing and rearranging it? </span> 
 
 **Learning goals: By the end of this chapter you should be able to**  
 
@@ -73,7 +73,7 @@ include_tweet("https://twitter.com/kwbroman/status/1326678636649394176")
 
 
 #### Be consistent and deliberate    
-You should refer to thing in the same thoughtful way throughout a column. Take, for example, gender as a nominal variable.
+You should refer to a thing in the same thoughtful way throughout a column. Take, for example, gender as a nominal variable.
 
 <span style="color: red;">A bad organization would be:</span> male, female, Male, M, Non-binary, Female.    
 <span style="color: blue;">A good organization would be:</span> male, female, male, male, non-binary, female.  
@@ -104,7 +104,7 @@ Names should be concise and descriptive. They need not tell the entire story. Fo
 `r ji(keyword = "thinking")` Why? `r ji(keyword = "thinking")` You don't want to keep typing long awkward things in `R` but you do want variable names to convey meaning you can instantly recognize. 
 
 #### Make a data dictionary    
-What is a **data dictionary**, you ask? All the TMI that you would otherwise put in you overly complex column names. So, each row should correspond to a variable in the main data file, and each column should be additional info. For example, columns could be `name`, `description`, `type`, `unit`,`range_or_values`, etc...  
+What is a **data dictionary**, you ask? All the TMI that you would otherwise put in your overly complex column names. So, each row should correspond to a variable in the main data file, and each column should be additional info. For example, columns could be `name`, `description`, `type`, `unit`,`range_or_values`, etc...  
 
 
 
@@ -127,7 +127,7 @@ knitr::include_graphics('images/nondata.jpeg')
 You may be tempted to encode information with bolded text, highlighting, or text color. Don't do this! Be sure that all information is in a readable column. 
 
 
-`r ji(keyword = "thinking")` Why? `r ji(keyword = "thinking")` These  extra markings will either be lost or add an extra degrees of difficultly to your analysis. Reserve such markings for the presentation of data. 
+`r ji(keyword = "thinking")` Why? `r ji(keyword = "thinking")` These  extra markings will either be lost or add an extra degree of difficultly to your analysis. Reserve such markings for the presentation of data. 
 
 #### No  values should  be  implied. 
 

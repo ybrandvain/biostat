@@ -1,4 +1,4 @@
-#  Making betteR figures
+#  Making betteR figures {#betteRfigs}
 
 ```{r, echo = FALSE, warning=FALSE, message=FALSE}
 library(tidyverse)
@@ -81,7 +81,7 @@ Always be sure to keep visual metaphors consistent across figures (e.g. colors a
 
 Here I focus on making multi-panel figures. There are a bunch of ways to do this in ggplot, but my favorite uses the [`plot_grid()`](https://wilkelab.org/cowplot/articles/plot_grid.html) function in the [cowplot](https://wilkelab.org/cowplot/index.html) package. You do this by saving plots and combining them with   `plot_grid()`.   I show a quick example below and urge you to go the [help page]((https://wilkelab.org/cowplot/articles/plot_grid.html)) for more complex issues. 
 
-```{r, fig.cap = 'Combining plots with [`plot_grid()`](https://wilkelab.org/cowplot/articles/plot_grid.html) function in the [cowplot](https://wilkelab.org/cowplot/index.html) package. Look at the [help page]((https://wilkelab.org/cowplot/articles/plot_grid.html)) for more customization.', fig.height=3, fig.width=6}
+```{r, fig.cap = 'Combining plots with [`plot_grid()`](https://wilkelab.org/cowplot/articles/plot_grid.html) function in the [cowplot](https://wilkelab.org/cowplot/index.html) package. Look at the [help page]((https://wilkelab.org/cowplot/articles/plot_grid.html)) for more customization.', fig.height=2, fig.width=6}
 # If you have not installed cowplot, you will need to!
 library(cowplot)  # After cowplot is installed you still need to load it with the library function  
 
@@ -133,7 +133,7 @@ ggplot(daphnia_resist, aes(x = cyandensity, y = resistance, color = cyandensity)
 
 
 ```{block2, type='rmdtip'}
-Beyond these quick tricks  [`theme()`](https://ggplot2.tidyverse.org/reference/theme.html)  function is super complicated and frustrating. **I strongly recommend the [`ggThemeAssist package`](https://github.com/calligross/ggthemeassist/)`**, as this provides a GUI that lets us point and click our way to our desired figure and then returns the R code (Fig. \@ref(fig:ggthemeassist)). Also, in the past years I have gotten way better at using the [`theme()`](https://ggplot2.tidyverse.org/reference/theme.html) function without `ggThemeAssist` because that package gave me a sense of which arguments to use. 
+Beyond these quick tricks  [`theme()`](https://ggplot2.tidyverse.org/reference/theme.html)  function is super complicated and frustrating. **I strongly recommend the [`ggThemeAssist package`](https://github.com/calligross/ggthemeassist/)** as this provides a GUI that lets us point and click our way to our desired figure and then returns the R code (Fig. \@ref(fig:ggthemeassist)). Also, in the past years I have gotten way better at using the [`theme()`](https://ggplot2.tidyverse.org/reference/theme.html) function without `ggThemeAssist` because that package gave me a sense of which arguments to use. 
 ```
 
 ```{r ggthemeassist, fig.cap = "An example of how to use the `ggThemeAssist` package from the `ggThemeAssist` [website](https://github.com/calligross/ggthemeassist/). Be nice to yourself and get use this package.", echo = FALSE}
@@ -226,23 +226,147 @@ honest_jitter <- ggplot(daphnia_resist, aes(x = cyandensity, y = resistance, col
 plot_grid(dishonest_jitter, honest_jitter, labels = c("a","b"))
 ```
 
-#### Making Honest figures: Show when you are logging   
+#### Making Honest figures: Notify your audience of nonlinear scales   
 
-Now let us take a look at variability in mammal lifespan across species as a function of the specie's bodyweight. As we will see below, log-transforming these data can help reveal a pattern, but we should go out of our way to inform the reader that the data are presented on a log scale, so that they do not quickly look at a plot and interpret relationships linearly. The [`annotation_logticks`]( https://ggplot2.tidyverse.org/reference/annotation_logticks.html) can help alert readers to the fact that we're in logscale.  Note that we make this *log=log* plot with the [`scale_x_continuous()`](https://ggplot2.tidyverse.org/reference/scale_continuous.html) and [`scale_y_continuous()`](https://ggplot2.tidyverse.org/reference/scale_continuous.html) functions to retain linear numbers but show the data on a log scale.
+Now let us take a look at variability in mammal lifespan across species as a function of the species bodyweight. Log-transforming these data can reveal  patterns (compare Fig. \@ref(fig:showticks)b to  Fig. \@ref(fig:showticks)a), but make it clear to the reader that the data are presented on a log scale (**That why Fig. \@ref(fig:showticks)c is the best**), so that they do not quickly look at a plot and interpret relationships linearly. The [`annotation_logticks`]( https://ggplot2.tidyverse.org/reference/annotation_logticks.html) can help alert readers to the fact that we're in logscale.  Note that we make this *log-log* plot with the [`scale_x_continuous()`](https://ggplot2.tidyverse.org/reference/scale_continuous.html) and [`scale_y_continuous()`](https://ggplot2.tidyverse.org/reference/scale_continuous.html) functions to retain linear numbers but show the data on a log scale.
 
 
-
-```{r message=FALSE, fig.height=2, fig.width=3}
-mammal_sleep <- read_tsv("http://www.statsci.org/data/general/sleep.txt") # because it is tab delimitted 
-  
-ggplot(mammal_sleep , aes(x= BodyWt, y = LifeSpan, ))+
+```{r echo=FALSE, message=FALSE}
+mammal_lifespan <- read_tsv("http://www.statsci.org/data/general/sleep.txt") # because it is tab delimitted 
+plota <- ggplot(mammal_lifespan , aes(x= BodyWt, y = LifeSpan, ))+
   geom_point()+
+  labs(title = "linear")+
+  annotate(x = Inf, y = 1, geom = "text", color = "red", label = "bad :(", hjust = 1, vjust = -1)
+  
+plotb <- ggplot(mammal_lifespan , aes(x= BodyWt, y = LifeSpan, ))+
+  geom_point() +
   scale_x_continuous(trans = "log10")+
   scale_y_continuous(trans = "log10")+
-  annotation_logticks(sides = "bl",base = 10) # put log ticks on bottom and left 
+  labs(title = "log10 scale (no warning)")+
+  annotate(x = Inf, y = 1, geom = "text", color = "red", label = "bad :(", hjust = 1, vjust = -1)
 ```
 
 
+```{r fig.height=2, fig.width=3, message=FALSE, warning=FALSE}
+mammal_lifespan <- read_tsv("http://www.statsci.org/data/general/sleep.txt") # because it is tab delimitted 
+plotc <- ggplot(mammal_lifespan , aes(x= BodyWt, y = LifeSpan, ))+
+  geom_point()+
+  scale_x_continuous(trans = "log10")+
+  scale_y_continuous(trans = "log10")+
+  annotation_logticks(sides = "bl",base = 10, size = .2)+ # put log ticks on bottom "b" and left )
+  labs(title = "log10 scale (w. warning)")
+```
+
+```{r showticks, fig.cap = 'Figure **a** hides the pattern. **b** log transforms both axes to reveal the log linear relationship, but only a careful reader would notice the axes increase on a $log_{10}$ scale. **c** reveals the patterns and notifies the reader that the plot is on $log_{10}$ scale.', message=FALSE, fig.height=2, fig.width=8, message=FALSE, warning=FALSE, echo=FALSE}
+plot_grid(plota, plotb, plotc+
+  annotate(x = Inf, y = 1, geom = "text", color = "blue", label = "good :)", hjust = 1, vjust = -1), labels = c("a","b","c"), nrow = 1)
+```
+
+
+### Show your data to be transparent 
+
+By showing your data, we mean show the actual data, rathr than simply showing means and standard errors, or boxplots. Fortunately, if you start with raw data, R makes it pretty hard to hide it. So long as you give ggplot raw data, most ggplot goems will show the data. However there are a few things to consider.  
+
+
+#### Don't hide your data by overplotting {-}
+In Section \@(ref:goodplots) we said to [avoid overplotting](#nooverplotting) -- the hiding of your data by piling to many data points on top of one another. 
+
+**With a modest sized data set**, like the `daphnia_resistance` data, a simple jitterplot can show data hidden by overplotting (compare Fig. \@ref(fig:jitterp)a to Fig. \@ref(fig:jitterp)b). Remember to adjust the `width` and `height` arguments in `geom_jitter` to [make an honest jitterplot](#honestjitter).  
+
+```{r, message=FALSE, warning=FALSE}
+daphnia_points <- ggplot(daphnia_resist, aes(x = cyandensity, y = resistance, color =  cyandensity))  + 
+  geom_point(show.legend = FALSE)+
+  scale_y_continuous(limits = c(0,1))+
+  labs(title = "points hide data")
+
+daphnia_jitter <- ggplot(daphnia_resist, aes(x = cyandensity, y = resistance, color =  cyandensity))  + 
+  geom_jitter(height = 0, width = .2, show.legend = FALSE)+
+  scale_y_continuous(limits = c(0,1))+
+  labs(title = "jitter shows data")
+```
+
+```{r jitterp, fig.cap= 'When points are on top of each other we cannot see all the data (**a**). Spread the data out with [`geom_jitter()`](https://ggplot2.tidyverse.org/reference/geom_jitter.html).', fig.height=2, fig.width=4, message=FALSE, warning=FALSE, echo = FALSE}
+plot_grid(daphnia_points+  annotate(x = Inf, y = -Inf, geom = "text", color = "red", label = "bad :(", hjust = 1, vjust = -1),
+          daphnia_jitter +  annotate(x = Inf, y = -Inf, geom = "text", color = "blue", label = "good :)", hjust = 1, vjust = -1), 
+          labels = c("a","b"))
+```
+
+**With a larger data set**, avoiding overplotting requires more effort. So, while plotting points hides the distribution in the price of diamonds of a given clarity, a simple jitter does not make things much better. Three common solutions to this problem are 
+
+- Show the distribution of the data as a violin plot. (I don't like this because it still hides the data).   
+-  Increase the transparency of points by changing `alpha` in [`geom_jitter()`](https://ggplot2.tidyverse.org/reference/geom_jitter.html).   
+- Make a sinaplot (with the [`geom_sina()`](https://ggforce.data-imaginist.com/reference/geom_sina.html) function in the [`ggforce`]( https://ggforce.data-imaginist.com/index.html) package). A sina plot  is like a violin polot made of data. 
+
+Figure \@ref(fig:overplot2) shows both bad (Fig. \@ref(fig:overplot2)a:c) and good (Fig. \@ref(fig:overplot2)d:e) solutions to this problem. If none of these work for your data, check out [Chapter 5 of the R graphics cookbook](https://r-graphics.org/recipe-scatter-overplot) [@chang2020].
+
+```{r cache=TRUE}
+library(ggforce)
+base_diamond <- ggplot(diamonds, aes(x = clarity, y = price))
+
+plot_a <- base_diamond + geom_point()  + labs(title = "geom_point")
+plot_b <- base_diamond + geom_violin() + labs(title = "geom_violin")
+plot_c <- base_diamond + geom_jitter()  + labs(title = "geom_jitter")
+plot_d <- base_diamond + geom_jitter(alpha = 0.0025) + labs(title = "geom_jitter(alpha = 0.0025)")
+plot_e <- base_diamond + geom_sina(alpha = 0.0025) + labs(title = "geom_sina")
+```
+
+```{r overplot2, fig.cap = 'Tricks for dealing with dense overplotting. The value of alpha was found by trial and error, and the best choice for alpha will get closer to one as the density of data points decreases.', echo = FALSE}
+plot_grid(plot_a +  annotate(x = Inf, y = Inf, geom = "text", color = "red", label = "bad :(", hjust = 1, vjust = 1)+ylim(c(0,22500)), 
+          plot_b +  annotate(x = Inf, y = Inf, geom = "text", color = "red", label = "bad :(", hjust = 1, vjust = 1)+ylim(c(0,22500)),
+          plot_c + annotate(x = Inf, y = Inf, geom = "text", color = "red", label = "bad :(", hjust = 1, vjust = 1) +ylim(c(0,22500)),
+          NULL,
+          plot_d + 
+            annotate(x = Inf, y = Inf, geom = "text", color = "blue", 
+                     label = "good :)", hjust = 1, vjust = 1) +ylim(c(0,22500)),
+          plot_e +  
+            annotate(x = Inf, y = Inf, geom = "text", color = "blue", 
+                     label = "good :)", hjust = 1, vjust = 1) + ylim(c(0,22500)) ,
+          nrow = 3, labels = c(letters[1:3],"",letters[4:5]))
+```
+
+
+
+
+
+#### Don't hide your data with a boxplot  {-}
+
+As we saw when encountering the [interquartile range](#iqr) in Chapter \@ref(summaRy) boxplots show the quartiles of the data, adding a potentially useful visual summary to a plot. **But, boxplots themselves are not a solution to overplotting** (Fig. \@ref(fig:howtobox)), and if [`geom_boxplot()`](https://ggplot2.tidyverse.org/reference/geom_boxplot.html) is added after showing the data, the boxes will hide the data.
+
+
+```{r, message=FALSE, warning=FALSE}
+daphnia_boxplot_a <- ggplot(daphnia_resist, aes(x = cyandensity, y = resistance))  + 
+  geom_boxplot(outlier.color = NA) +   scale_y_continuous(limits = c(0,1)) 
+
+daphnia_boxplot_b <- ggplot(daphnia_resist, aes(x = cyandensity, y = resistance))  + 
+  geom_jitter(width = .2, height = 0) +
+  geom_boxplot(outlier.color = NA) +   scale_y_continuous(limits = c(0,1)) 
+
+daphnia_boxplot_c <- ggplot(daphnia_resist, aes(x = cyandensity, y = resistance))  + 
+  geom_boxplot(outlier.color = NA) +
+  geom_jitter(width = .2, height = 0) +   scale_y_continuous(limits = c(0,1))
+```
+
+```{r howtobox, fig.cap = 'Plot **c** effectively shows the data and summarizes quantiles with a boxplot. The boxplots in **a** and **b** hide the data.', message=FALSE, warning=FALSE, echo=FALSE, fig.height=2, fig.width=6}
+plot_grid(daphnia_boxplot_a+  annotate(x = Inf, y = -Inf, geom = "text", color = "red", label = "bad :(", hjust = 1, vjust = -1),
+          daphnia_boxplot_b +  annotate(x = Inf, y = -Inf, geom = "text", color = "red", label = "bad :(", hjust = 1, vjust = -1), 
+          daphnia_boxplot_c +  annotate(x = Inf, y = -Inf, geom = "text", color = "blue", label = "good :)", hjust = 1, vjust = -1), 
+        labels = c("a","b","c"), ncol = 3)
+```
+
+### Supercharge your ggplot skills to make clear plots  
+
+ggplot is great for making clear, explanatory plots, but this requires a bunch of new tricks. Remember that [clear plots](#clarity) are easy to interpret and help readers focus on patterns. Below I show some very useful R tricks to achieve these goals. There is a lot here, so **I recommend skimming these to understand what you can do, rather than memorizing every trick**. Again I strongly recommend the [The R Graphics Cookbook](https://r-graphics.org/) [@chang2020] as a great place to expand your tools.
+
+#### Add annotations, summaries, and lines to point out patterns {-} 
+
+- Clear   
+9.4.3.1 Help readers focus on patterns. stat_summary  annotate. geom_vline(). nudge Bring out important comparisons/ Consider how people process images [position]. smart colors
+
+9.4.3.2 Make labels informative, easy to digest, and readable. coord_flip. lablez_both
+9.4.3.3 Be consistent
+9.4.3.4 Order categories sensibly
+9.4.3.5 Use direct labeling
+9.4.3.6 Avoid distractions: Consider theme Don’t use 3D, animation, etc. unnecessarily, What the duck? Stay away from “glass slippers”. Avoid chartjunk
   filter(Species %in%c("Bigbrownbat", "Wateropossum","Littlebrownbat", "Giantarmadillo"))
 
 
@@ -266,17 +390,8 @@ labs()
 
 labeller = label_both or paste things before show mapg
 
-9.4.2 Be transparent
-9.4.2.1 Show your data / Allow the reader to interrogate your claims
-9.4.2.2 Avoid overplotting
 
-9.4.3.1 Help readers focus on patterns. annotate. geom_vline(). nudge Bring out important comparisons/ Consider how people process images [position]
 
-9.4.3.2 Make labels informative, easy to digest, and readable. coord_flip. lablez_both
-9.4.3.3 Be consistent
-9.4.3.4 Order categories sensibly
-9.4.3.5 Use direct labeling
-9.4.3.6 Avoid distractions: Consider theme Don’t use 3D, animation, etc. unnecessarily, What the duck? Stay away from “glass slippers”. Avoid chartjunk
 9.4.4 Consider Accessibility and Universal Design
 9.4.4.1 Color
 9.4.4.2 Size

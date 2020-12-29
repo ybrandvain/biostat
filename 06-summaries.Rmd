@@ -315,7 +315,7 @@ Common measurements of width are the
 - **Coefficient of variation**: A unitless summary of the standard deviation facilitating the comparison of variances between variables with different means.   
 
 
-#### Measures of width: Range and Interquartile range (IQR).  
+#### Measures of width: Range and Interquartile range (IQR)  {#iqr}
 
 We call the range and the interquartile range nonparametric because we can’t write down a simple equation to get them, but rather we describe a simple algorithm to find them (sort, then take the difference between things).
 

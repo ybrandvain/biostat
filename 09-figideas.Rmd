@@ -45,11 +45,9 @@ In Chapter \@ref(viz1), we went over our goals in making a plot, and dove into m
 - Reflect on what makes plots less effective, and  
 - Consider how plots can lie to us.  
 
-In chapter XXX we focus on making our desired figures in R.      
-
 My goal here is to separate the challenge of conceptualizing and interpreting a figure from the challenge of making a figure in R. I do this because they are very different problems, and worrying about making your figure in R before you know what you want to do often leads to bad figures. On the other hand, if you know what you are aiming to do in R you can usually do it, and if/when you cannot, you can then readjust your goal (or touch up the figure in illustrator).  
 
-That said, I do introduce a few R tips when our desired effects can be achieved relatively simply.
+That said, I do introduce a few R tips when our desired effects can be achieved relatively simply. In Chapter \@ref(betteRfigs), we focus on making our desired figures in R.   
 
 ##  Why make a plot?     
 
@@ -323,7 +321,7 @@ Sometimes showing all your data actually hides patterns. Figure 9.15a demonstrat
 include_graphics("images/overplot-1.png")
 ```
 
-### Be clear    
+### Be clear    {#clarity}
 
 Good plots are clear with messages that pop out at you. To make a clear plot, minimize the cognitive burden, make the point easy to see, and avoid distractions.  
 

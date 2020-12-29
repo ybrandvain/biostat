@@ -108,7 +108,7 @@ Another devious form of bias is known as **survivorship bias**, in which survivo
 include_graphics("https://upload.wikimedia.org/wikipedia/commons/thumb/9/98/Survivorship-bias.png/256px-Survivorship-bias.png")
 ```  
 
-A classic example of survivorship bias is this distribution of gunshots holes in airplanes returning from WWII --- the army initially reacted to the prevalence of holes in the wings and tail by suggesting that such parts of the plain be reinforced. However, Abraham Wald pointed out that airplanes that did not return were the ones who needed more help and these where likely shot where we don't see holes.
+A classic example of survivorship bias is this distribution of gunshot holes in airplanes returning from WWII --- the army initially reacted to the prevalence of holes in the wings and tail by suggesting that such parts of the plane be reinforced. However, Abraham Wald pointed out that airplanes that did not return were the ones who needed more help and these where likely shot where we don't see holes.
 
 ```{block2, type='rmdwarning'}
 This is a good time to remember to read pages 38-44 and 104-112 [available here](https://drive.google.com/uc?export=download&id=1auP6kzHJUj_ltnfmWUav1Fas_iiXuOiv) of Calling Bullshit [@bergstrom2020].

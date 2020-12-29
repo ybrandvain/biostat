@@ -146,11 +146,11 @@ As we build and evaluate statistical models, a key consideration is the type of 
 ### Explanatory and Response variables {-}
 We often care to distinguish between **explanatory variables**, which *we think underlie or are associated with the biological process of interest*, from **response variables**, *the outcome we aim to understand*. This distinction helps us build and consider our statistical model and relate the results to our biological motivation.
 
-The difference between an explanatory and response variable often depends on the motivation and/or study design. For example if we where interested to know if fertilizer type had an (?indirect?) impact on insect deversity, the type of fertilizer would be the explanatory variable and he number of insect species per hectare would be the response variable.
+The difference between an explanatory and response variable often depends on the motivation and/or study design. For example if we where interested to know if fertilizer type had an (?indirect?) impact on insect deversity, the type of fertilizer would be the explanatory variable and the number of insect species per hectare would be the response variable.
 
 ### Types of Data {-}  
 
-Data can come in different flavors. it is important to understand these, as they should direct our model building and data summaries, interpretation and data visualization.
+Data can come in different flavors. It is important to understand these, as they should direct our model building and data summaries, interpretation and data visualization.
 
 
 
@@ -184,7 +184,7 @@ include_graphics("https://github.com/allisonhorst/stats-illustrations/raw/master
 - **Nominal variables** which *cannot be ordered and have names* -- like sample ID, species, hair color etc...  
 - **Binary variables** are special types of nominal variables, which *have only two options* (or for which we only consider two options. Alive/dead, pass/fail, on/off are classic binary variables).  
 
-- **Ordinal variables** *can be ordered, but do not correspond to a magnitude*. For example, no medal, bronze, silver and gold medals in the Olympics are ranked from best to worst, but first isn't some reliable distance away from second or third etc... .
+- **Ordinal variables** *can be ordered, but do not correspond to a magnitude*. For example, bronze, silver and gold medals in the Olympics are ranked from best to worst, but first isn't some reliable distance away from second or third etc... .
 
 
 

@@ -73,7 +73,7 @@ We will be using R in this course, in the RStudio environment. My goal is to hav
 Some of you might have experience with R and some may not. Some of this experience might be in tidyverse or not. There will be ups and downs — the frustration of not understanding and/or it not working and the joy of small successes. Remember to be patient, forgiving and kind to yourself, your peers, and me. Ask for help from the internet, your friends, Anna, and Yaniv.
 
 ```{block2, type='rmdwarning'}
-<span style="color:red"> We will using R version 4.0.0 or above, and tidyverse version 1.3.0 or above.</span>  
+<span style="color:red"> We will be using R version 4.0.0 or above, and tidyverse version 1.3.0 or above.</span>  
 
 You can download these onto your computer (Make sure the `R` is version 4.0.0).  
 
@@ -92,9 +92,9 @@ This 'book' functions as an extensive syllabus and course notes. I will embed yo
 
 I hope that this book provides clear and useful background for the course, and I advise you to regularly go through each book 'chapter' for the relevant week. **Be sure you get familiar with the content BEFORE class.**
 
-Note that this 'book' is not the entirety of the course content, and is not an original piece of my own effort -- in addition from lifting from a few other course online (with attribution), I also make heavy use of these texts:  
+Note that this 'book' is not the entirety of the course content, and is not an original piece of my own effort -- in addition from lifting from a few other courses online (with attribution), I also make heavy use of these texts:  
 
-- *The Analysis of Biological Data Third Edition [@whitlock2020]:* This is the official book of this course, and is a standard biostats textbook, with many [useful resources](https://whitlockschluter3e.zoology.ubc.ca/) available online. The writing is great, as are the examples. Most of my material originates here (although I occasionally do things a bit differently). This book is officially optional, but students consistently ell me that it is extremely helpful. So, I highly recommend buying it. You can get the newest edition [here](https://www.macmillanlearning.com/college/us/product/Analysis-of-Biological-Data/p/131922623X), but any edition will be pretty useful.   
+- *The Analysis of Biological Data Third Edition [@whitlock2020]:* This is the official book of this course, and is a standard biostats textbook, with many [useful resources](https://whitlockschluter3e.zoology.ubc.ca/) available online. The writing is great, as are the examples. Most of my material originates here (although I occasionally do things a bit differently). This book is officially optional, but students consistently tell me that it is extremely helpful. So, I highly recommend buying it. You can get the newest edition [here](https://www.macmillanlearning.com/college/us/product/Analysis-of-Biological-Data/p/131922623X), but any edition will be pretty useful.   
 
 - *Calling Bullshit [@bergstrom2020]:* This book is not technical, but points to the big picture concerns of statisticians. It is very practical and well written. I will occasionally assign readings from this book, and/or point you to videos on their [website](https://www.callingbullshit.org/videos.html). All readings will be made available for you, but you might want to [buy a physical copy](https://www.penguinrandomhouse.com/books/563882/calling-bullshit-by-carl-t-bergstrom-and-jevin-d-west/).      
 
@@ -114,7 +114,7 @@ include_graphics("https://media.giphy.com/media/KZdaJU4SPaNzA3VPMF/giphy.gif")
 
 - Prep for 'class'. This class is flipped with asynchronous content delivery and synchronous meetings.  
 - Be sure to look over the assigned readings and/or videos, and complete the short low-stakes homework BEFORE each course.  
-- During class time, I will address questions make announcements, and get you started on in-class work. Anna & I will bounce around your breakout rooms to provide help and check-in. If you cannot make the class, you could do this on your own time without help, but we do not recommend this as a class strategy.
+- During class time, I will address questions, make announcements, and get you started on in-class work. Anna & I will bounce around your breakout rooms to provide help and check-in. If you cannot make the class, you could do this on your own time without help, but we do not recommend this as a class strategy.
 - The help of your classmates and the environment they create is one of the best parts of this class. Help each other.  
 - In addition to low stakes work before and in class, there will be a few more intense assignments, some collaborative projects and a summative project as the term ends. There will be no 'high-stakes' in class timed tests.
 

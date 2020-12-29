@@ -44,7 +44,7 @@ What's more, I believe this content is more important now than it has ever been,
 tweet_embed("https://twitter.com/LucyStats/status/1086757516674039813")
 ```
 
-My motivating goal for this course is to empower you to produce, present, and critically evaluate statistical evidence — especially as applied to biological topics. You should know that stats models are only models and that models are imperfect abstractions of reality. Yu should be able to think about jhow a biological question could be formulated as a statistical question, present graphs which show how data speak to this question, be aware of any shortcomings of that model, and how statistical analysis of a data set can be brought back into our biological discussion.
+My motivating goal for this course is to empower you to produce, present, and critically evaluate statistical evidence — especially as applied to biological topics. You should know that stats models are only models and that models are imperfect abstractions of reality. You should be able to think about how a biological question could be formulated as a statistical question, present graphs which show how data speak to this question, be aware of any shortcomings of that model, and how statistical analysis of a data set can be brought back into our biological discussion.
 
 *"By the end of this course...*  
 

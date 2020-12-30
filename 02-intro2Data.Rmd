@@ -222,14 +222,18 @@ If you want to be super cool and get the most out of `R`, I suggest starting an 
 
 The assignment is on canvas.  YB ADD LINK. It consists of three parts   
 
-1.  Identify a dataset on your computer (ideally one that is important to you if you have one), or one you've come across in another class, or online etc... Does it follow best practices in spreadsheet setup? Explain why or why not.       
+1.  Identify a dataset on your computer (ideally one that is important to you if you have one), or one you've come across in another class, or online etc... Does it follow best practices in spreadsheet setup? Explain why or why not.  
 
 2. Make up a small dataset, either from simple observations in your world or from your imagination following best practices in spreadsheet setup.    
 
 3. Quiz questions that are the same as those below. If you try them first here, you'll be sure to enter the right answers on canvas.  
 
 
+--- JK ideas
+Determine which of the following studies are experimental. If they are, explain why. If they are not, explain why not, or describe how they could be modified to be experimental? 
+a) ...
 
+Consider the final panel of the cartoon above. What could be modified in the panel to make the study experimental? What could be modified in the panel to exemplify sampling error instead of bias? 
 
 
 ## Quiz {-}

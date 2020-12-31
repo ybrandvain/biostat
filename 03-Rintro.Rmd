@@ -1,3 +1,7 @@
+# (PART) Introduction to `R` {-}
+
+
+
 # Day one of R and RStudio {#intro2r}  
 
 
@@ -104,7 +108,7 @@ Using RStudio Cloud allows you to use R and RStudio without installing anything 
 
 DETAILS YANIV
 
-#### Advantages to RStudio Cloud  {cloadadvant -}  
+#### Advantages to RStudio Cloud  {#cloadadvant -}  
 - From my experiencing teaching this course, about 5% of students have computers or computer systems where installing R is challenging, now you don’t have to.  
 
 - Some students have older computers with limited computation. For them, a few class exercises (involving large-scale permutation or simulation) go super slow, and they can get justifiably frustrated.  

@@ -23,6 +23,8 @@ library(emo)
 library(here)
 ```
 
+# (PART) Introduction to this course {-}
+
 # Preface {-}
 
 ## A book of (com)passion {-}

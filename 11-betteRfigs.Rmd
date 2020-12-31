@@ -720,7 +720,7 @@ Above we used the `legend.position` argument in [`theme()`](https://ggplot2.tidy
 
 ### Pick your theme   
 
-The default theme for ggplot is not for everyone. Spice up your plot with other themes. I introduced `theme_light()` above. [Other themes](https://ggplot2.tidyverse.org/reference/ggtheme.html) come standard with ggplot, and the [`ggthemes`](https://ggplot2.tidyverse.org/reference/ggtheme.html) package has even more (Fig. \@ref(fig:)). You can even [make your own theme](https://themockup.blog/posts/2020-12-26-creating-and-using-custom-ggplot2-themes/)!     
+The default theme for ggplot is not for everyone. Spice up your plot with other themes. I introduced `theme_light()` above. [Other themes](https://ggplot2.tidyverse.org/reference/ggtheme.html) come standard with ggplot, and the [`ggthemes`](https://ggplot2.tidyverse.org/reference/ggtheme.html) package has even more (Fig. \@ref(fig:themes)). You can even [make your own theme](https://themockup.blog/posts/2020-12-26-creating-and-using-custom-ggplot2-themes/)!     
 
 ```{r, themes, fig.cap= "Themes in ggthemes. From [Hiroaki Yutani](https://yutannihilation.github.io/allYourFigureAreBelongToUs/ggthemes/).",echo=FALSE}
 include_graphics("images/themes.jpeg")

@@ -1,3 +1,5 @@
+# (PART) Describing and visualizing data {-}
+
 # Summarizing data {#summaRy}  
 
 ```{r, echo = FALSE, message=FALSE}

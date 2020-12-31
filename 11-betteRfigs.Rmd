@@ -18,6 +18,43 @@ library(datasauRus)
 library(ggridges)
 library(randomNames)
 library(infer)
+
+df_students <- readr::read_csv("https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2019/2019-05-07/student_teacher_ratio.csv")
+
+df_world_tile <- readr::read_csv("https://gist.githubusercontent.com/maartenzam/787498bbc07ae06b637447dbd430ea0a/raw/9a9dafafb44d8990f85243a9c7ca349acd3a0d07/worldtilegrid.csv") %>% 
+  mutate(
+    ## Namibias two-digit country code is handled as `NA` - let us fix that
+    alpha.2 = if_else(name == "Namibia", "NA", alpha.2),
+    ## We are going to split "Americas" into "North America" and "Sout America"
+    region = if_else(region == "Americas", sub.region, region),
+    region = if_else(region %in% c("Northern America", "Central America", "Caribbean"), 
+                     "North America", region),
+    region = if_else(region == "Southern America", "South America", region),
+    ## to join both data sets, we need a id column
+    country_code = alpha.3
+  )
+
+df_ratios <- df_students %>% 
+  ## Let's keep only the most recent data per country
+  group_by(country, indicator) %>% 
+  filter(year == max(year)) %>% 
+  ungroup() %>% 
+  # Create `NA`s for countries which do not have any data 2012-2018
+  complete(indicator, nesting(country, country_code)) %>% 
+  ## Let's focus on primary education and keep only countries (coded by letters)
+  filter(
+    indicator == "Primary Education",
+    str_detect(country_code, "[A-Z]")
+  ) %>% 
+  ## merge with world tile map data
+  full_join(df_world_tile) %>%
+  filter(
+    !is.na(region),
+    !is.na(indicator)
+  ) %>% 
+  group_by(region) %>% 
+  mutate(student_ratio_region = median(student_ratio, na.rm = T)) %>% 
+  ungroup()
 ```
 
 
@@ -187,7 +224,7 @@ ggplot(daphnia_resist, aes(x = cyandensity, y = resistance))  +
 ```
 
 
-#### Making Honest figures: Ordering ordinals  {- #lim}   
+#### Making Honest figures: Ordering ordinals  {- #orderordinals}   
 
 The explanatory variable in the daphnia data, on the x axis is the density of cyanobacteria, as `high`, `low`, or `medium`. This order on the x could confuse readers and might deceive them if they did not  look carefully. Ordering these from low to medium to high is more natural and would minimize the opportunity for deception.
 
@@ -295,7 +332,7 @@ plot_grid(daphnia_points+  annotate(x = Inf, y = -Inf, geom = "text", color = "r
 
 - Show the distribution of the data as a violin plot. (I don't like this because it still hides the data).   
 -  Increase the transparency of points by changing `alpha` in [`geom_jitter()`](https://ggplot2.tidyverse.org/reference/geom_jitter.html).   
-- Make a sinaplot (with the [`geom_sina()`](https://ggforce.data-imaginist.com/reference/geom_sina.html) function in the [`ggforce`]( https://ggforce.data-imaginist.com/index.html) package). A sina plot  is like a violin polot made of data. 
+- Make a sinaplot (with the [`geom_sina()`](https://ggforce.data-imaginist.com/reference/geom_sina.html) function in the [`ggforce`]( https://ggforce.data-imaginist.com/index.html) package). A sina plot  is like a violin plot made of data. 
 
 Figure \@ref(fig:overplot2) shows both bad (Fig. \@ref(fig:overplot2)a:c) and good (Fig. \@ref(fig:overplot2)d:e) solutions to this problem. If none of these work for your data, check out [Chapter 5 of the R graphics cookbook](https://r-graphics.org/recipe-scatter-overplot) [@chang2020].
 
@@ -357,42 +394,334 @@ plot_grid(daphnia_boxplot_a+  annotate(x = Inf, y = -Inf, geom = "text", color =
 
 ggplot is great for making clear, explanatory plots, but this requires a bunch of new tricks. Remember that [clear plots](#clarity) are easy to interpret and help readers focus on patterns. Below I show some very useful R tricks to achieve these goals. There is a lot here, so **I recommend skimming these to understand what you can do, rather than memorizing every trick**. Again I strongly recommend the [The R Graphics Cookbook](https://r-graphics.org/) [@chang2020] as a great place to expand your tools.
 
-#### Add annotations, summaries, and lines to point out patterns {-} 
+####  Order categories sensibly  
 
-- Clear   
-9.4.3.1 Help readers focus on patterns. stat_summary  annotate. geom_vline(). nudge Bring out important comparisons/ Consider how people process images [position]. smart colors
+By default, R orders categorical variables alphabeticallt, which does not make any sense biologically. 
 
-9.4.3.2 Make labels informative, easy to digest, and readable. coord_flip. lablez_both
-9.4.3.3 Be consistent
-9.4.3.4 Order categories sensibly
-9.4.3.5 Use direct labeling
-9.4.3.6 Avoid distractions: Consider theme Don’t use 3D, animation, etc. unnecessarily, What the duck? Stay away from “glass slippers”. Avoid chartjunk
-  filter(Species %in%c("Bigbrownbat", "Wateropossum","Littlebrownbat", "Giantarmadillo"))
+Above we used the [`forcats`](https://forcats.tidyverse.org/index.html) package to [order ordinals](#orderordinals) as we see fit. But what if there is no natural order for a categorical variable (i.e. it is nominal)? **A great way to highlight patters is to order categories from the greatest to the smallest mean.** 
 
+
+Again the [`forcats`](https://forcats.tidyverse.org/index.html) package can help. We can use the [`fct_reorder`](https://forcats.tidyverse.org/reference/fct_reorder.html) function to reorder a factor by some other value.  *NOTE* this alters our data before plotting so we do this via the [`mutate`](https://dplyr.tidyverse.org/reference/mutate.html) function.  
+
+After making Figure \@ref(fig:fctreorder)a with the default order of regions, we reorder `region` by `mean` `student_ratio`, in `desc`ending order and removing `NA` values to generate  \@ref(fig:fctreorder)b with the same code as we used for  \@ref(fig:fctreorder)a.  
 
 
 
 
-coord_flip
 
-themes: some default options, ggthemeassist. font size, legend placement etc
+```{r fctreorder, fig.cap = 'Use [`fct_reorder`](https://forcats.tidyverse.org/reference/fct_reorder.html) to order nominal categories by a numerical summary.', fig.height=2, fig.width=7, message=FALSE, warning=FALSE}
+student_order_a <-  ggplot(df_ratios, aes(x = region, y = student_ratio, color = region)) + 
+  geom_jitter(alpha = .3,size = 2, height = 0, width = .15, show.legend = FALSE)+
+  scale_y_continuous(limits = c(0,100))
 
-color and fill. svcale manual, colorbrewer, beyonc new wilke one, wes anderson. ref wilke book
+df_ratios <- df_ratios %>%
+  mutate(region = fct_reorder(region, student_ratio, mean, na.rm = TRUE,.desc = TRUE))
 
-alpha
-annotation
-geom_text / geom_text_repel
-shape mapping
-size mapping
-stat_summary
+student_order_b <-  ggplot(df_ratios, aes(x = region, y = student_ratio, color = region)) + 
+  geom_jitter(alpha = .3,size = 2, height = 0, width = .15, show.legend = FALSE)+
+  scale_y_continuous(limits = c(0,100))
 
-labs()
-
-labeller = label_both or paste things before show mapg
-
+plot_grid(student_order_a, student_order_b, labels = c("a","b"))
+```
 
 
-9.4.4 Consider Accessibility and Universal Design
-9.4.4.1 Color
-9.4.4.2 Size
-9.4.4.3 Redundant coding
+#### Make clear labels   
+
+There are a few ways labels can be unclear:  
+
+- Labels can run over one another making the hard to read.   
+- By default, labels take the name of their column in a tibble, but often this is a handy shortcut, not a descriptive name.  
+- Labels ca be missing altogether.  
+
+Here is how we can solve these problems in R.
+
+##### **Preventing labels from running over one another**  {-}  
+
+Let us return to our example of variability in student to faculty ratios from Chapter \@ref(goodfigs). There we noticed that [region names ran over each other, and we could fix this](#goodlabels) by rotating the axes, or ever better, by flipping our coordinates. Figure \@ref(fig:howtoshowlabs) shows  how you do this in R.
+
+
+```{r, message=FALSE, warning=FALSE}
+student_plot_a <- ggplot(df_ratios, aes(x = region, y = student_ratio, color = region)) + 
+  geom_jitter(alpha = .3,size = 2, height = 0, width = .15, show.legend = FALSE)+
+  scale_y_continuous(limits = c(0,100))
+
+student_plot_b <- student_plot_a +
+  theme(axis.text.x = element_text(angle = 90))
+
+student_plot_c <- student_plot_a +
+  coord_flip()
+```
+
+
+```{r howtoshowlabs, fig.cap = 'Plot **c** effectively shows the x-axis labels.', message=FALSE, warning=FALSE, echo=FALSE, fig.height=2.5, fig.width=6}
+plot_grid(student_plot_a +  annotate(x = Inf, y = Inf, geom = "text", color = "red", label = "bad :(", hjust = 1, vjust = 1),
+          student_plot_b +  annotate(x = Inf, y = Inf, geom = "text", color = "grey", label = "meh :|", hjust = 1, vjust = 1), 
+          student_plot_c  +  annotate(x = Inf, y = Inf, geom = "text", color = "blue", label = "good :)", hjust = 1, vjust = 1), 
+        labels = c("a","b","c"), ncol = 3, rel_widths = c(1,1,2))
+```
+
+
+##### **Make more descriptive labels**  {-}  
+
+
+We often want plots with more descriptive labels than we want to type in our data analysis. You can override the defaults labels with the [`labs()`](https://ggplot2.tidyverse.org/reference/labs.html) function. You can add math and Greek by using the [`expression`](https://rpubs.com/kylewbrown/math-expressions) function (Fig \@ref(fig:complexlabs)).  
+
+
+
+
+```{r complexlabs, fig.cap = 'Customized labels.', fig.height=2, fig.width=5,message=FALSE, warning=FALSE}
+student_plot_c   + 
+labs(y = expression(paste('Students per faculty (', rho, " = ", frac('#  students','#faculty'),")")))
+```
+
+
+
+```{r faceted, echo = FALSE, fig.height=2.3, fig.width=2.52, message=FALSE, warning=FALSE, out.extra='style="float:right"'}
+plot_grid(ggplot(iris, aes(x = Sepal.Length)) +
+            geom_histogram(bins = 20,color = "white")+ 
+            facet_wrap(~Species, ncol = 1)+
+            scale_y_continuous(breaks = c(0,5,10)),
+          ggplot(mtcars, aes(x = mpg)) +
+            geom_histogram(bins = 8, color = "white")+ 
+            facet_wrap(~gear, ncol = 1)+
+            scale_y_continuous(breaks = c(0,3,6)), 
+          labels = c("a","b"))
+```
+
+
+##### **Add labels to facets when ambiguous**  {-}
+
+- In `iris` an educated reader could deduce that the facets designate the species.    
+- Maybe a reader who knew a lot about cars could guess that the facet in **b** referred to the number of gears in the car, but I would not have guessed that.  
+
+We do not want our readers guessing. At best this is frustrating for them and at worst the guess wrong. We could note the labels in the legend, but that would add to the reader's cognitive load. Best to include this information in the facet with the [`labeller`](https://ggplot2.tidyverse.org/reference/labeller.html) function in [`facet_wrap`](https://ggplot2.tidyverse.org/reference/facet_wrap.html) (Fig. \@ref(fig:facetedlabs)).  
+
+```{r facetedlabs, fig.cap = 'Use `labeller` to add labels to your facets.', fig.height=2.5, fig.width=2.5}
+ggplot(mtcars, aes(x = mpg)) +
+  geom_histogram(bins = 8, color = "white")+ 
+  facet_wrap(~gear, ncol = 1, labeller = label_both)
+```
+
+
+
+#### Add annotations, text, summaries, and lines to point out patterns  
+
+
+```{block2, type='rmdwarning'}
+This part is very fun, but invites two common pitfalls:   
+  
+1. It can be a big time sink.  
+
+2. You can add too much and overwhelm the reader.  
+
+To minimize these risks, I suggest saving these elaborations for nearly the last step in your explanatory presentation, and making carefully thinking about what elaborations to add and what the goal of each is.  
+```
+
+We can add statistical summaries, guiding lines, and other useful information to help the reader get more from our plot. For example, in Figure \@ref(fig:annotated), we:     
+
+
+- Add the mean and 95% bootstrapped confidence interval for each region by giving the  `mean_cl_boot` command to the [`stat_summary()`](https://ggplot2.tidyverse.org/reference/stat_summary.html) function, showing the readers our estimates and uncertainty in them.   
+- Use [`hline`]( https://ggplot2.tidyverse.org/reference/geom_abline.html) to add a horizontal line <span style="color: LightGrey;">(we can also use [`vline()`](https://ggplot2.tidyverse.org/reference/geom_abline.html) for a vertical line) </span> to show the overall mean.  
+- Used the [`annotate()`](https://ggplot2.tidyverse.org/reference/annotate.html) function to add the word "mean" above the dashed line  to point out that the dashed line shows the mean.   
+- Used the [`geom_text`]() function to add text to data points. Note that rather than showing every country, we filtered the data for the countries with the largest and smallest student ratios in Africa, and exceptionally variable region. We did so using our standard `dplyr` tools (from chapter \@ref(rdata)), starting with the data we initially gave ggplot (represented by the `.`).    
+
+
+
+```{r annotated, fig.cap  = 'Sprucing up our figure!', fig.height=2, fig.width=6, message=FALSE, warning=FALSE}
+ggplot(df_ratios, aes(x = region, y = student_ratio, color = region)) + 
+  geom_jitter(alpha = .3,size = 2, height = 0, width = .15, show.legend = FALSE)+
+  scale_y_continuous(limits = c(0,100)) +
+  stat_summary(fun.data = mean_cl_boot, color ="black")+
+  geom_hline( yintercept = summarise(df_ratios, mean(student_ratio, na.rm = TRUE)) %>% pull(), lty = 2 )+ # lty = 2 asks for a dashed line
+  annotate(x = 3.5, y = 28, label = "mean", geom = "text", size = 3)+
+  geom_text(data = . %>%
+              filter(region == "Africa") %>%
+              filter(student_ratio == max(student_ratio, na.rm = TRUE) | 
+                       student_ratio == min(student_ratio, na.rm = TRUE)  ),
+            aes(label = country), size =3, hjust = 0, show.legend = FALSE)
+```
+
+
+#### Use direct labeling   {#direct}
+
+There are a bunch of ways to add direct labels. The most straightforward way is with the   [`annotate()`](https://ggplot2.tidyverse.org/reference/annotate.html)  function, introduced above.
+
+
+
+#### Add groups to avoid confusion 
+
+R does not naturally know what comes in groups. So, for example, if we are plotting weight of baby chicks on different diets over time (Fig \@ref(fig:chicks)), or bacterial growth rates over time, we need to tell R to group by bird, or bacteria plate or whatever, otherwise, we got nonsensical plots (e.g. Fig. \@ref(fig:chicks)a). 
+
+In Figure \@ref(fig:chicks)b, we add `groups = Chick` in the main `aes` call when we set up our ggplot.  
+
+
+In Figure \@ref(fig:chicks)c, we add `groups = Chick` only to `geom_point` `aes` because we want to show how  mean chick weight changes over time for each diet. 
+
+I include a bit more details on sprucing up `plot_grid` for the curious.  
+
+
+
+
+
+
+
+```{r chicks, fig.cap='Use the `groups` arguments in `aes` to keep repeated observations on a single entity together', message=FALSE, warning=FALSE, fig.height=2}
+ChickWeight <- mutate(ChickWeight , Diet = factor(Diet)) # letting R know diet is categorical  
+
+chick_plot_a <- ggplot(ChickWeight, aes(x = Time, y = weight, color = Diet))+
+     geom_line() 
+ 
+chick_plot_b <- ggplot(ChickWeight, aes(x = Time, y = weight, group = Chick, color = factor(Diet)))+
+     geom_line(alpha = .8)
+ 
+chick_plot_c <-  ggplot(ChickWeight, aes(x = Time, y = weight, color = factor(Diet)))+
+     geom_line(aes(group = Chick), alpha = .3)+
+     stat_summary(fun= mean, geom = "line", size = 2,alpha = .7)
+ 
+chick_plots <- plot_grid(chick_plot_a + theme(legend.position = "none") + annotate(x = -Inf, y = Inf, color = "red", label = "bad :(", geom = "text", hjust = -1, vjust = 1) ,
+                         chick_plot_b + theme(legend.position = "none") + annotate(x = -Inf, y = Inf, color = "blue", label = "better :|", geom = "text", hjust = -1, vjust = 1),
+                         chick_plot_c + theme(legend.position = "none")+ theme(legend.position = "none") + annotate(x = -Inf, y = Inf, color = "blue", label = "better :|", geom = "text", hjust = -1, vjust = 1), 
+                         labels = c("a","b","c"), nrow = 1)
+
+chick_legend <- get_legend(chick_plot_c + theme(legend.position = "bottom"))
+
+plot_grid(chick_plots,chick_legend, rel_heights = c(8,2), nrow =2)
+```
+
+#### Think about colors  
+
+Just like our data type guide our choices of plot, our data type should guide our color scheme for mapping color onto a variable.     
+
+- Use continuous color pallets for continuous variables.      
+- Use sequential color schemes for ordinal variables.    
+- Use qualitative color schemes for nominal variables.   
+
+I have spent too much of my life choosing colors for plots. I suggest simplifying this choice by using the [`colorspace`](http://colorspace.r-forge.r-project.org/articles/hcl_palettes.html) package. This package has a range of color schemes you can choose from, and all are meant to minimize confusion for readers with a color vision deficiency.  I show how to use this package in Figure \@ref(fig:coloR).
+
+
+```{r, coloR, fig.cap = 'Using [`colorspace`](http://colorspace.r-forge.r-project.org/articles/hcl_palettes.html) to specify colors.', fig.height=8, fig.width=7, message=FALSE, warning=FALSE}
+library(colorspace)
+color_a <- chick_plot_c +
+  scale_color_discrete_qualitative(palette = "Harmonic")+
+  theme(legend.position = "bottom")+
+  labs(title = "Discrete qualitative pallets\nfor nominal variables")
+
+color_b <- mammal_lifespan  %>%
+  mutate(Danger = factor(Danger)) %>%  # letting R know Danger is categorical
+  ggplot(aes(x= BodyWt, y = LifeSpan,  color = Danger))+
+  geom_point(size = 3,alpha = .6)+
+  scale_x_continuous(trans = "log10")+
+  scale_y_continuous(trans = "log10")+
+  annotation_logticks(sides = "bl",base = 10, size = .2)+
+  scale_color_discrete_sequential(palette = "Viridis")+
+  theme(legend.position = "bottom")+
+  labs(title = "Discrete sequential (or diverging)\npallets for nominal variables")
+
+color_c <- ggplot(mammal_lifespan , aes(x= BodyWt, y = LifeSpan, color = Gestation))+
+    geom_point(size = 3,alpha = .6)+
+    scale_x_continuous(trans = "log10")+
+    scale_y_continuous(trans = "log10")+
+    annotation_logticks(sides = "bl",base = 10, size = .2)+
+    scale_color_continuous_sequential(palette = "Hawaii")+
+    theme(legend.position = "bottom")+
+    labs(title = "Continuous sequential (or diverging)\npallets for nominal variables")
+
+plot_grid(color_a,color_b,color_c, labels = letters[1:3], ncol=2)
+```
+
+
+Check out the available pallets and which ypes of variables they accompany [here](http://colorspace.r-forge.r-project.org/articles/ggplot2_color_scales_files/figure-html/hcl-palettes-1.png)!
+
+```{r fig.cap='Pallets from [colorspace](http://colorspace.r-forge.r-project.org/articles/ggplot2_color_scales_files/figure-html/hcl-palettes-1.png)', echo=FALSE}
+knitr::include_graphics('http://colorspace.r-forge.r-project.org/articles/ggplot2_color_scales_files/figure-html/hcl-palettes-1.png')
+```
+
+If you are interested in specifying a few colors yourself you can use the `scale_color_manual(vals = <vectors of colors>)` function where  `<vector of colors>` is the colors you want (e.g. `scale_color_manual(vals = c("red", "blue"))` will have the first category in red and the second in blue). If you want to have more fun (but likely have harder to read figures), you can try the [`beyonce`](https://github.com/dill/beyonce) or [`wesanderson`](https://github.com/karthik/wesanderson) packages which have their own color pallets.   
+
+
+#### Avoid distractions 
+
+Luckily, R makes adding distracting backgrounds/graphics, 3D, animation, glass slippers and ducks somewhat challenging. But there are enough `R` packages to make anything possible, and adding these features can be fun. So before adding fancy decorations to a plot, think hard about if you are adding critical information and capturing the attention of readers, or if you are distracting them.   
+
+
+
+
+
+
+###  Accessibility and Universal Design
+
+In chapter \@ref(goodfigs) we discussed the advantages of univrsal desig - so how do we achieve this in R?  
+
+#### Think of people with color vision deficiency 
+
+##### **Think of people with color vision deficiency when picking colors**  {-}  
+Think of people with color vision deficiency when picking colors. The main reason I pointed out the [`colorspace`]( http://colorspace.r-forge.r-project.org/index.html) package is because they have already picked pallets with accessibility in mind.  
+ 
+##### **Use color vision deficiency emulators to make sure your colors are accessible**  {-}
+Regardless, it is worth checking if your figures are accessible for people with color vision deficiency. We [previously](color) checked out an [online color vision deficiency emulator](http://hclwizard.org/cvdemulator/). Alternatively you can use the [`colorblindr`](https://github.com/clauswilke/colorblindr) package in R as a color vision deficiency emulator.
+
+##### **Use direct labeling to make figures accessible**  {-}
+See [above](#direct).   
+
+#### Modify size of text and points to make figures accessible   
+
+We have already discussed changing size in e.g. [`geom_point()`](https://ggplot2.tidyverse.org/reference/geom_point.html) or in [`theme()`](https://ggplot2.tidyverse.org/reference/theme.html) (perhaps using [`ggthemeassist`](https://github.com/calligross/ggthemeassist)).  
+
+#### Use redundant coding to make figures accessible   
+
+Colors can be tough to distinguish (or people might print in black and white). Redundancy in presentation provides readers with multiple opportunities to take the message in. I show some examples in Fig. \@ref(fig:redundant):  
+
+a.  Danger is shown by shape and color.   
+b.  Danger is shown by shape and color, but shape is made to be a number from one to five, decreasing the reader's cognitive burden.
+c. Gestation time is shown by both the size and color of the points.   
+
+```{r, redundant, fig.cap = "Redundant coding provides readers numerous ways to get the message.", fig.height=5, fig.width=7, message=FALSE, warning=FALSE}
+redundant_coding_a <- mammal_lifespan  %>%
+  mutate(Danger = factor(Danger)) %>%  # letting R know Danger is categorical
+  ggplot(aes(x= BodyWt, y = LifeSpan,  color = Danger, shape = Danger))+
+  geom_point(size = 3,alpha = 1)+
+  scale_x_continuous(trans = "log10")+
+  scale_y_continuous(trans = "log10")+
+  annotation_logticks(sides = "bl",base = 10, size = .2)+
+  scale_color_discrete_sequential(palette = "Viridis")+
+  theme(legend.position = "bottom")+
+  theme_light()
+
+ redundant_coding_b <- redundant_coding_a+
+  scale_shape_manual(values = as.character(1:5)) +
+  theme(legend.text = element_blank())
+ 
+ 
+ redundant_coding_c <- ggplot(mammal_lifespan , aes(x= BodyWt, y = LifeSpan, color = Gestation, size = Gestation))+
+    geom_point(alpha = .6)+
+    scale_x_continuous(trans = "log10")+
+    scale_y_continuous(trans = "log10")+
+    annotation_logticks(sides = "bl",base = 10, size = .2)+
+    scale_color_continuous_sequential(palette = "Hawaii")+
+  theme_light()
+
+plot_grid(redundant_coding_a, redundant_coding_b, redundant_coding_c,  labels = letters[1:3], ncol=2) 
+```
+
+
+```{r, fig.cap = 'Watch [this video](https://www.youtube.com/watch?v=X8b44P5D-5w) from Stat 545, about making nicer ggplots (7 min and 25 sec). Note that he uses a slightly differe way to use log scale than I showed. No worries, there is more than one right way to do thing in R.',  echo=FALSE,  out.extra= 'allowfullscreen'}
+include_url("https://www.youtube.com/embed/X8b44P5D-5w")
+```
+
+
+
+## Extra style  
+
+Here, I shout out a few stylistic options to further customize your ggplots that I have used above.   
+
+### Place your legend
+
+Above we used the `legend.position` argument in [`theme()`](https://ggplot2.tidyverse.org/reference/theme.html) to change place a legend on the bottom of a plot. But we can have way more control -- play with [`ggthemeassist`](https://github.com/calligross/ggthemeassist) to see!  
+
+### Pick your theme   
+
+The default theme for ggplot is not for everyone. Spice up your plot with other themes. I introduced `theme_light()` above. [Other themes](https://ggplot2.tidyverse.org/reference/ggtheme.html) come standard with ggplot, and the [`ggthemes`](https://ggplot2.tidyverse.org/reference/ggtheme.html) package has even more (Fig. \@ref(fig:)). You can even [make your own theme](https://themockup.blog/posts/2020-12-26-creating-and-using-custom-ggplot2-themes/)!     
+
+```{r, themes, fig.cap= "Themes in ggthemes. From [Hiroaki Yutani](https://yutannihilation.github.io/allYourFigureAreBelongToUs/ggthemes/).",echo=FALSE}
+include_graphics("images/themes.jpeg")
+```

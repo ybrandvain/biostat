@@ -18,6 +18,43 @@ library(datasauRus)
 library(ggridges)
 library(randomNames)
 library(infer)
+
+df_students <- readr::read_csv("https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2019/2019-05-07/student_teacher_ratio.csv")
+
+df_world_tile <- readr::read_csv("https://gist.githubusercontent.com/maartenzam/787498bbc07ae06b637447dbd430ea0a/raw/9a9dafafb44d8990f85243a9c7ca349acd3a0d07/worldtilegrid.csv") %>% 
+  mutate(
+    ## Namibias two-digit country code is handled as `NA` - let us fix that
+    alpha.2 = if_else(name == "Namibia", "NA", alpha.2),
+    ## We are going to split "Americas" into "North America" and "Sout America"
+    region = if_else(region == "Americas", sub.region, region),
+    region = if_else(region %in% c("Northern America", "Central America", "Caribbean"), 
+                     "North America", region),
+    region = if_else(region == "Southern America", "South America", region),
+    ## to join both data sets, we need a id column
+    country_code = alpha.3
+  )
+
+df_ratios <- df_students %>% 
+  ## Let's keep only the most recent data per country
+  group_by(country, indicator) %>% 
+  filter(year == max(year)) %>% 
+  ungroup() %>% 
+  # Create `NA`s for countries which do not have any data 2012-2018
+  complete(indicator, nesting(country, country_code)) %>% 
+  ## Let's focus on primary education and keep only countries (coded by letters)
+  filter(
+    indicator == "Primary Education",
+    str_detect(country_code, "[A-Z]")
+  ) %>% 
+  ## merge with world tile map data
+  full_join(df_world_tile) %>%
+  filter(
+    !is.na(region),
+    !is.na(indicator)
+  ) %>% 
+  group_by(region) %>% 
+  mutate(student_ratio_region = median(student_ratio, na.rm = T)) %>% 
+  ungroup()
 ```
 
 
@@ -357,7 +394,7 @@ include_graphics("images/bromancomparisontypes.png")
 ```
 
 
-####  Make labels informative, easy to digest, and readable
+####  Make labels informative, easy to digest, and readable {#goodlabels}
 
 Figure \@ref(fig:xlab)a is clearly bad – we cannot read the names of regions. \@ref(fig:xlab)b, c, and d present possibilities.  
 
@@ -470,8 +507,8 @@ Making figures accessible for all tends to make them better for everyone. Consid
 
 We have already highlighted a few good practices -- for example, describing results of a figure in words can make figures more accessible to blind readers, while direct labeling can make colors visible to colorblind readers. These examples highlight the benefit of universal design – as they make figures better all readers.
 
-#### Color  
-Picking colors is hard. Be sure that your colors are easy to distinguish, especially if printed in black and white or viewed by a colorblind reader. There are numerous R tools, including the [ColorBrewer package](https://rdrr.io/cran/RColorBrewer/man/ColorBrewer.html) which can help. In particular, I suggest putting figures through a color vision deficiency emulator (I suggest http://hclwizard.org/cvdemulator/) to see how your plots would look to readers with a color vision deficiency.
+#### Color  {#color}
+Picking colors is hard. Be sure that your colors are easy to distinguish, especially if printed in black and white or viewed by a colorblind reader. There are numerous R tools, including the [colorspace package](http://colorspace.r-forge.r-project.org/index.html) which can help. In particular, I suggest putting figures through a color vision deficiency emulator (I suggest http://hclwizard.org/cvdemulator/) to see how your plots would look to readers with a color vision deficiency.
 
 
 ```{r, fig.cap = '**ASSIGNMENT**: Download <a href="https://github.com/ybrandvain/biostat/blob/master/images/homglobin4comp.png?raw=true" download="hemoglobin"> this figure  </a> showing human hemoglobin levels by population -- which is meant to understand the basis of high altitude adaptation in the Andes, Ethiopia, Tibet, and  USA (as a control population that has not adapted to high elevation), upload it to http://hclwizard.org/cvdemulator/ (embedded below)  and see how these different figures are viewed under different color vision deficiencies.', echo = FALSE}

@@ -152,6 +152,10 @@ include_graphics("https://github.com/allisonhorst/stats-illustrations/blob/maste
 9. How important is this thing? Can I **do something slightly different that is good enough**? If so I try that. If it's essential,   
 10. **Find an expert** or [stackoverflow](https://stackoverflow.com/) or something.
 
+```{r, echo=FALSE}
+include_tweet("https://twitter.com/allison_horst/status/1213275783675822080?s=20")
+```
+
 ### Warnings and Errors, Mistakes  and Impasses
 
 Before digging into the common R errors, lets go over the four ways R can go wrong. 

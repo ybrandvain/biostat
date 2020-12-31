@@ -455,7 +455,7 @@ After reading this Section, you know that these two outcomes could happen for tw
 
 
 
-## Sampling Quiz {#samplingQuiz} {-}   
+## Sampling Quiz {#samplingQuiz -} 
 
 ```{r, echo=FALSE}
 knitr::include_app('https://brandvain.shinyapps.io/sampling/', height = '800px')

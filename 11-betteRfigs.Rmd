@@ -59,7 +59,7 @@ df_ratios <- df_students %>%
 
 
 ```{block2, type='rmdnote'}
-This chapter helps us achieve some of the issues discusses in Chapter 2 of @whitlock2020.
+This chapter helps us follow  the best practices in plotting outlined in  Chapter 2 of @whitlock2020.
 ```
 
 <span style="color: Blue;font-size:22px;">   Motivating scenarios:  </span>  <span style="color: Black;font-size:18px;">   You know what figure you want to make but need the R skills to go beyond the basics. </span> 

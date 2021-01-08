@@ -120,3 +120,8 @@ include_graphics("https://media.giphy.com/media/KZdaJU4SPaNzA3VPMF/giphy.gif")
 - The help of your classmates and the environment they create is one of the best parts of this class. Help each other.  
 - In addition to low stakes work before and in class, there will be a few more intense assignments, some collaborative projects and a summative project as the term ends. There will be no 'high-stakes' in class timed tests.
 
+## Note about the text's videos {-}
+
+- Some of the videos embedded in the text are required course content, and some are optional. 
+- Any video containing me (Yaniv), Anna, or Jordan is **optional** and meant to serve as a supplement to the course reading. These videos are intended to help support your learning, but are not required to watch.
+- Any video NOT containing me, Anna, or Jordan is **required**. These videos have been chosen specifically to highlight/explain specific concepts. 

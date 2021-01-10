@@ -38,7 +38,7 @@ This is a lot getting started, remember our goal here is exposure, not mastery. 
 
 <span style="color: Blue;font-size:22px;">   Motivating scenarios:  </span>  <span style="color: Black;font-size:18px;"> We just got our data, how do we get it into `R` and explore? </span> 
 
-**Learning goals: By the end of this chapter you should be  get data  into `R` and explore it**. Specifically, stiduents will be able to:
+**Learning goals: By the end of this chapter you should be able to get data  into `R` and explore it**. Specifically, stiduents will be able to:
 
 - *Load data into `R` and make their own tibbles.*       
 - *[`filter`](https://dplyr.tidyverse.org/reference/filter.html), [`mutate`](https://dplyr.tidyverse.org/reference/mutate.html), [`arrange`](https://dplyr.tidyverse.org/reference/arrange.html), and [`select`](https://dplyr.tidyverse.org/reference/select.html) data with the [`dplyr`](https://dplyr.tidyverse.org/) package.*   
@@ -244,13 +244,13 @@ Say we only wanted to deal with individuals os the species,  *Bufo bufo*. We can
 filter(toad_data, species == "Bufo bufo" )
 ```
 
-We can filter by any set of logical questions like greater then `>`, greater then or equal to `>=`, less than `<`, not equal `!=`, in a vector `%in%` etc... (see Ch \@ref(intro2r) for more info).   
+We can filter by any set of logical questions like greater than `>`, greater than or equal to `>=`, less than `<`, not equal `!=`, in a vector `%in%` etc... (see Ch \@ref(intro2r) for more info).   
 
 
 
 ### `select` your columns 
 
-Let's we didnt care about height of weight, and we just wanted individual, species, sound, and BMI. We can  [`select()`](https://dplyr.tidyverse.org/reference/select.html) those columns as follows: 
+Let's say we didnt care about height of weight, and we just wanted individual, species, sound, and BMI. We can  [`select()`](https://dplyr.tidyverse.org/reference/select.html) those columns as follows: 
 
 
 ```{r}
@@ -337,7 +337,7 @@ Science is iterative, social / collaborative, and builds on previous work. You s
 (3) People might want to take you've done, understand it, and do it again on this or another data set, perhaps changing it a bit. 
 
 Think about this when you work in `R`. Be sure to think 
-(1) Could what my code is doing to a colleague? What if I hadn't looked at it in a month?  Could someone who's pretty good with `R` look at my code and understand what I was trying to do?   
+(1) Could I explain what my code is doing to a colleague? What if I hadn't looked at it in a month?  Could someone who's pretty good with `R` look at my code and understand what I was trying to do?   
 (2) Could my code work well (within minimal changes) on another data set? How about on another computer?    
 
 

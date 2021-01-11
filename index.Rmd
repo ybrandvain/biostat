@@ -33,6 +33,8 @@ I begin this writing in early Sept 2020, and am thinking about you, my students 
 
 *Mid sept update:* Now much of the west coast is ablaze.
 
+*January update:* Rioters have breached the US capitol.  
+
 **Why do I bring this up?** Well I know you're dealing with a lot. Every year students are dealing with a lot -- from jobs, to supporting family, to the everyday of being in college and living life, and this year there's even more. I too have a lot -- A 14 month-old daughter, research and life pressures, teaching etc. Yet, we are all trying to make the most of life in this era. We want to teach, learn, and grow.
 
 What's more, I believe this content is more important now than it has ever been, statistics is obsessed with the critical evaluation of claims in the face of data, and is therefore particularly useful in uncertain times. Given this focus, and given that you all have different energies, motivations and backgrounds, I am restructuring this course slightly from previous years. The biggest change is a continued de-emphasis on math and programming -- that doesn't mean I'm eliminating these features, but rather that I am streamlining the required math and programming to what I believe are the essentials. For those who want more mathematical and/or computational details (either because you want to push yourself or you need this to make sense of things), I am including a bunch of optional content and support.

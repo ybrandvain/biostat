@@ -1,0 +1,260 @@
+---
+title: "Tutorial"
+output: learnr::tutorial
+runtime: shiny_prerendered
+---
+
+```{r setup, include=FALSE}
+library(learnr)
+library(tidyverse)
+library(ggmosaic)
+knitr::opts_chunk$set(echo = FALSE)
+```
+
+# Probabilistic thinking quiz  
+
+## Background
+
+Imagine there is some disease spreading, and people concerned about the disease take a test with the following behavior:   
+
+- The test correctly reports someone uninfected as uninfected in 0.995 of tests.   
+- The test correctly reports someone infected as infected in 0.94 of tests.  
+
+
+```{r quiz1, echo=FALSE}
+quiz(caption = "Concept questions",
+    question("Imagine you do not have the disease, what is the probability that the test says you do?",
+    answer("0.000"),
+    answer("0.005", correct = TRUE),
+    answer("0.060"),
+    answer("0.94"),
+    answer("0.995"),
+    answer("1.000"),
+    answer("Not enough info"),
+    allow_retry = TRUE,
+    incorrect = "Try again!"
+  ),
+  question("Which variables are independent? (check all that apply)",
+    answer("Disease status is independent of test result"),
+    answer("Being sick is independent of being not sick"),
+    answer("None of the variables are independent of each other", correct = TRUE),
+    answer("Not enough information"),
+    allow_retry = TRUE,
+    incorrect = "Try again!"
+  ),
+    question("Which variables are mutually exclusive? (check all that apply)",
+    answer("Being sick and having a test say you are not sick are mutually exclusive"),
+    answer("Being sick and not being sick are mutually exclusive",  correct = TRUE),
+    answer("Being healthy and having a test say you are sick are mutually exclusive"),
+    answer("Having the test say you are sick and having the test say you are not sick are mutually exclusive",  correct = TRUE),
+    answer("None of the variables are mutually exclusive"),
+    answer("Not enough information"),
+    allow_retry = TRUE,
+    incorrect = "Try again!"
+  ),
+  question("Which is the explanatory variable and which is the response?",
+    answer("Sick is Explanatory, Test is response",  correct = TRUE),
+    answer("Test is Explanatory, Sick is response"),
+    answer("Not enough info"),
+    allow_retry = TRUE,
+    incorrect = "Try again!"
+  ),
+    question("How MIGHT results of this test paint a biased view of the proportion of the population that has the disease? (check all that apply)",
+    answer("Sick people are more likely to be tested than healthy people (contributing to a case positivity rate greater than the proportion of the population that is sick)",  correct = TRUE),
+    answer("Risk takers recklessly exposing themselves to the disease might not care to know if they are infected. (contributing to a case positivity rate lower than the proportion of the population that is sick)",  correct = TRUE),
+    answer("Because the test only correctly designates a sick person as sick  94% of the time, the proportion of tests coming back as sick will be less than the proportion of test takes that are coming in sick", correct = TRUE),
+    answer("There is no opportunity for bias, the test is highly accurate and the people conducting the tests are morally upright medical professionals."),
+    answer("Not enough information"),
+    allow_retry = TRUE,
+    incorrect = "Try again!"
+  )
+)
+```
+
+
+**Consider the final question, above:**    
+- Can you think of any biases not listed above?   
+- Which bias do you think is responsible for the greatest difference between disease rate and test positivity rate? Why?   
+
+## Simulate disease
+
+To better understand this case, lets simulate ten thousand tests in a population where **2%** of people getting tested are sick, and find the proportion of people that are sick. 
+
+
+```{r sim1, exercise=TRUE, eval = FALSE}
+n_tests  <- 10000
+p_sick   <- 0.02
+
+sickness <- tibble(
+  actual_status = sample(c("sick","healthy"),
+                         size = ___,
+                         replace = TRUE,
+                         prob = c(___, 1 - ___)))
+)
+
+sickness %>% 
+  summarise(prop_sick = mean( actual_status == "___"))
+```
+
+```{r sim1-solution}
+n_tests  <- 10000
+p_sick   <- 0.02
+sickness <- tibble(
+  actual_status = sample(c("sick","healthy"),
+                         size = n_tests,
+                         replace = TRUE,
+                         prob = c(p_sick, 1-p_sick))
+)
+
+sickness %>% 
+  summarise(prop_sick = mean( actual_status == "sick"))
+```
+
+### Uncertainty
+
+Hit the `run code` button a bunch of times to get a sense of the expected  variability across samples of size ten thouand. Then increase the number of tests to one million, and hit `run code` a few more times
+
+```{r samplesize, echo=FALSE}
+question("On average which sample size has a proportion of sick people closest to the true population parameter?",
+  answer("Ten thousand"),
+  answer("One million", correct = TRUE),
+  answer("No discernable pattern"),
+  allow_retry = TRUE
+)
+```
+
+## Simulate testing   
+
+Now let's test these people, and find the number that are    
+
+1. healthy and diagnosed as healthy.       
+2. healthy and diagnosed as sick.    
+2. sick and diagnosed as healthy.   
+3. sick and diagnosed as sick.   
+
+Remember 
+
+- That we use the [`case_when`](https://dplyr.tidyverse.org/reference/case_when.html) function to simulate conditional probabilities.    
+- The test correctly reports someone uninfected as uninfected in 0.995 of tests.   
+- The test correctly reports someone infected as infected in 0.94 of tests.    
+<span style="color:lightgrey;">Note these answers will differ slightly from before because we are running the simulation again. </span>
+
+```{r sim2, exercise=TRUE, eval = FALSE}
+n_tests  <- 10000
+p_testsick_givensick       <- 0.94
+p_testhealthy_givenhealthy <- 0.995
+p_sick                      <- 0.02
+
+sickness <- tibble(
+  actual_status = sample(c("sick","healthy"), size = n_tests,  replace = TRUE, prob = c(p_sick, 1 - p_sick))) %>%
+    group_by(actual_status) %>%
+    mutate(test_status = case_when(
+      actual_status == "sick" ~ sample(c("sick","healthy"),
+            prob = c(___, 1 - ___), 
+            replace = TRUE, size = n()),  
+      actual_status == "healthy" ~  sample(c("sick","healthy"),
+            prob = c(1 - ___, ___), 
+            replace = TRUE,  size = n()))) %>%
+  ungroup()
+
+### Counting all combinations of outcomes
+sickness %>%
+  group_by(___, ___) %>%
+  summarise(count = n(), .groups = "drop")
+
+
+
+#### We will make a plot with the mosaic plot  function in base R. 
+# These plots are nice, but hard to make in ggplot. 
+# Build off of this code if you ever want to build one. 
+# Mosaic plots are discussed in more detail in the textbook
+table(sickness) %>% 
+  mosaicplot(color = c("firebrick","blue"), 
+             main = "", xlab = "actual status", ylab = "test status")
+```
+
+```{r sim2-solution}
+n_tests  <- 10000
+p_testsick_givensick       <- 0.94
+p_testhealthy_givenhealthy <- 0.995
+p_sick                      <- 0.02
+
+sickness <- tibble(
+  actual_status = sample(c("sick","healthy"), size = n_tests,  replace = TRUE, prob = c(p_sick, 1 - p_sick))) %>%
+    group_by(actual_status) %>%
+    mutate(test_status = case_when(
+      actual_status == "sick" ~  sample(c("sick","healthy"),
+              prob = c(p_testsick_givensick , 1 - p_testsick_givensick ),
+              replace = TRUE, size = n()),  
+      actual_status == "healthy" ~ sample(c("sick","healthy"),
+              prob = c(1 - p_testhealthy_givenhealthy, p_testhealthy_givenhealthy),
+              replace = TRUE, size = n()))) %>%
+  ungroup()
+
+### Counting all combinations of outcomes
+sickness %>%
+  group_by(test_status, actual_status) %>%
+  summarise(count = n(), .groups = "drop")
+
+#### We will make a plot with the mosaic plot  function in base R. 
+# These plots are nice, but hard to make in ggplot. 
+# Build off of this code if you ever want to build one. 
+# Mosaic plots are discussed in more detail in the textbook
+table(sickness) %>% 
+  mosaicplot(color = c("firebrick","blue"), 
+             main = "", xlab = "actual status", ylab = "test status")
+```
+
+### Learning new things from the simulation   
+
+Using R as a calculator, find the proportion of people that are diagnosed to be sick, who are actually healthy.  
+
+```{r calculator, exercise=TRUE, eval=FALSE}
+___ / (___ + ___)
+```
+
+<div id="calculator-hint">
+**Hint:** Divide the number of people who are diagnosed to be sick but are actually healthy by the number of people diagnosed as sick.
+</div>
+
+
+```{r bayes1, echo=FALSE}
+question("In this example, the proportion of people that are diagnosed to be sick who are actually healthy is approximatly",
+  answer("0.005"),
+  answer("0.04"),
+  answer("0.20", correct = TRUE),
+  answer("0.26"),
+  answer("0.98"),
+  allow_retry = TRUE
+)
+```
+
+#### Change the proportion of people who are sick, `p_sick` to `0.10` and run th simulation again.
+
+```{r bayes2, echo=FALSE}
+question("Compared to the answers above, the proportion of people that are diagnosed to be sick who are actually healthy is now ",
+  answer("much less"),
+  answer("about the same"),
+  answer("much greater", correct = TRUE),
+  allow_retry = TRUE
+)
+```
+
+**REFLECT** on this answer. How could this be?   
+
+
+#### Guess   
+
+Play with the simulation a bit and consider: 
+
+
+```{r and, echo=FALSE}
+question("What equation is closest to predicting the number of people who are sick and diagnosed as sick (select all that apply)",
+  answer("P(sick)  * n_tests"),
+  answer("P(actually sick) x P(sick diagnosis | actually sick) * n_tests", correct = TRUE),
+  answer("P(sick diagnosis) x P(actually sick | sick diagnosis) * n_tests", correct = TRUE),
+  answer("(P(sick diagnosis) + P(actually sick)) * n_tests"),
+  answer("None of these are close"), 
+  allow_retry = TRUE
+)
+```

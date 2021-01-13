@@ -10,9 +10,12 @@ library(tufte)
 library(emo)
 ```
 
-<span style="color: red"> YB TDO: videos, add advanced material about RMarkdown, projects</span>
-
 <span style="color: Blue;font-size:22px;">   Motivating scenario:  </span>  <span style="color: Black;font-size:18px;"> We start at the beginning of a study -- how do we set up a good way to keep track of data that will allow us to focus on understanding and analyzing our data, not reorganizing and rearranging it? </span> 
+
+```{r collecting, out.extra= 'allowfullscreen', out.width="40%", out.extra='style="float:right; padding:10px"', echo=FALSE}
+include_url("https://www.youtube.com/embed/TPWPzrzY_1M",height = "200")
+```
+
 
 **Learning goals: By the end of this chapter you should be able to**  
 
@@ -24,9 +27,7 @@ library(emo)
 
 
 
-```{r collecting, fig.cap='Intro to this chapter (2 min and 45 sec).', echo=FALSE, out.extra= 'allowfullscreen'}
-include_url("https://www.youtube.com/embed/TPWPzrzY_1M")
-```
+
 
 
 
@@ -53,10 +54,9 @@ Data are most often stored in spreadsheets, or sometimes in databases. An import
 
 
 
-```{r, echo = FALSE, echo=FALSE, out.extra= 'allowfullscreen'}
-include_url("https://www.youtube.com/embed/0f8PTAQGdGY")
+```{r,  out.width="40%", out.extra='style="float:right; padding:10px"', echo=FALSE}
+include_url("https://www.youtube.com/embed/0f8PTAQGdGY",height = "200")
 ```
-
 
 
 
@@ -180,12 +180,13 @@ knitr::include_graphics('https://github.com/allisonhorst/stats-illustrations/raw
 
 
 
-```{r modetidy, fig.cap='More about tidy data (3 min and 30 sec).', echo=FALSE, out.extra= 'allowfullscreen'}
-include_url("https://www.youtube.com/embed/pYNEpBTmfoI")
+
+
+
+
+```{r,  out.width="40%", out.extra='style="float:right; padding:10px"', echo=FALSE}
+include_url("https://www.youtube.com/embed/pYNEpBTmfoI",height = "200")
 ```
-
-
-
 
 
 ### Dealing with (other people's)  data in spreadsheets  
@@ -229,18 +230,18 @@ The assignment is on canvas.  YB ADD LINK. It consists of three parts
 3. Quiz questions that are the same as those below. If you try them first here, you'll be sure to enter the right answers on canvas.  
 
 
+## Quiz {-}
+
+```{r, echo=FALSE}
+knitr::include_app('https://brandvain.shinyapps.io/intro2data/', height = '500px')
+```
+
+
+
+
 --- JK ideas
 Determine which of the following studies are experimental. If they are, explain why. If they are not, explain why not, or describe how they could be modified to be experimental? 
 a) ...
 
 Consider the final panel of the cartoon above. What could be modified in the panel to make the study experimental? What could be modified in the panel to exemplify sampling error instead of bias? 
-
-
-## Quiz {-}
-
-```{r, echo=FALSE}
-knitr::include_app('https://brandvain.shinyapps.io/02-data/', height = '500px')
-```
-
-
 

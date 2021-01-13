@@ -1,0 +1,75 @@
+---
+title: "Tutorial"
+output: learnr::tutorial
+runtime: shiny_prerendered
+---
+
+```{r setup, include=FALSE}
+library(learnr)
+library(tidyverse)
+library(knitr)
+library(ggmosaic)
+library(praise)
+knitr::opts_chunk$set(echo = FALSE)
+```
+
+# Intro to Data quiz  
+
+Complete this quiz to evaluate your comprehension of the material
+A similar, if not identical quiz should be completed for credit on canvas.
+
+
+### Q1: Entering data
+
+
+```{r, echo=FALSE,out.width='40%'}
+include_graphics("https://github.com/ybrandvain/biostat/blob/master/images/bad_names.jpeg?raw=true",)   
+```
+
+
+```{r enterdata, echo=FALSE}
+question("Which of the spreadsheets above uses best practices for entering data in the life_history column",
+  answer("A"),
+  answer("B", correct = TRUE),
+  correct = random_praise(),
+  incorrect = random_encouragement(),
+  allow_retry = TRUE
+)
+```
+
+### Q2: Which is tidy?
+
+
+```{r, echo=FALSE,out.width='40%'}
+include_graphics("https://github.com/ybrandvain/biostat/blob/master/images/tidy.jpeg?raw=true",)   
+```
+
+```{r whichistidy, echo=FALSE}
+question("Which of the spreadsheets above is tidy?",
+  answer("A", correct = TRUE),
+  answer("B"),
+  correct = random_praise(),
+  incorrect = random_encouragement(),
+  allow_retry = TRUE
+)
+```
+
+
+### Q3: Naming columns
+
+
+
+
+```{r, echo=FALSE,out.width='40%'}
+include_graphics("https://github.com/ybrandvain/biostat/blob/master/images/name4things.jpeg?raw=true",)   
+```
+
+```{r colnames, echo=FALSE}
+question("Which of the spreadsheets has a bad coumn name?",
+  answer("A"),
+  answer("B", correct = TRUE),
+  correct = random_praise(),
+  incorrect = random_encouragement(),
+  allow_retry = TRUE
+)
+```

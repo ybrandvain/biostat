@@ -252,7 +252,7 @@ You do not need to give the arguments name if we don’t want – by default R p
 ```
 
 ```{r collecting, fig.cap='Intro to this chapter (5 min and 12 sec).', echo=FALSE, out.extra= 'allowfullscreen'}
-include_url("https://youtu.be/O7eOwj0YyUg")
+include_url("http://youtu.be/O7eOwj0YyUg")
 ``` 
 
 ###  Assigning variables in R

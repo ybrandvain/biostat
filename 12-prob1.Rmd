@@ -1,3 +1,4 @@
+# (PART) Probability and hypothesis testing {-}
 
 # Probabilistic thinking {#prob1}
 
@@ -85,7 +86,7 @@ include_graphics("https://imgs.xkcd.com/comics/sports.png")
 
 3. **Understanding probability helps us interpret statistical results** Confidence intervals, the sampling distribution, p-values, and a host of other  statistical concepts are notoriously confusing. Some of this is because they are strange and confusing topics, but a large contributor is that people come across these terms without a foundation in probability. In addition to helping us understand statistical concepts, probabilistic thinking can help us understand many seemingly magical or concerning observations in the scientific literature. For example, later in this class, we will see that attempts to replicate exciting experimental results often fail, and that the effect of a treatment tends to get smaller the longer we study it. Amazingly, understanding a little about probability and a little about how scientists work can explain many of these observations.  
 
-Luckly, none of his requires serious expertise in probability theory -- while I recommend taking a bunch of probability theory courses (because it's soooo fun), a quick primer, like we're working through here is quite powerful!   
+Luckily, none of his requires serious expertise in probability theory -- while I recommend taking a bunch of probability theory courses (because it's soooo fun), a quick primer, like we're working through here is quite powerful!   
 
 **Perhaps the most important take home message from all of this is that random goes not mean equal probability, and does not mean we have no clue. In fact, we can often make very good predictions about the world by considering how probability works. **   
 
@@ -503,10 +504,11 @@ nonexclusive1 %>%
 
 **A plot**   
 
-```{r, out.width=3, out.height=1.5}  
+```{r workfig, fig.width=3, fig.height=2}  
 ggplot(nonexclusive1, aes(x =A, fill = B))+
   geom_bar(position = "dodge")+
-  scale_fill_manual(values = c("black","grey"))
+  scale_fill_manual(values = c("black","grey"))+
+  theme_light()
 ```
 
 

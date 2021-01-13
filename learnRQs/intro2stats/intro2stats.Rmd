@@ -1,0 +1,137 @@
+---
+title: "Tutorial"
+output: learnr::tutorial
+runtime: shiny_prerendered
+---
+
+```{r setup, include=FALSE}
+library(learnr)
+library(tidyverse)
+library(knitr)
+library(ggmosaic)
+library(praise)
+knitr::opts_chunk$set(echo = FALSE)
+```
+
+# Statistical thinking quiz  
+
+Complete this quiz to evaluate your comprehension of the material
+A similar, if not identical quiz should be completed for credit on canvas.
+
+### Q1: Goals of Statistics
+
+```{r statsgoals, echo=FALSE}
+question("The three major goals of statistics are (check all that apply)",
+  answer("Estimating population parameters from samples", correct = TRUE),
+  answer("Eliminating sampling error"),
+  answer("Learning about causation", correct = TRUE),
+  answer("Hypothesis testing", correct = TRUE),
+  answer("Rejecting the null hypothesis"), 
+  correct = random_praise(),
+  incorrect = random_encouragement(),
+  allow_retry = TRUE
+)
+```
+
+### Q2: Object of Study
+
+
+```{r objectofstudy, echo=FALSE}
+question("When we do science we usually have data from an entire population",
+  answer("TRUE"),
+  answer("FALSE", correct = TRUE),
+  correct = random_praise(),
+  incorrect = random_encouragement(),
+  allow_retry = TRUE
+)
+```
+
+
+### Q3: Populations?
+
+
+```{r pops, echo=FALSE}
+question("Which of the following can be considered populations?",
+  answer("All moose in Minnesota.", correct = TRUE),
+  answer("15 moose caught in 'camera traps' set across the state of Minnesota."),
+  answer("The probability that  a fair dice will come up as 'snake eyes.'", correct = TRUE),
+  answer("The observed proportion of 'snake eyes' from a finite number of rolls of fair dice."),
+  correct = random_praise(),
+  incorrect = random_encouragement(),
+  allow_retry = TRUE
+)
+```
+
+### Q4: Sample?
+
+
+```{r samps, echo=FALSE}
+question("Which of the following can be considered populations?",
+  answer("All moose in Minnesota."),
+  answer("15 moose caught in 'camera traps' set across the state of Minnesota.", correct = TRUE),
+  answer("The probability that  a fair dice will come up as 'snake eyes.'"),
+  answer("The observed proportion of 'snake eyes' from a finite number of rolls of fair dice.", correct = TRUE),
+  correct = random_praise(),
+  incorrect = random_encouragement(),
+  allow_retry = TRUE
+)
+```
+
+
+### Q5: Isn’t it numeric (don’t you think)?
+
+
+```{r numeric, echo=FALSE}
+question("Which of the following variables are numeric? (click all that apply)",
+  answer("The number of lemurs on a tree", correct = TRUE),    
+  answer("Lemur ID number (in a park where all lemurs have been tagged with randomly assigned numbers)"),
+  answer("Weights of lemurs", correct = TRUE),
+  answer("Lemur eye-color", correct = TRUE),
+  correct = random_praise(),
+  incorrect = random_encouragement(),
+  allow_retry = TRUE
+)
+```
+
+
+
+
+### Q6: Experiment or Observation?   
+
+
+
+```{r experiment, echo=FALSE}
+question("Which of the following studies is experimental? (click all that apply)",
+  answer("A study comparing insect diversity on organic farms to neighboring conventional farms"),       
+  answer("A study comparing insect diversity on farms randomly assigned to use conventional or organic practices", correct = TRUE),    
+  answer("Comparing expression of IGFII in lab mice born to large vs small litters"),
+  correct = random_praise(),
+  incorrect = random_encouragement(),
+  allow_retry = TRUE
+)
+```
+
+### Q7:  Why not?
+
+```{r, echo = FALSE, fig.cap = "According to polls, most people dont like playing in traffic. So why do I never seem to meet these people on the street. [link](https://xkcd.com/2357/)"}
+include_graphics("https://imgs.xkcd.com/comics/polls_vs_the_street.png")
+```
+
+
+Experimental, Error
+Observational, Bias
+Observational, Error
+
+
+```{r srteet, echo=FALSE}
+question("Consider the final panel of the cartoon above. The questioner is referring to an ____ study, and the answer exemplifies sampling ____.",
+  answer("Experimental, Bias"),
+  answer("Experimental, Error"),
+  answer("Observational, Bias", correct = TRUE),
+  answer("Observational, Error"),
+  correct = random_praise(),
+  incorrect = random_encouragement(),
+  allow_retry = TRUE
+)
+```
+

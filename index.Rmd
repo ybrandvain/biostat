@@ -91,6 +91,10 @@ Alternatively you can simply join the course via RStudioCloud. This could be des
 
 ## What is this 'book' and how will we use it? {-}
 
+```{r,  echo = FALSE, out.extra= 'allowfullscreen'}
+include_url("https://www.youtube.com/embed/KWzwum4VZfE")
+```
+
 This 'book' functions as an extensive syllabus and course notes. I will embed youtube videos, app-based demonstrations and class exercises. As noted above, there are some things I will include that will not be necessary for everyone, and I will clearly mark these sections.
 
 
@@ -125,5 +129,5 @@ include_graphics("https://media.giphy.com/media/KZdaJU4SPaNzA3VPMF/giphy.gif")
 ## Note about the text's videos {-}
 
 - Some of the videos embedded in the text are required course content, and some are optional. 
-- Any video containing me (Yaniv), Anna, or Jordan is **optional** and meant to serve as a supplement to the course reading. These videos are intended to help support your learning, but are not required to watch.
-- Any video NOT containing me, Anna, or Jordan is **required**. These videos have been chosen specifically to highlight/explain specific concepts. 
+- Small videos on the right (usually by Yaniv, Anna, or Jordan) are **optional** and meant to serve as a supplement to the course reading. These videos are intended to help support your learning, but are not required to watch.
+- Videos in the middle of a page (usually NOT by yaniv, Anna, or Jordan) are **required**. These videos have been chosen specifically to highlight/explain specific concepts. 

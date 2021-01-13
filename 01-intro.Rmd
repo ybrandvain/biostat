@@ -17,21 +17,24 @@ library(here)
 These notes accompany Chapter 1 --- Statistics and samples --- of our textbook. **The reading below is required**, @whitlock2020 is not, but is encouraged.    
 ```
 
-<span style="color: red"> YB TDO: videos, add advanced material about RMarkdown, projects</span>
-
 <span style="color: Blue;font-size:22px;">   Motivating scenario:  </span>  <span style="color: Black;font-size:18px;">You have seen or heard about statistics, but you don't really know what people are getting at. You hear words like "p-value", "statistically significant", "effect size", "bias", or "nonindependent" but can't pinpoint exactly what they mean? </span> 
 
+
+```{r,  echo = FALSE, out.extra= 'allowfullscreen', out.width="40%", out.extra='style="float:right; padding:10px"'}
+#fig.cap = 'Intro to this chapter (1 min and 05 sec).',
+include_url("https://www.youtube.com/embed/1sBX_GzIO8k",height = "200")
+```
+
 **Learning goals: By the end of this chapter you should be able to**    
+
+
+
 
 
 - Get a sense of what motivates statisticians.  
 - Be able to explain the difference between a population and a sample, a parameter and an estimate, the relationship between these four concepts, and the things which can make a sample deviate from a population.   
 - Have a sense of why as statisticians, we must consider the type of data and variables in building models.  
 - Understand the differences in motivation and what we can get out of an observational and experimental study.
-
-```{r, fig.cap = 'Intro to this chapter (1 min and 05 sec).', echo = FALSE, out.extra= 'allowfullscreen'}
-include_url("https://www.youtube.com/embed/1sBX_GzIO8k")
-```
 
 
 
@@ -40,6 +43,14 @@ The other assignment for class is to read pages 38-44 and 104-112 [available her
 ```
 
 ## Goals of (Bio)stats
+
+
+```{r, echo = FALSE, out.extra= 'allowfullscreen', out.width="40%", out.extra='style="float:right; padding:10px"'}
+# fig.cap = 'The goals of stats (2 min and 33 sec).', 
+include_url("https://www.youtube.com/embed/4W1py-VB37U", height = "200")
+```
+
+
 Statistics claims to be obsessed with the TRUTH. It's meant to be a way of understanding the world. It's meant to describe and differentiate, and ideally, to tease apart causation from correlation. These three goals    
 
 1. Estimation   
@@ -61,13 +72,15 @@ My goal is to enable you to unleash these powers. But also to realize that on th
 tweet_embed("https://twitter.com/bryan_howie/status/1073054519808876544")
 ```
 
-```{r, fig.cap = 'The goals of stats (2 min and 33 sec).', echo = FALSE, out.extra= 'allowfullscreen'}
-include_url("https://www.youtube.com/embed/4W1py-VB37U")
-```
-
 
 
 ## Sampling from Populations
+
+
+```{r, echo = FALSE, out.extra= 'allowfullscreen', out.width="40%", out.extra='style="float:right; padding:10px"'}
+# fig.cap = 'Sampling -- what could go wrong? (7 min and 45 sec)'
+include_url("https://www.youtube.com/embed/aL_feXB7nG0", height = "200")
+```
 
 To a statistician the TRUTH is a **population** -- *a collection of all individuals of a circumscribed type* (e.g. all grasshoppers in North America), or a process for generating these individuals (see note below). We characterize a population by its **parameters** (e.g. its TRUE mean, or its TRUE variance).
 
@@ -81,6 +94,9 @@ So a major goal of a statistical analysis is how to go from conclusions about a 
 ```{block2, type='rmdnote'}
 Sometimes we think of a population as a process generating our data. For example, when we compare binomial outcomes to the flip of a fair coin, we do not think about all coins flipped in the world. Rather we think about what we would expect to observe from the process of flipping a fair coin.
 ```
+
+
+
 
 ### Sampling Error {#samplingError -}
 
@@ -119,10 +135,6 @@ This is a good time to remember to read pages 38-44 and 104-112 [available here]
 Most (intro) stats assumes that samples are independent. If observations in a sample are *independent of on another, the probability that one individual is studied is unrelated to the probability that any other individual is studied*. While this is desirable, it is sometimes impossible, so we address methods for accommodating non-independence later in the term.
 
 
-```{r, fig.cap = 'Sampling -- what could go wrong? (7 min and 45 sec)', echo = FALSE, out.extra= 'allowfullscreen'}
-include_url("https://www.youtube.com/embed/aL_feXB7nG0")
-```
-
 ##  Models and Hypothesis Testing
 
 ### Statistical Models {-}
@@ -137,9 +149,16 @@ So, while we use statistics to search for truth, we must always remember this un
 
 ### Hypothesis Testing  {-}
  
-A common use of statistics --- especially the statistics we focus on this term --- is hypothesis testing. Here, we use our estimates from samples to ask if data come from populations with different parameters. This approach often relies on statistical models BUT SEE CHAPTER XXX
+A common use of statistics --- especially the statistics we focus on this term --- is hypothesis testing. Here, we use our estimates from samples to ask if data come from populations with different parameters. This approach often relies on statistical models <span style="color: lightgrey;"> BUT SEE CHAPTER XXX</span>.    
 
 ##  Types of Variables and Data
+
+
+```{r, echo = FALSE, out.extra= 'allowfullscreen', out.width="40%", out.extra='style="float:right; padding:10px"'}
+#fig.cap = 'Types of variables (2 min and 15 sec).', 
+include_url("https://www.youtube.com/embed/JVo19zqq5cs",height = "200")
+```
+
 
 As we build and evaluate statistical models, a key consideration is the type of data and the process that generates these data. Variables are things which differ among individuals (or sampling units) of our study. So, for example, height, or eye color, or the type of fertilizer applied to a site, or the number of insect species per hectare are all variables.
 
@@ -189,12 +208,15 @@ include_graphics("https://github.com/allisonhorst/stats-illustrations/raw/master
 
 
 
-```{r, fig.cap = 'Types of variables (2 min and 15 sec).', echo = FALSE, out.extra= 'allowfullscreen'}
-include_url("https://www.youtube.com/embed/JVo19zqq5cs")
-```
-
 
 ##  Types of Studies
+
+
+```{r,  echo = FALSE, out.extra= 'allowfullscreen', out.width="40%", out.extra='style="float:right; padding:10px"'}
+#fig.cap = 'Types of variables (4 min and 15 sec).',
+include_url("https://www.youtube.com/embed/loAKxnepIHU", height = "200")
+```
+
 
 The third major goal of statistics (in addition to estimation and hypothesis testing) is inferring causation. When hoping to do so, we must consider the type of study.
 
@@ -205,17 +227,25 @@ Additionally, randomized control experiments are often unfeasible, impractical, 
 Remember: the distinction between an experimental and an observational experimental study is not about the equipment used or the lab vs. the field. For example, comparing patterns of methylation between live bearing and egg laying species of fish is an observation, not an experiment, as we did not randomly assign live-bearing or egg-laying to fish in this study.
 
 
-```{r, fig.cap = 'Types of variables (4 min and 15 sec).', echo = FALSE, out.extra= 'allowfullscreen'}
-include_url("https://www.youtube.com/embed/loAKxnepIHU")
-```
-
 
 
 ## Quiz
 
 ```{r, echo=FALSE}
-knitr::include_app('https://brandvain.shinyapps.io/01-introqs/', height = '500px')
+knitr::include_app('https://brandvain.shinyapps.io/intro2stats/', height = '500px')
 ```
+
+
+## Homework   
+
+The homework (due by 7 am on monday) is on [canvas](https://canvas.umn.edu/courses/225135/quizzes/397367). It consists of:     
+
+1. The same questions as above (if you have the answers from here, you're guaranteed to get 100%).  
+
+2. *Reflections on a data set:* Spend about five minutes finding a data set on your computer or online. Reflects on it in light of what we covered (e.g. What is the motivating question/idea? is this from an observation or experiment? How could sampling error effect it? What is the opportunity for sampling bias? What type of variables are there? Which is the response? etc...)  
+
+3. Reflect on the Calling Bullshit  [@bergstrom2020] reading [link](https://drive.google.com/uc?export=download&id=1auP6kzHJUj_ltnfmWUav1Fas_iiXuOiv). What did you like? What did you learn? Why did I assign it? 
+
 
 ## Definitions
 

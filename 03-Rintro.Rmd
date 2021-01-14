@@ -17,7 +17,7 @@ library(emo)
 There is no accompanying reading.    
 ```
 
-<span style="color: Blue;font-size:22px;">   Motivating scenario:  </span>  <span style="color: Black;font-size:18px;"> Motivating scenario: You have heard about R and RStudio, and mayb used them, but want a foundation so you can know whats going on as you do more in more with it.</span>    
+<span style="color: Blue;font-size:22px;">   Motivating scenario:  </span>  <span style="color: Black;font-size:18px;"> Motivating scenario: You have heard about R and RStudio, and maybe used them, but want a foundation so you can know whats going on as you do more and more with it.</span>    
 
 **Learning goals: By the end of this chapter you should be able to**  
 

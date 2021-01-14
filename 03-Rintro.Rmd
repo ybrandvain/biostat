@@ -27,7 +27,7 @@ There is no accompanying reading.
 - Set up RStudio preferences.   
 - Install the tidyverse package.  
 - Open and save an R script.  
-- Explain a vectors, classes of variables, doing math, and asking logical questions in R.  
+- Explain vectors, classes of variables, doing math, and asking logical questions in R.  
 
 
 ```{block2, type='rmdnote'}

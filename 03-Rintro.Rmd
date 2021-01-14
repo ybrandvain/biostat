@@ -251,8 +251,8 @@ The `tab` button is very useful when we deal with functions. Hitting tab as you 
 You do not need to give the arguments name if we don’t want – by default R processes arguments by the order it expects them. So `sqrt(x = 4)`, returns `2`, as does `sqrt(4)`. But it’s usually a good practice to do so, especially when there are more than two arguments as this makes it easier to understand your code and harder to mess up.
 ```
 
-```{r collecting, fig.cap='Intro to this chapter (9 min).', echo=FALSE, out.extra= 'allowfullscreen'}
-include_url("https://www.youtube.com/embed/W1mDLZwG_uU")
+```{r collecting, fig.cap='R as a calculator, intro to vectors (3 min 47 sec).', echo=FALSE, out.extra= 'allowfullscreen'}
+include_url("https://www.youtube.com/embed/gkxE57xGmuc)
 ``` 
 
 ###  Assigning variables in R

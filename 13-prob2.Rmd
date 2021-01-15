@@ -18,6 +18,7 @@ library(datasauRus)
 library(ggridges)
 library(randomNames)
 library(infer)
+library(tiktokrmd)
 ```
 
 
@@ -29,6 +30,14 @@ These notes accompany portions of Chapter 5  --- *Probability* --- of our textbo
 
 <span style="color: Blue;font-size:22px;">   Motivating scenarios:  </span>  <span style="color: Black;font-size:18px;">  We want to build on our intuitive feel for probability that we can build from simulation, by developing a mathematical framework and key rules to  predict probabilistic outcomes. </span> 
  
+**Learning goals: By the end of this chapter you should be able to**   
+
+- Add and subtract to calculate the probability of this OR that.       
+- Subtract to find the probability of NOT THIS.   
+- Multiply to calculate the probability of this AND that.          
+- Add up all the ways you can get this to find its probability.    
+- Use Bayes' theorem to flip between *"the probability of this given that"* to *"the probability of that given this."*    
+
 
 
 ```{block2, type='rmdwarning'}
@@ -44,7 +53,7 @@ In the previous chapter we saw that we could get pretty deep into probability by
 
 The major advantages of math over simulation are:   
 
-```{r, out.width='30%', echo=FALSE, ,out.extra='style="float:right; padding:10px"'}
+```{r, out.width='30%', echo=FALSE, out.extra='style="float:right; padding:10px"'}
 include_graphics("images/whynotboth.gif")   
 ```
 
@@ -92,15 +101,23 @@ P(a\text{ or }b) &= P(a) + P(b) - P(ab)\\
 (\#eq:or)
 \end{equation} 
 
+where *P(ab)* is the probability of outcomes *a* and *b*.     
 
 ### **Special case of exclusive outcomes** {-}
 
-**If outcomes are mutually exclusive, the probability of outcome *a* or *b* is P(*a*) + P(*b*).**  
+**If outcomes are mutually exclusive, the probability of outcome of both of them,** *p(ab)* **is zero, so the probability of** *a* **or** *b* **is**  
 
-For example the probability that a random persons favorite color is **blue or orange** is the sum sum of the     
+\begin{equation} 
+\begin{split}P(a\text{ or }b | P(ab)=0) &= P(a) + P(b) - P(ab)\\
+ &= P(a) + P(b) - 0\\
+ &= P(a) + P(b)
+\end{split}
+\end{equation} 
 
-Probability their favorite color is orange, P(Orange),   
-Plus the probability their favorite color blue, P(Blue).         
+For example the probability that a random persons favorite color is  **<span style="color:#EDA158;">orange</span> OR <span style="color:#62CAA7;">green</span>** is:       
+
+Probability their favorite color is <span style="color:#EDA158;">orange, P(Orange),</span>      
+**Plus** the probability their favorite color is <span style="color:#62CAA7;">green, P(Green)</span>.         
 
 We often use this rule to find the probability of a range of outcomes for discrete variables (e.g. the probability that the sum of two dice rolls is between six and eight  = P(6) + P(7) + P(8)). 
 
@@ -108,7 +125,7 @@ We often use this rule to find the probability of a range of outcomes for discre
 
 ### **General case** {-}
 
-**More generally, the probability of outcome a or b is P(a) + P(b) - P(a and b).** This subtraction (which is irrelevant for exclusive events, because in that case P(*a* and *b*) = 0) avoids double counting. 
+**More generally, the probability of outcome a or b is P(a) + P(b) - P(a b)** [Equation \@ref(eq:or)]. This subtraction <span style="color:lightgrey;">(which is irrelevant for exclusive events, because in that case $P(ab) = 0$)</span> avoids double counting. 
 
 **Why do we subtract P(a and b) from P(a) + P(b) to find P(a or b)?** Figure \@ref(fig:dontdoublecount) shows that this subtraction prevents double-counting -- the sum of falling through A or B is $0.50 + 0.75 = 1.25$. Since probabilities cannot exceed one, we know this is foolish -- but we must subtract to avoid double counting even when the sum of probabilities do not exceed one.
 
@@ -129,6 +146,11 @@ For a simple and concrete example, the probability a random student played socce
 My favorite thing about probabilities is that they have to sum (or integrate) to one. This helps us be sure we laid out sample space right, and allows us to check our math. It also provides us with nice math tricks. 
 
 Because probabilities sum to one, the **probability of "not a" equals 1 - the probability of a**. This simple trick often makes hard problems a lot easier.
+
+
+
+
+
 
 
 
@@ -155,20 +177,18 @@ P(ab) &= P(a) \times P(b|a)\\
 include_graphics("images/PunnettSquare.png")
 ```
 
-The Punnett square is a classic example of independent probabilities in genetics as the sperm genotype usually does not impact meiosis in eggs (but see [my paper](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC5539998/) [@brandvain2015] about exceptions and the consequences for fun). If we cross two heterozygotes, each transmits their recessive allele with probability $1/2$, so the probability of being homozygous for the recessive allele when both parents are heterozygous is $\frac{1}{2}\times{1}{2} = \frac{1}{4}$.   
+The Punnett square is a classic example of independent probabilities in genetics as the sperm genotype usually does not impact meiosis in eggs (but see [my paper](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC5539998/) [@brandvain2015] about exceptions and the consequences for fun). If we cross two heterozygotes, each transmits their recessive allele with probability $1/2$, so the probability of being homozygous for the recessive allele when both parents are heterozygous is $\frac{1}{2}\times \frac{1}{2} = \frac{1}{4}$.   
 
 
 ### The general cases of AND {-}   
 
-The outcome of meiosis does not depend on who you mate with, but in much of the world context changes probabilities. 
-
-**CONDITIONAL PROBABILIY EXAMPLE:** You're way less likely to get the flu if you get the flu vaccine.      
-
-*So, what's the probability that a random person got a flu vaccine and got the flu?* It is the probability a random person got a flu vaccine (P(vaccine) $\approx$ 49%) and that they got the flu conditional on the vaccine (P(flu|vaccine) $\approx$ 10%), so the overall probability (P(vaccine) $\times$ P(flu|vaccine) $\approx$ is approximately 4.9%.       
-By contrast, the probability of not getting a flu shot (P(no vaccine) $\approx$ 51%) and getting the flu if you didn't get a vaccine(P(flu | no vaccine) $\approx$ 30%) is 15%.      
+The outcome of meiosis does not depend on who you mate with, but in much of the world context changes probabilities. When outcomes are nonexclusive, we find the probability of both *a* and *b* by multiplying the probability of a times the probability of *b* conditional on observing *a*, $P(ab) =P(a) \times P(b|a)$ [Eq. \@ref(eq:and)].     
 
 
-**CONDITIONAL PROBABILITY VISUAL:**  Let's work through a visual example!   
+
+#### **CONDITIONAL PROBABILITY VISUAL:**  {-}   
+
+Let's work through a visual example!   
 
 ```{r, echo=FALSE}
 include_graphics("images/nonindep1.gif")    
@@ -204,215 +224,187 @@ tibble(x = rep(1:3, each = 2), y = rep(1:2,times = 3),
 #  labs(title = "Probability of each outcome")
 ```
 
-### Multiply probabilities for **AND** statements  
 
-The probability of two types of events in an outcome e.g. the probability of *a* and *b* equals the probability of *a* times the probability of *b* conditional on *a*, which will also equal the probability of *b* times the probability of *a* conditional on *b*.    
+#### **CONDITIONAL PROBABILITY REAL WORLD EXAMPLE:**  {-}   
 
+
+You are way less likely to get the flu if you get the flu vaccine.     
+So, what is the probability that a random person got a flu vaccine and got the flu?     
+First, we lay out some rough probabilities:   
+
+```{r, out.width = '30%', out.extra='style="float:right; padding:10px"'}
+include_graphics("https://images.everydayhealth.com/images/no-flu-shot-and-now-you-have-the-flu-what-to-do-722x406.jpg?w=1110")
+```
+
+- Every year, a little more than half of the population gets a flu vaccine, let us say P(No Vaccine) = 0.58.        
+
+- About 30% of people who do not get the vaccine get the flu, P(Flu|No Vaccine) = 0.30.      
+- The probability of getting the flu diminishes by about one-fourth among the vaccinated, P(Flu|Vaccine) =  0.075.  
+
+But we seem stuck, what is $P(\text{Vaccine})$?    We can find this as $1 - P(\text{no vaccine}) = 1 - 0.58 = 0.42$.   
+
+Now we find P(Flu and Vaccine) as P(Vaccine) x P(Flu | Vaccine) = 0.42 x 0.075 = 0.0315.   
+
+## The law of total probability  
+Let's say we wanted to know the probability that someone caught the flu.  How do we find this?   
+
+We learned in Chapter \@ref(prob1) that the probability of all outcomes in sample space has to sum to one. Likewise, the probability of all ways to get some outcome have to sum to the probability of getting that outcome:    
+
+\begin{equation} 
+P(b) = \sum P(a_i) \times P(b|a_i)
+(\#eq:tot)
+\end{equation} 
+
+The $\sum$ sign notes that we are going over all possible outcomes of $a$, and the subscript, $_i$, indexes these potential outcomes of $a$.  In plain language, **we find probability of some outcome** by     
+
+1. Writing down all the ways we can get it,       
+2. Finding the probability of each of these ways,    
+3. Adding them all up.    
+
+So for our flu example, the probability of having the flu is the probability of being vaccinated and having the flu, plus the probability of not being vaccinated and catching the flu <span style="color:lightgrey;">(NOTE: We don't subtract anything off because they are mutually exclusive.)</span>. We can find each following the general multiplication principle \@ref(eq:and):     
 
 \begin{equation} 
 \begin{split}
-P(ab) &= P(a) \times P(b|a)\\
- & = P(b) \times P(a|b)
+P(\text{Flu}) &= P(\text{Vaccine}) \times P(\text{Flu}|\text{Vaccine})\\ 
+&\text{ }+ P(\text{No Vaccine}) \times  P(\text{Flu}|\text{No Vaccine})  \\
+&=  0.42  \times 0.075 + 0.58 \times 0.30\\ 
+&=  0.0315 + 0.174\\ 
+&= 0.2055
 \end{split}
-(\#eq:and)
+\end{equation}
+
+
+## Probability trees   
+
+It can be hard to keep track of all of this. Probability trees are a tool we use to help. To make a probability tree, we   
+
+1. Write down all potential outcomes for *a*, and use lines to show their probabilities.  
+2. We then write down all potential outcomes for *b* separately for each potential a, and connect each a to these outcomes with a line denoting the conditional probabilities.   
+3. Keep going for events *c*, *d*, etc...    
+4. Multiply each value on path to get the probability of that path (The general multiplication rule, Equation \@ref(eq:and)).     
+5. Add up all paths that lead to the outcome you are interested in. <span style="color:lightgrey;">(NOTE: Again, reach path is exclusive, so we don't subtract anything.)</span>   
+
+Here is a probability tree I drew for the flu example. Reassuringly the probability of getting the flu matches our math above.   
+
+```{r, echo=FALSE}
+include_graphics("images/probtree.jpeg")
+```
+
+
+
+## Flipping conditional probabilities    {#bayes}
+
+The probability that a vaccinated person gets the flu, P(Flu|Vaccine) is 0.075.    
+But what is the probability that someone who has the flu got vaccinated, P(Vaccine|Flu)?   
+We could follow our approach in Section \@ref(condishsim), by simulating these conditional probabilities, counting, and dividing the number of people that had the flu and the vaccine by the number of people who had the flu. But we can basically do the same thing with math -- the probability that someone who has the flu got vaccinated equals the probability that someone got the flu and was vaccinated, divided by the probability that someone has the flu.   
+
+\begin{equation} 
+\begin{split}
+P(\text{Vaccine|Flu}) &= P(\text{Vaccine and Flu}) / P(\text{Flu}) \\
+P(\text{Vaccine|Flu}) &= \tfrac{P(\text{Flu|Vaccine}) \times P(\text{Vaccine})}{P(\text{Vaccine}) \times P(\text{Flu}|\text{Vaccine}) + P(\text{No Vaccine}) \times  P(\text{Flu}|\text{No Vaccine})}\\
+P(\text{Vaccine|Flu}) &= 0.0315 / 0.2055 \\ 
+P(\text{Vaccine|Flu}) &=0.1533  
+\end{split}
+\end{equation}
+
+So, while the vaccinated make up 42% of the population, they only make up 15% of people who got the flu.
+
+The numerator on the right hand side,  $P(\text{Vaccine and Flu})$, comes from the general multiplication rule (Eq. \@ref(eq:and)).   
+The denominator on the right hand side, $P(\text{Flu})$, comes from the law of total probability (Eq. \@ref(eq:tot)). 
+
+This is an application of **Bayes' theorem**. Bayes' theorem is a math trick which allows us to flip conditional probabilities as follows 
+
+\begin{equation} 
+\begin{split}
+P(A|B) &= \frac{P(A\text{ and }B)}{P(B)}\\ 
+P(A|B) &= \frac{P(B|A) \times P(A)}{P(B)}
+\end{split}
+(\#eq:bayes)
 \end{equation} 
 
-If two events are mutually exclusive, the probability of one given the other is zero. So, returning to our example in Figures \@ref(fig:nonexclusivefull), \@ref(fig:counting), and \@ref(fig:conditional), the probability of <span style="color:#EDA158;">A</span> and <span style="color:#98C5EB;">C</span>  equals zero, because these are exclusive events. 
 
-```{block2, type='rmdwarning'}
-For some terrible reason  
 
-`|` means *or* to R    
-`|` means "conditional on" in stats. 
 
-This is confusing and unfortunate, and I am very sorry.   
-Stay safe.
+```{block2, type='rmdnote'}
+This reversal of conditional probabilities is critically important in many arenas, especially the proper interpretation of medical test results.   Additionally, this way of thinking has spawned a whole branch of statistics, known as Bayesian statistics. While Bayesian statistics is not the focus of this class, we will discuss it from time to time.
 ```
 
-### Conditional probabilities  
 
-Above we introduced one sort of conditional probability -- for exclusive events the probability of one event conditional on seeing another equals zero. We see in Figures \@ref(fig:nonexclusivefull), \@ref(fig:counting), and \@ref(fig:conditional) that events <span style="color:#EDA158;">A</span> and <span style="color:#98C5EB;">C</span> are mutually exclusive, so the probability of <span style="color:#EDA158;">A</span> conditional on <span style="color:#98C5EB;">C</span> equals zero (and vice versa). 
+## Simulation   
 
-More broadly, the conditional probability of event *b* given event *a* (aka $P(b|a)$) is the probability of observing *b* if we know that *a* happened. Note this does not imply any causal or mechanistic relationship, just that our predictions change. The explanation from [Seeing Theory](https://seeing-theory.brown.edu/compound-probability/index.html#section3) (pasted below) is better than mine, so read it!
-
-
-```{block2, type='rmdseeingtheory'}
-Explanation of conditional probabilities from [Seeing Theory](https://seeing-theory.brown.edu/compound-probability/index.html#section3)
-                        
-"**Conditional probabilities** allow us to account for information we have about our system of interest. For example, we might expect the probability that it will rain tomorrow (in general) to be smaller than the probability it will rain tomorrow given that it is cloudy today. This latter probability is a conditional probability, since it accounts for relevant information that we possess.     
-
-Mathematically, computing a conditional probability amounts to shrinking our sample space to a particular event. So in our rain example, instead of looking at how often it rains on any day in general, we "pretend" that our sample space consists of only those days for which the previous day was cloudy. We then determine how many of those days were rainy.    
-
-Click on the tabs below to visualize the shrinking of the sample space."   
-```
-
-```{r conditional,echo=FALSE, fig.cap = '**Conditional probabilities.** These probabilities in this plot are the same as the figure [above](fig:nonexclusivefull). We reveal the probability of all outcomes, conditional on one other outcome by clicking on the outcome we are conditioning on (e.g. we see P(<span style="color:#EDA158;">A</span>|<span style="color:#62CAA7;">B</span>) and P(<span style="color:#98C5EB;">C</span>|<span style="color:#62CAA7;">B</span>), after clicking on <span style="color:#62CAA7;">B</span> (which also reveals that P(<span style="color:#62CAA7;">B</span>|<span style="color:#62CAA7;">B</span>) = 1)). Explre for yourself at the Seeing Theory [website](https://seeing-theory.brown.edu/compound-probability/index.html#section3).'}
-include_graphics("images/conditional.gif")
-```
-
-In the example above,   
-
-- P(<span style="color:#EDA158;">A</span>) = <span style="color:#EDA158;">1/3</span>,     
-- P(<span style="color:#62CAA7;">B</span>)= P(<span style="color:#62CAA7;">1/6</span>),  and        
-- P(<span style="color:#98C5EB;">C</span>)=<span style="color:#98C5EB;">11/18</span>.
-
-####  Independece       
-
-*Narrowing our universe to <span style="color:#EDA158;">A</span>* we see that the probability of <span style="color:#62CAA7;">B</span>, P(<span style="color:#62CAA7;">B</span>|<span style="color:#EDA158;">A</span>) is still <span style="color:#62CAA7;">1/6</span>. So **B is independent of A -- as the conditional probability equals to unconditional probability** (the probability if we didn't know if the ball fell through A or not). Likewise, in this example, <span style="color:#EDA158;">A</span> is independent of <span style="color:#62CAA7;">B</span>.   
-
-Following Eq. \@ref(eq:and), the probability of <span style="color:#EDA158;">A</span> and <span style="color:#62CAA7;">B</span>, P(<span style="color:gold;">gold</span>), equals     
-P(<span style="color:#EDA158;">A</span>\&<span style="color:#62CAA7;">B</span>) =  P(<span style="color:#EDA158;">A</span>) $\times$ P(<span style="color:#62CAA7;">B</span>|<span style="color:#EDA158;">A</span>) = <span style="color:#EDA158;">1/3</span> $\times$ <span style="color:#62CAA7;">1/6</span> = <span style="color:gold;">1/18</span>.
-
-
-####  Non-independece   
-
-Again *narrowing our universe to <span style="color:#EDA158;">A</span>*, we see that the probability of <span style="color:#98C5EB;">C</span> differs based on if we observe <span style="color:#EDA158;">A</span> or not. For example, P(C | <span style="color:#EDA158;">A</span>) = <span style="color:#98C5EB;">0</span>. Likewise  the probability of <span style="color:#EDA158;">A</span> differs based on if we observe <span style="color:#98C5EB;">C</span> or not P(<span style="color:#EDA158;">A</span>|<span style="color:#98C5EB;">C</span>) =0. We call outcomes **non-independent if their conditional probabilities differ from their unconditional probabilities.** 
-
-Reassuringly, applying \@ref(eq:and) to this case shows that P(<span style="color:#c69c6d;">A&C</span>) = P(<span style="color:#EDA158;">A</span>) $\times$ P(<span style="color:#98C5EB;">C</span>|<span style="color:#EDA158;">A</span>) =span style="color:#98C5EB;">1/3</span> $\times$ 0 = <span style="color:#c69c6d;">0</span>.
-
-While <span style="color:#62CAA7;">B</span> and <span style="color:#98C5EB;">C</span> are not mutually exclusive, they are not independent.  The probability of <span style="color:#62CAA7;">B</span> given <span style="color:#98C5EB;">C</span>, P(<span style="color:#62CAA7;">B</span>|<span style="color:#98C5EB;">C</span>) = <span style="color:#62CAA7;">1/11</span> (which differs from P(<span style="color:#62CAA7;">B</span>) = <span style="color:#62CAA7;">1/6</span>). Likewise the probability of <span style="color:#98C5EB;">C</span> given <span style="color:#62CAA7;">B</span>, P(<span style="color:#98C5EB;">C</span>|<span style="color:#62CAA7;">B</span>) =<span style="color:#98C5EB;">1/3</span>, (which differs from P(<span style="color:#98C5EB;">C</span>) = <span style="color:#98C5EB;">11/18</span>). 
-
-Following Eq. \@ref(eq:and), the probability of outcome <span style="color:aqua;">B&C</span> is       
-P(<span style="color:aqua;">B&C</span>) = P(<span style="color:#62CAA7;">B</span>)  $\times$   P(<span style="color:#98C5EB;">C</span>|B) = <span style="color:#62CAA7;">1/6</span> $\times$ <span style="color:#98C5EB;">1/3</span> = <span style="color:aqua;">1/18</span>.     
-Which is the same as         
-P(<span style="color:aqua;">B&C</span>) = P(<span style="color:#98C5EB;">C</span>)  $\times$   P(<span style="color:#62CAA7;">B</span>|<span style="color:#98C5EB;">C</span>) = <span style="color:#98C5EB;">11/18</span> $\times$ <span style="color:#62CAA7;">1/11</span> = <span style="color:aqua;">1/18</span>.   
-
-### Calculating total probabilities from conditional probabilities. 
-
-Let's move away from failling balls, and
-
-
-
-### Simulating proportions in `R`    
-
-A lot of statistics is wrapping our heads around probabilistic thinking. To me the key here is to get good intuition for probabilistic thinking. Mathematical rules of thumb (below) are helpful for some people. But I personally understand things better when I see them, so I often simulate. 
-
-I simulate to:    
-
-1. Make sure my math is right.   
-2. Build intuition for probability problems.   
-3. Solve probability questions that do not have a mathematical solution.  
-
-So, how do we simulate? We can use a bunch of `R` functions to simulate, depending on our goals. Today, we'll use the [`sample()`](https://stat.ethz.ch/R-manual/R-devel/library/base/html/sample.html) function, which we saw when we considering sampling and uncertainty in our estimates.
-
-
-#### **Simulating proportions from a single sample in `R`**    {-}   
-
-Let's generate a sample of fifty balls, with probabilities equal to those in Figure \@ref(fig:probdist):  
+Below, I simulate the process of vaccination and acquiring the flu to show that these math results make sense. 
 
 ```{r}
-n_balls  <- 50
-P_A      <- 3/6  # aka 1/2
-P_B      <- 1/6  # aka 1/6
-P_C      <- 2/6  # aka 1/3
-ball_colors <-  c(A = "#EDA158", B = "#62CAA7", C = "#98C5EB")
+p_Vaccine             <- 0.42
+p_Flu_given_Vaccine   <- 0.075
+p_Flu_given_NoVaccine <- 0.300
+n_inds                <- 10000000
 
-ball_dist_exclusive <- tibble(balls = sample(x = c("A","B","C"), 
-                                  size  = n_balls, 
-                                  replace = TRUE, 
-                                  prob = c(P_A, P_B, P_C)))
+flu_sim <- tibble(vaccine = sample(c("Vaccinated","Not Vaccinated"),
+                                   prob =c(p_Vaccine, 1- p_Vaccine),
+                                   size = n_inds,
+                                   replace = TRUE )) %>%
+  group_by(vaccine) %>%
+  mutate(flu = case_when(vaccine == "Vaccinated" ~ sample(c("Flu","No Flu"), 
+                                      size = n(),
+                                      replace = TRUE, 
+                                      prob = c(p_Flu_given_Vaccine, 1  - p_Flu_given_Vaccine)),
+                       vaccine != "Vaccinated" ~ sample(c("Flu","No Flu"), 
+                                      size = n(),
+                                      replace = TRUE, 
+                                      prob = c(p_Flu_given_NoVaccine, 1  - p_Flu_given_NoVaccine))
+           )) %>%
+  ungroup()
 ```
 
-**Let's have a look at the result**
+**Let's browse the first 1000 values**
 
-```{r echo=FALSE,fig.width=5}
-DT::datatable(ball_dist_exclusive,
-              options = list(autoWidth = TRUE,pageLength = 5, lengthMenu = c(5, 25, 50),
-                             columnDefs=list(list(targets=1, class="dt-right"),
-                                             list(width = '20px', targets = 1)
-                                             )))
-
+```{r, echo = FALSE}
+DT::datatable(head(flu_sim, n = 1000) ,
+              options = list(autoWidth = TRUE,pageLength = 5, lengthMenu = c(5, 25, 50, 100),
+                             columnDefs=list(list(targets=1:2, class="dt-right"))))
 ```
 
-**Let's make a nice plot**
-```{r, ballsim1,fig.width=3, fig.height=3}
-ggplot(ball_dist_exclusive, aes(x = balls, fill = balls)) +
-  geom_bar(show.legend = FALSE)+
-  scale_fill_manual(values = ball_colors)+
-  labs(title = "One simulation")
-```
-
-#### **Simulating proportions for many samples in `R`**    {-}   
-
-We can also use the [`sample()`](https://stat.ethz.ch/R-manual/R-devel/library/base/html/sample.html) function to simulate a sampling distribution. There are a bunch of ways to do this but my favorite recipe is:    
-
-1. Make a sample of size `sample_size` $\times$ `n_reps`.       
-2. Assign the first `sample_size` outcomes to the first replicate, the second `sample_size` outcomes to the second replicate etc...    
-3. Summarize the output.    
-
-Here I show these steps
-
-
-**1. Make a sample of size `sample_size` $\times$ `n_reps`.**   
+**Let's find all the proportion of each combo**   
 
 ```{r}
-n_reps   <- 1000
-
-ball_sampling_dist_exclusive <- tibble(balls = sample(x = c("A","B","C"), 
-         size  = n_balls * n_reps, # sample 50 balls 1000 times
-         replace = TRUE, 
-         prob = c(P_A, P_B, P_C))) 
+flu_sum <- flu_sim %>% 
+  group_by(vaccine, flu, .drop = FALSE) %>%
+  summarise(sim_prop = n() / n_inds, .groups = "drop") 
 ```
 
-
-
-**2. Assign the first `sample_size` outcomes to the first replicate, the second `sample_size` outcomes to the second replicate etc...** 
+**Compare to predictions**  
 
 ```{r}
-ball_sampling_dist_exclusive <- ball_sampling_dist_exclusive %>%
-  mutate(replicate = rep(1:n_reps, each = n_balls))
+precitions <- tibble(vaccine   = c("Not Vaccinated", "Not Vaccinated", "Vaccinated", "Vaccinated"),
+       flu       = c("Flu", "No Flu", "Flu", "No Flu"), 
+       math_prob = c((1-p_Vaccine) * (p_Flu_given_NoVaccine) , 
+                     (1-p_Vaccine) * (1- p_Flu_given_NoVaccine), 
+                     (p_Vaccine) * (p_Flu_given_Vaccine), 
+                     (p_Vaccine) * (1-p_Flu_given_Vaccine))) 
+
+full_join(flu_sum, precitions)       
 ```
 
-
-**Let's have a look at the result** looking at only the first ten replicates:
-
-```{r echo=FALSE,fig.width=5}
-DT::datatable(head(ball_sampling_dist_exclusive, n = 500),
-              options = list(autoWidth = TRUE,pageLength = 5, lengthMenu = c(5, 25, 50),
-                             columnDefs=list(list(targets=1:2, class="dt-right"),
-                                             list(width = '20px', targets = 1:2)
-                                             )))
-
-```
-
-
-**3. Summarize the output.**  
+**Now let's check our flipping of conditional probabilities (aka Bayes' theorem)**
 
 ```{r}
-ball_sampling_dist_exclusive <- ball_sampling_dist_exclusive %>% 
-  group_by(replicate, balls, .drop=FALSE) %>% # make sure to keep zeros
-  summarise(count = n(),.groups = "drop")  # count number of balls of each color each replicate
+flu_sum %>% 
+  filter(flu == "Flu") %>% # only looking at people with flu  
+  mutate(prop_given_flu = sim_prop / sum(sim_prop))
+```
 
-ball_sampling_dist_exclusive 
+This is basically what we got by math in section \@ref(bayes).   
+
+```{r}
+tt_url <- "https://www.tiktok.com/@aquickspoonful/video/6890681375431691526"
+tt <- tiktok_embed(tt_url)
+tiktok_html(tt)
 ```
 
 
-**Let's have a look at the result**
 
-```{r echo=FALSE,fig.width=5}
-DT::datatable(ball_sampling_dist_exclusive,
-              options = list(autoWidth = TRUE,pageLength = 5, lengthMenu = c(5, 25, 50),
-                             columnDefs=list(list(targets=1:3, class="dt-right"),
-                                             list(width = '20px', targets = 1:2)
-                                             )))
-
-```
+reflection qs. math vs sim, which makes more sens eto you, why? 
 
 
-**MAKE A PLOT**  
-
-```{r ballsim2,fig.width=4, fig.height=2}
-ggplot(ball_sampling_dist_exclusive, aes(x = count, fill = balls)) +
-  geom_density(alpha = .8, show.legend = FALSE, adjust =1.5)+
-  scale_fill_manual(values = ball_colors)+
-  geom_vline(xintercept =  n_balls * c(P_A, P_B, P_C), lty = 2,  color = ball_colors)+
-  annotate(x = c(25, 8, 16), y = c(.09,.09,.09), 
-           geom = "text",label = c("A","B","C"), size = 6 )+
-  labs(title = "Many simulations") 
-```
-
-##### **Calculating the proportion of OR from simulations** {-}   
-
-We can calculate the proportion of A or B from our simulation by using the `|` operator which tells `R` that we want thing1 OR thing2.
-
-So 
+add learnr quiz, definitions and videos

@@ -23,13 +23,45 @@ library(emo)
 library(here)
 ```
 
+```{r call.packages, echo=FALSE, message=FALSE}
+call.packages <- function(list.packages) {
+  # Install the packages that are not already installed 
+  install.packages(pkgs = list.packages[!(list.packages %in% installed.packages())],
+                   repos = "http://cran.us.r-project.org")
+  
+  # Call the libraries 
+  lapply(X = list.packages, 
+         FUN = library, 
+         character.only = TRUE) # in order to work, you must set character.only = TRUE
+  
+  # See if the packages were loaded properly 
+  sapply(X = list.packages,
+         FUN = require, 
+         character.only = TRUE) 
+}
+
+install.github <- function(pkgs, repos) {
+    install.packages(pkgs = c("devtools" %in% installed.packages()),
+                   repos = "http://cran.us.r-project.org")
+    if(!c(as.character(pkgs) %in% installed.packages())) {
+    devtools::install_github(as.character(repos))
+  }
+}
+install.github(pkgs = "tweetrmd",repos = "gadenbuie/tweetrmd")
+install.github(pkgs = "emo",repos = "hadley/emo")
+
+pkgs.list = c("knitr","tidyverse","blogdown",
+              "tweetrmd","tufte","emo","here")
+call.packages(pkgs.list)
+```
+
 # (PART) Introduction to this course {-}
 
 # Preface {-}
 
 ## A book of (com)passion {-}
 
-I begin this writing in early Sept 2020, and am thinking about you, my students for the fall 2021 term. Currently much is uncertain — we are beginning a term in the wake of George Floyd's murder [among many others], which has resulted in protests, uprisings, rioting and armed confrontation between protestors, armed citizens and police. We are in the midst of an uncertain economy, and a vicious presidential election. Most of us feel isolated as COVID has pushed most of us home, some of us are sick and/or have had family members fall ill. Who knows if classes will be happening in person or not in 2021? Global climate change is threatening our future etc. etc. etc.. You get it, there's just **so much happening**, and so much uncertainty about the future of this class, the University of Minnesota, the United States, and the World.
+I begin this writing in early Sept 2020, and am thinking about you, my students for the fall 2021 term. Currently much is uncertain — we are beginning a term in the wake of George Floyd's murder [among many others], which has resulted in protests, uprisings, rioting and armed confrontation between protesters, armed citizens and police. We are in the midst of an uncertain economy, and a vicious presidential election. Most of us feel isolated as COVID has pushed most of us home, some of us are sick and/or have had family members fall ill. Who knows if classes will be happening in person or not in 2021? Global climate change is threatening our future etc. etc. etc.. You get it, there's just **so much happening**, and so much uncertainty about the future of this class, the University of Minnesota, the United States, and the World.
 
 *Mid sept update:* Now much of the west coast is ablaze.
 
@@ -131,3 +163,4 @@ include_graphics("https://media.giphy.com/media/KZdaJU4SPaNzA3VPMF/giphy.gif")
 - Some of the videos embedded in the text are required course content, and some are optional. 
 - Small videos on the right (usually by Yaniv, Anna, or Jordan) are **optional** and meant to serve as a supplement to the course reading. These videos are intended to help support your learning, but are not required to watch.
 - Videos in the middle of a page (usually NOT by yaniv, Anna, or Jordan) are **required**. These videos have been chosen specifically to highlight/explain specific concepts. 
+

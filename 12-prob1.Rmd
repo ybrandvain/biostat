@@ -47,11 +47,11 @@ These notes accompany portions of Chapter 5  --- *Probability* --- of our textbo
 - Explain why we need to think about probability when interpreting data.     
 - Consider a proportion as an estimate as random outcome of a population parameter.      
 - Recognize that "Random" does not mean "No clue".   
-- Understand condicitional probabilities and non-ndependence.  
+- Understand conditional probabilities and non-independence.  
 - Simulate complex probabilistic events in R with the [`sample()`](https://stat.ethz.ch/R-manual/R-devel/library/base/html/sample.html)  function.   
 - Find proportions from real or simulated data using `tidyverse` tools.      
 - Apply your knowledge of figure design to categorical data.   
-- Use simulated data to to find the probability of one codition, given the observation of some other state.  
+- Use simulated data to to find the probability of one condition, given the observation of some other state.  
 
 
 
@@ -537,7 +537,7 @@ Figure \@ref(fig:nonindepA) shows an example of non-independence:
 include_graphics("images/nonindep1.gif")
 ```
 
-#### Simulating conditional probabilities    
+#### Simulating conditional probabilities {#condishsim}   
 
 So, how to simulate conditional probabilities?   
 The easiest way to do this is to:   

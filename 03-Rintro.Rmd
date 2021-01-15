@@ -17,7 +17,7 @@ library(emo)
 There is no accompanying reading.    
 ```
 
-<span style="color: Blue;font-size:22px;">   Motivating scenario:  </span>  <span style="color: Black;font-size:18px;"> Motivating scenario: You have heard about R and RStudio, and mayb used them, but want a foundation so you can know whats going on as you do more in more with it.</span>    
+<span style="color: Blue;font-size:22px;">   Motivating scenario:  </span>  <span style="color: Black;font-size:18px;"> Motivating scenario: You have heard about R and RStudio, and maybe used them, but want a foundation so you can know whats going on as you do more and more with it.</span>    
 
 **Learning goals: By the end of this chapter you should be able to**  
 
@@ -27,7 +27,7 @@ There is no accompanying reading.
 - Set up RStudio preferences.   
 - Install the tidyverse package.  
 - Open and save an R script.  
-- Explain a vectors, classes of variables, doing math, and asking logical questions in R.  
+- Explain vectors, classes of variables, doing math, and asking logical questions in R.  
 
 
 ```{block2, type='rmdnote'}
@@ -59,7 +59,6 @@ include_url("https://www.youtube.com/embed/91LmBj29-Sc")
 ###  What is RStudio?
 > More precisely, R is a programming language that runs computations, while RStudio is an integrated development environment (IDE) that provides an interface by adding many convenient features and tools. So just as the way of having access to a speedometer, rearview mirrors, and a navigation system makes driving much easier, using RStudio’s interface makes using R much easier as well.
 > `r tufte::quote_footer('--- [Statistical Inference via Data Science: A ModernDive into R and the Tidyverse](https://moderndive.com/) [@ismay2019]')`
-
 
 In addition to being a great place to use R, RStudio is a [Certified B corporation](https://bcorporation.net/directory/rstudio), which offers many great resources we will rely on over this term. RStudio has a freemium business model, and you will not need to pay for any of RStudio's products this term.
 
@@ -220,6 +219,11 @@ You may also come across two other classes of vectors:
 - `integer` -- A number that must take an integer value. For example `as.integer(c(1, 2.1, 3))` returns `1, 2, 3`.  
 
 
+```{r, echo = FALSE, out.extra = 'allowfullscreen', out.width="40%", out.extra='style="float:right; padding:10px"'} 
+#fig.cap = 'R as a calculator, intro to vectors (3 min 47 sec).', 
+include_url("https://www.youtube.com/embed/gkxE57xGmuc", height="200")
+```
+
 ####  Using math and/or logical operations on vectors {-}   
 
 In R you can add, subtract etc. two vectors. When doing so make sure vectors are of the same length, or one is of length one, otherwise you can get weird results.   
@@ -251,9 +255,10 @@ The `tab` button is very useful when we deal with functions. Hitting tab as you 
 You do not need to give the arguments name if we don’t want – by default R processes arguments by the order it expects them. So `sqrt(x = 4)`, returns `2`, as does `sqrt(4)`. But it’s usually a good practice to do so, especially when there are more than two arguments as this makes it easier to understand your code and harder to mess up.
 ```
 
-```{r vectorsInR, fig.cap='Intro to this chapter (9 min).', echo=FALSE, out.extra= 'allowfullscreen'}
-include_url("https://www.youtube.com/embed/W1mDLZwG_uU")
-``` 
+```{r, echo = FALSE, out.extra = 'allowfullscreen', out.width="40%", out.extra='style="float:right; padding:10px"'} 
+#fig.cap = 'More vectors in R, intro to functions (6 min).', 
+include_url("https://www.youtube.com/embed/xPe8pKtBD4o", height = "200")
+```  
 
 ###  Assigning variables in R
 
@@ -320,4 +325,3 @@ Be sure to complete [this primer](https://rstudio.cloud/learn/primers/1.2) from 
 ```{r, primer12, fig.cap = 'Primer on programming basics: Complete the RStudio programming basics tutorial [from the RStudio website](https://rstudio.cloud/learn/primers/1.2)',echo=FALSE}
 include_app("https://rstudio.cloud/learn/primers/1.2")
 ```
-

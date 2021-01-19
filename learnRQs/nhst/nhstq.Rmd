@@ -1,0 +1,164 @@
+---
+title: "Tutorial"
+output: learnr::tutorial
+runtime: shiny_prerendered
+---
+
+```{r setup, include=FALSE}
+library(learnr)
+library(tidyverse)
+library(ggmosaic)
+knitr::opts_chunk$set(echo = FALSE)
+library(ggthemes)
+```
+
+# Null hypothesis significance testing quiz
+
+###  Null or alternative? Identify whether each of the following statements is more appropriate as a null hypothesis or as an alternative hypothesis:  
+
+
+
+```{r quiz1, echo=FALSE}
+quiz(caption = "null or alternative",
+    question("*Homework Hypothesis:* The number of hours that grade school children spend doing homework predicts their future success on standardized tests.",
+    answer("Null"),
+    answer("Alternative", correct = TRUE),
+    answer("Not enough info"),
+    allow_retry = TRUE,
+    incorrect = "Try again!"
+  ),
+  question("*Cheetahs Hypothesis:* King cheetahs on average run the same speed as standard spotted cheetahs.",
+    answer("Null", correct = TRUE),
+    answer("Alternative"),
+    answer("Not enough information"),
+    allow_retry = TRUE,
+    incorrect = "Try again!"
+  ),
+    question("Elephant tusks Hypothesis: The mean length of African elephant tusks has changed over the last 100 years.",
+    answer("Null"),
+    answer("Alternative", correct = TRUE),
+    answer("Not enough info"),
+    allow_retry = TRUE,
+    incorrect = "Try again!"
+  )
+)
+```
+
+
+
+### Significant intuition   
+
+
+
+```{r quiz2, echo=FALSE}
+quiz(caption = "samplesize",
+    question("Assume the null hypothesis is **TRUE**. Which one of the following statements is true?",
+    answer("A study with a larger sample is more likely than a smaller study to get the result that 
+P < 0.05."),
+    answer("A study with a large sample is less likely than a smaller study to get the result that 
+P < 0.05"),
+    answer("A study with a large sample is equally likely compared to a smaller study to get the
+ result that P < 0.05.", correct = TRUE),
+    allow_retry = TRUE,
+    incorrect = "Try again!"
+  ),
+    question("Assume the null hypothesis is **FALSE**. Which one of the following statements is true?",
+    answer("A study with a larger sample is more likely than a smaller study to get the result that 
+P < 0.05.", correct = TRUE),
+    answer("A study with a large sample is less likely than a smaller study to get the result that 
+P < 0.05"),
+    answer("A study with a large sample is equally likely compared to a smaller study to get the
+ result that P < 0.05."),
+    allow_retry = TRUE,
+    incorrect = "Try again!"
+  )
+)
+```
+
+### That new-baby smell.   
+
+Can parents distinguish their own children by smell alone? To investigate, Porter and Moore (1981) gave new T-shirts to children of nine mothers. Each child wore his or shirt to bed for three consecutive nights. During the day, from waking until bedtime, the shirts were kept in individually sealed plastic bags. No scented soaps or perfumes were used during the study. Each mother was given the shirt of her child and that of another, randomly chosen child and asked to identify her own by smell. Eight of nine mothers identified their children correctly. Use this study to answer the following questions, using a two-sided significance level $\alpha$ = 0.05. [modified from Q25 in chapter 6].   
+
+
+
+
+```{r quiz3, echo=FALSE}
+quiz(caption = "babies",
+    question("$H_0:$ What  is the appropriate **NULL** hypothesis?",
+    answer("Mothers correctly guess their children's shirts half of the time", correct = TRUE),
+    answer("Mothers correctly guess their children's shirts half of the time or less"),
+    answer("Mothers correctly guess their children's shirts more than half of the time"),
+    answer("Mothers do not correctly guess their children's shirts half of the time"),
+    allow_retry = TRUE,
+    incorrect = "Try again!"
+  ),
+  question("$H_A:$ What  is the appropriate **ALTERNATIVE** hypothesis?",  
+    answer("Mothers correctly guess their children's shirts half of the time"),
+    answer("Mothers correctly guess their children's shirts half of the time or less"),
+    answer("Mothers correctly guess their children's shirts more than half of the time"),
+    answer("Mothers do not correctly guess their children's shirts half of the time", correct = TRUE),
+    allow_retry = TRUE,
+    incorrect = "Try again!"
+  ),
+    question("Assume the null hypothesis is **FALSE**. Which one of the following statements is true?",
+    answer("A study with a larger sample is more likely than a smaller study to get the result that 
+P < 0.05.", correct = TRUE),
+    answer("A study with a large sample is less likely than a smaller study to get the result that 
+P < 0.05"),
+    answer("A study with a large sample is equally likely compared to a smaller study to get the
+ result that P < 0.05."),
+    allow_retry = TRUE,
+    incorrect = "Try again!"
+  )
+)
+```
+
+
+**Find the p-value**
+
+```{r, echo=FALSE}
+tibble(x = 0:9, 
+       prob = dbinom(x = 0:9,size = 9,prob = .5))%>%
+  mutate(rounded_prob = round(prob, digits = 3))%>%
+  ggplot(aes(x = x, y = prob, label = rounded_prob))+
+  geom_col(fill = "pink")+
+  scale_x_continuous(breaks = 0:9)+
+  geom_text(nudge_y = .02)+
+  theme_tufte()+
+  theme(axis.line = element_line(color = "black"))
+```
+
+```{r p, echo=FALSE}
+quiz(caption = "babies",
+     question("Recall that eight of nine mothers identified their children correctly. Use the numbers on the figure above to estimate a P-value",
+  answer("0.002"),
+  answer("0.004"),
+  answer("0.018"),
+  answer("0.020"),
+  answer("0.036"),
+  answer("0.040", correct = TRUE),
+  answer("0.180"),
+  allow_retry = TRUE,
+  incorrect = random_encouragement(),
+  correct = random_praise()
+),
+  question("What do we do to the null hypotheiss in this case?",
+  answer("Reject it", correct = TRUE),
+  answer("Fail to Reject it"),
+  answer("Accept it"),
+  answer("Fail to accept it"),
+  answer("Not enough information"),
+  allow_retry = TRUE,
+  incorrect = random_encouragement(),
+  correct = random_praise()
+  ),
+  question("In this case, the null hypothesis",
+  answer("Is True"),
+  answer("Is False"),
+  answer("has a 4% chance of being true"),
+  answer("need more info", correct = TRUE)
+))
+
+```
+
+

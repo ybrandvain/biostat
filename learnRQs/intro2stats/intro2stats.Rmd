@@ -86,7 +86,7 @@ question("Which of the following variables are numeric? (click all that apply)",
   answer("The number of lemurs on a tree", correct = TRUE),    
   answer("Lemur ID number (in a park where all lemurs have been tagged with randomly assigned numbers)"),
   answer("Weights of lemurs", correct = TRUE),
-  answer("Lemur eye-color", correct = TRUE),
+  answer("Lemur eye-color"),
   correct = random_praise(),
   incorrect = random_encouragement(),
   allow_retry = TRUE
@@ -117,10 +117,6 @@ question("Which of the following studies is experimental? (click all that apply)
 include_graphics("https://imgs.xkcd.com/comics/polls_vs_the_street.png")
 ```
 
-
-Experimental, Error
-Observational, Bias
-Observational, Error
 
 
 ```{r srteet, echo=FALSE}

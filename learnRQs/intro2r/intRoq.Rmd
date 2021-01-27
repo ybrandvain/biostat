@@ -1,0 +1,131 @@
+---
+title: "Tutorial"
+output: learnr::tutorial
+runtime: shiny_prerendered
+---
+
+```{r setup, include=FALSE}
+library(learnr)
+library(tidyverse)
+library(ggmosaic)
+knitr::opts_chunk$set(echo = FALSE)
+```
+
+# First Day of R quiz
+
+### Reflect on the stat 545 video
+
+```{r quiz1, echo=FALSE}
+quiz(caption = "Code like a pro",
+    question("Which of the following is **NOT** a tip from the video on how to code like a pro? (select all that apply).",
+    answer("Write code in as few lines as possible", correct = TRUE),
+    answer("Save your code"),
+    answer("Use an IDE when developing code"),
+    answer("Apply functions to your data"),
+    answer("Write code to run effificently", correct = TRUE),
+    answer("Start with a clean slate"),
+    answer("Use add on packages"),
+    answer("Not enough info"),
+    allow_retry = TRUE,
+    correct = random_praise(),
+    incorrect = random_encouragement()
+  ),
+  question("How can an IDE help us with our coding? (select all that apply).",
+    answer("Anticipate your code and help you write it.", correct = TRUE),
+    answer("Highlight your code with colors", correct = TRUE),
+    answer("Fix coding mistakes for you"),
+    allow_retry = TRUE,
+    correct = random_praise(),
+    incorrect = random_encouragement()
+  ),
+    question("In R, applying a function to an object changes the object.",
+    answer("TRUE"),
+    answer("FALSE",  correct = TRUE),
+    allow_retry = TRUE,
+    correct = random_praise(),
+    incorrect = random_encouragement()
+  ),
+    question("In this course, how often will you type `install.packages('tidyverse')`?",
+    answer("Never"),
+    answer("Once (maybe twice)",  correct = TRUE),
+    answer("Occasionally"),
+    answer("Many times"),
+    allow_retry = TRUE,
+    correct = random_praise(),
+    incorrect = random_encouragement()
+  ),
+    question("In this course, how often will you type `library(tidyverse)`?",
+    answer("Never"),
+    answer("Once (maybe twice)"),
+    answer("Occasionally"),
+    answer("Many times",  correct = TRUE),
+    allow_retry = TRUE,
+    correct = random_praise(),
+    incorrect = random_encouragement()
+  )
+)
+```
+
+  
+
+### R practice
+
+Below, assign the number 9 to the variable `a`, and a vector with numbers, 2, 9, and 8, in that order, to the variable  `b`.     And then   
+
+- Ask if `a` equals `b`        
+- Multiply `a` by `b`   
+
+```{r sim1, exercise=TRUE, eval = FALSE}
+a <- ___                # set a equal to 9
+b <- c( __, __, __)     # set b equal to a vector with 2, 9 and 8, in that order,
+____                    # ask if a equals b 
+____                    # multiply a and b
+```
+
+```{r sim1-solution}
+a <- 9                # set a equal to 9
+b <- c( 2, 9, 8)      # set b equal to a vector with 2, 9 and 8, in that order,
+a == b                # ask if a equals b 
+a * b                 # multiply a and b
+```
+
+
+
+```{r pRactice, echo=FALSE}
+quiz(caption = "pRactice",
+    question("In the example above, what does R tell you when you ask it if a equals b?",
+    answer("It doesn't return anything"),
+    answer("`FALSE`"),
+    answer("An error"),
+    answer("The vector, `FALSE TRUE FALSE`", correct = TRUE),
+    allow_retry = TRUE,
+    correct = random_praise(),
+    incorrect = random_encouragement()
+  ),
+  question("In the example above, what does multiplying a and b return?",
+    answer("The vector, `2 9 8`"),
+    answer("The vector, `18 81 72`", correct = TRUE),
+    answer("The vector, `18 9 8`"),
+    answer("The vector, `4 81 64`"),
+    answer("An error"),
+    allow_retry = TRUE,
+    correct = random_praise(),
+    incorrect = random_encouragement()
+  )
+)
+```
+
+
+### Sandbox: Use the area below for any R practice
+
+
+```{r sandbox, exercise=TRUE, eval = FALSE}
+
+
+
+
+
+```
+
+
+

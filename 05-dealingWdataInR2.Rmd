@@ -1,4 +1,4 @@
-# Handling data in `R`  {#rdata}
+# Handling data in `R`  {#rdata2}
 
 
 ```{r, echo = FALSE, message=FALSE}
@@ -9,6 +9,12 @@ library(tweetrmd)
 library(tufte)
 library(emo)
 ```
+
+
+
+<span style="color: Red;font-size:40px;">   In progress not ready for class yet </span> 
+
+<!--
 
 
 
@@ -92,8 +98,9 @@ Getting data into R is often the first challenge we run into in our first R anal
 
  
 ```{r intoR, fig.cap='Getting data into R (6 in and 6 seconds).', echo=FALSE, out.extra = 'allowfullscreen', out.width="40%", out.extra='style="float:right; padding:10px"'}
-include_url("https://www.youtube.com/embed/d7gYc1o2M3c" , height = "200")
+include_url("https://www.youtube.com/embed/d7gYc1o2M3c" )
 ```
+
 
 
 
@@ -112,12 +119,12 @@ library(tidyverse)
 toad_data <- read_csv(file = "science_projects/Toads/data/toad_data.csv")
 ```
 
-The bit that says `science_projects/Toads/data/` points `R` to the correct folder, while `toad_data.csv` refers to the file we're reading into `R` and assigning to `toad_data`. Using tab-completion in RStudio makes finding our way to the file less terrible. <span style="color: lightgrey;"> But you can also point and click your way to data (see below). If you do, be sure to copy and paste the code you see in the code preview into the script so you can recreate your analysis.</span>.
+The bit that says `science_projects/Toads/data/` points `R` to the correct folder, while `toad_data.csv` refers to the file we're reading into `R` and assigning to `toad_data`. Using tab-completion in RStudio makes finding our way to the file less terrible. But you can also point and click your way to data (see below). If you do, be sure to copy and paste the code you see in the code preview into the script so you can recreate your analysis.
   
 
 
 ```{r fig.cap='', echo=FALSE}
-#knitr::include_graphics('images/loadingdata.jpeg')
+knitr::include_graphics('images/loadingdata.jpeg')
 ```
 
 
@@ -151,13 +158,13 @@ Feel free to [read about more ways to make tibbles](https://r4ds.had.co.nz/tibbl
 
 
 
-```{r Tips04, fig.cap='**Watch [this video](https://www.youtube.com/watch?v=91LmBj29-Sc)** introducing `dplyr` (watch the frist 5 min and 9 sec), from [STAT 545](https://stat545.com/) -- a grad level data science class at the University of British Columbia. We will borrow from this course occasionally.', echo=FALSE, out.extra= 'allowfullscreen'}
-include_url("https://www.youtube.com/embed/Gms3zSPqCk8?end=309")
+```{r Tips04, fig.cap='**Watch [this video](https://www.youtube.com/watch?v=91LmBj29-Sc)** introducing `dplyr` (6 min and 45 sec), from [STAT 545](https://stat545.com/) -- a grad level data science class at the University of British Columbia. We will borrow from this course occasionally.', echo=FALSE, out.extra= 'allowfullscreen'}
+include_url("https://www.youtube.com/embed/Gms3zSPqCk8")
 ```
 
 
 ```{r fig.cap='', out.width='30%', echo=FALSE, out.extra='style="float:right; padding:10px"'}
-knitr::include_graphics('https://github.com/A/stats-illustrations/raw/master/rstats-artwork/dplyr_wrangling.png')
+knitr::include_graphics('https://github.com/allisonhorst/stats-illustrations/raw/master/rstats-artwork/dplyr_wrangling.png')
 ```
 
 Looking at the `toad.data` tibble above, we can get a sense of the utility of a tibble. We can see, not only the first few values of the data set, but also the class of each variable (`chr` for character, `fct` for factor, `dbl` for double -- a continuous class of data). 
@@ -272,14 +279,57 @@ Some things we do in `R` require vectors to be pulled out of tibbles. We can ach
 
 `pull(toad_data, var = BMI)`  
 
+### An aside on the pipe `%>%` operator  
 
+Say you want to string together a few things -- like you want make a new tibble, called s`orted_bufo_bufo` by removing *Bufo spinosus* samples, sorting by BMI, getting rid of the column with the species name. The pipe operator, [`%>%`](https://magrittr.tidyverse.org/reference/pipe.html), makes this pretty clean by allowing us to pass results from one operation to another
+
+
+
+
+
+```{r}
+sorted_bufo_bufo <- toad_data     %>% # initial data
+  filter(species == "Bufo bufo")  %>% # only Bufo bufo
+  arrange(BMI)                    %>% # sort by BMI
+  select(-species)                    # remove species
+
+sorted_bufo_bufo
+```
+
+
+
+#### `group_by()` to perform operations by values of a (set of) column(s).   
+
+We can also conduct operations by value of a variable. Say we wanted to know each specie's smallest BMI. We would want to [`group_by()`](https://dplyr.tidyverse.org/reference/group_by.html) species. So, for example,  we could type:  
+
+
+
+
+```{r}
+toad_data                          %>% # initial data
+  group_by(species)                %>% # group by species
+  mutate(min_BMI = min(BMI))       %>% # add a column for min_BMI
+  ungroup()                            # remove groupings  
+```
+
+
+**Be sure to ungroup after  you're done or a group will stick together.** 
+
+We can combine this with a [`filter()`](https://dplyr.tidyverse.org/reference/filter.html) to get the lowest BMI for each species
+
+```{r}
+toad_data                          %>% # initial data
+  group_by(species)                %>% # group by species
+  mutate(min_BMI = min(BMI))       %>% # add a column for min_BMI
+  ungroup()                        %>% # remove groupings
+  filter(BMI == min_BMI)               # just keep lowest BMI 
+```
 
 ### Second primer   
 
 
 ***Now is a great time to complete the [Primer on isolating data with dplyr](https://rstudio.cloud/learn/primers/2.2)***,  embedded below (Fig. \@ref(fig:primer22)).   
 
-Note - we won't be working on the last part `%>%` aka 'piping' until next class so, you can out that off for a few days.   
 
 
 ```{r primer22, fig.cap = 'The RStudio [Primer on isolating data with dplyr](https://rstudio.cloud/learn/primers/2.2)', echo=FALSE} 
@@ -349,7 +399,11 @@ All require the tidyverse package
 [`mutate()`](https://dplyr.tidyverse.org/reference/mutate.html): Add a new column, usually as some function of existing columns.   
 [`arrange()`](https://dplyr.tidyverse.org/reference/arrange.html): Sort rows from low to high (or from high to low with `arrange(`[`desc()`](https://dplyr.tidyverse.org/reference/desc.html)`)`) values of a specified column.     
 [`filter()`](https://dplyr.tidyverse.org/reference/filter.html):  Limit your dataset to those with certain values in specifed columns.  
-[`select()`](https://dplyr.tidyverse.org/reference/select.html): Select columns of interest (or remove ones you do not care about with `select(-))` from your tibble.  ```
+[`select()`](https://dplyr.tidyverse.org/reference/select.html): Select columns of interest (or remove ones you do not care about with `select(-))` from your tibble.    
+[`pull()`](https://dplyr.tidyverse.org/reference/pull.html):  Extract a column from a tibble as a vector.       
+[`%>%`](https://magrittr.tidyverse.org/reference/pipe.html): Passes your answer down.   
+[`group_by()`](https://dplyr.tidyverse.org/reference/group_by.html): Conduct operatins separaely b values of a column  (or columns).   
+```
 
 
 
@@ -408,8 +462,9 @@ This function name, [`pivot_longer`](https://tidyr.tidyverse.org/reference/pivot
 
 Learn more about tidying messy data in Fig. \@ref(fig:tidying):
 
-```{r tidying, fig.cap='Tidying data (first 5 min and 40 seconds are relevant).',  echo=FALSE, out.extra= 'allowfullscreen'}
+```{r tidying, fig.cap='Tidying data (first 5 min and 40 seconds are required).',  echo=FALSE, out.extra= 'allowfullscreen'}
 include_url("https://www.youtube.com/embed/qivE6exNsZI?end=340")
 ```
 
 
+-->

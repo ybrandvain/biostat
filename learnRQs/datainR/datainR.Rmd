@@ -1,0 +1,223 @@
+---
+title: "Tutorial"
+output: learnr::tutorial
+runtime: shiny_prerendered
+---
+
+```{r setup, include=FALSE}
+library(learnr)
+library(tidyverse)
+library(ggmosaic)
+iris <- tibble(iris)
+ukgas<- data.frame(year = 1960:1986,matrix(c(UKgas), ncol = 4,byrow = TRUE))
+names(ukgas) <- c("year","quarter_1", "quarter_2", "quarter_3", "quarter_4")
+ukgas <- tibble(ukgas)
+knitr::opts_chunk$set(echo = FALSE)
+toad_data <- tribble(~individual,~species,~sound,~weight,~height,
+        "a", "Bufo spinosus", "chirp", 2.0,	2,
+        "b",	"bufo bufo",	"croak",	2.6,	3,
+        "c",	"Bufo bufo",	"ribbit",	3.0,	2)
+```
+
+# Dealing with data Questions
+
+###  Complete this quiz to evaluate your comprehension of the material
+A similar, if not identical quiz should be completed for credit on canvas.
+
+#### Q1: [`glimpse()`](https://tibble.tidyverse.org/reference/glimpse.html)
+
+The `iris` dataset in `R` has floral measurements for fifty individuals each from three of `iris species`. Execute the code below, fix the mistake, and then answer the question which follows.
+
+```{r glimpse, exercise=TRUE, eval = FALSE}
+glimps(iris)
+```
+
+
+```{r glimpse-solution}
+glimpse(iris)
+```
+
+
+
+```{r glimpseQ, echo=FALSE}
+question("Species is of class character.",
+    answer("TRUE"),
+    answer("FALSE", correct = TRUE),
+    allow_retry = TRUE,
+    correct = random_praise(),
+    incorrect = random_encouragement()
+  )
+```
+
+  
+
+#### Q2: [`filter()`](https://dplyr.tidyverse.org/reference/filter.html)     
+
+Use the [`filter()`](https://dplyr.tidyverse.org/reference/filter.html) function to find out how many individuals in the dataset have a `Sepal.Length` greater than 7 units, and then answer the question.
+
+
+```{r filter, exercise=TRUE, eval = FALSE}
+filter(iris,  ___ > 7  )
+```
+
+```{r filter-solution}
+filter(iris,  Sepal.Length > 7  )
+
+## OR 
+
+iris %>%
+  filter(Sepal.Length > 7 )
+```
+
+
+```{r filterQ, echo=FALSE}
+question_text("How many individuals Sepal.Length's greater than 7 units?",
+    allow_retry = T,
+    answer("12", correct = T),
+    correct = random_praise(),
+    incorrect = random_encouragement()
+  )
+```
+
+
+
+#### Q3: Reproducibility 
+
+
+```{r reproduce, echo=FALSE}
+question("It is more important to save the code underlying an analysis than the result of the analysis.",
+    answer("TRUE", correct = TRUE),
+    answer("FALSE"),
+    allow_retry = TRUE,
+    correct = random_praise(),
+    incorrect = random_encouragement()
+  )
+```
+
+#### Q3-6: [`arrange()`](https://dplyr.tidyverse.org/reference/arrange.html)  again
+
+
+**Q3:** Find the shortest character in the `starwars` data set [hint, you might want to [`glimpse()`](https://dplyr.tidyverse.org/reference/glimpse.html)  first.]
+
+```{r arrange2, exercise=TRUE, eval = FALSE}
+starwars_sortheight <- ____(starwars, ___) 
+
+# Use the to just  show name and height of this new sorted data set
+select(starwars_sortheight, ____, ___) 
+```
+
+```{r arrange2-solution}
+starwars_sortheight <- arrange(starwars, height) 
+
+# Use the to just  show name and height of this new sorted data set
+select(starwars_sortheight, name, height) 
+```
+
+
+```{r arrange2Q, echo=FALSE}
+question("Who is the shortest star wars character?",
+    answer("Yoda", correct = TRUE),
+    answer("R2-D2"),
+    answer("Luke Skywalker"),
+    answer("Yarael Poof"),
+    allow_retry = TRUE,
+    correct = random_praise(),
+    incorrect = random_encouragement()
+  )
+```
+
+**Q4:** 
+
+```{r arrange2Qnochange, echo=FALSE}
+question("After executing the code above, who is the first character in the `starwars` data set?",
+    answer("Yoda"),
+    answer("Luke Skywalker", correct = TRUE),
+    allow_retry = TRUE,
+    correct = random_praise(),
+    incorrect = random_encouragement()
+  )
+```
+
+**Q5:** 
+
+```{r arrange2Qdoublecheck, echo=FALSE}
+question("After executing the code above, who is the first character in the `starwars_sortheight` data set?",
+    answer("Yoda", correct = TRUE),
+    answer("Luke Skywalker"),
+    allow_retry = TRUE,
+    correct = random_praise(),
+    incorrect = random_encouragement()
+  )
+```
+
+**Q6:** 
+
+```{r arrange2Qstillnochange, echo=FALSE}
+question("After executing the code above, how many columns are in the ` `starwars_sortheight` dataset?",
+    answer("87"),
+    answer("14"),
+    answer("2", correct = TRUE),
+    allow_retry = TRUE,
+    correct = random_praise(),
+    incorrect = random_encouragement()
+  )
+```
+
+
+## Q7: Best practices in spreadsheets
+In Chapter 2 we discussed best practices in making spreadsheets. Imgine someone messed up, so our `toad_data` looks like this.    
+
+```{r, echo=FALSE}
+toad_data
+```
+
+If I then filter for `Bufo bufo`
+
+```{r, echo=TRUE}
+filter(toad_data, species == "Bufo bufo")
+```
+
+
+
+```{r spreadsheets, echo=FALSE}
+question("Which rule for making good spreadsheets did I break and why does it matter?",
+    answer("Values where implied, so I missed relevant context"),
+    answer("Difficult to understand column names made it hard to get the species column right"),
+    answer("We used color to contain information, which is lost in R"),
+    answer("Species names where inconsistent, so we didn't appropriately filter our data", correct = TRUE),
+    allow_retry = TRUE,
+    correct = random_praise(),
+    incorrect = random_encouragement()
+  )
+```
+
+####  OPTIONAL: Tidying data
+
+Let's have a  [`glimpse`](https://tibble.tidyverse.org/reference/glimpse.html) at data for gas consumption in the UK by quarter over years
+
+```{r}
+glimpse(ukgas)
+```
+
+These data are not tidy! Each observation is a quarter of a year, and the variables are -- `year`, `quarter`, and `gas` let's tidy theme with the [`pivot_longer`](https://tidyr.tidyverse.org/reference/pivot_longer.html) function.
+
+```{r, echo=TRUE}
+pivot_longer(data = ukgas, 
+             cols = c("quarter_1", "quarter_2", "quarter_3", "quarter_4"),
+             names_to = "quarter", 
+             names_prefix = "quarter_",
+             values_to = "gas") %>%
+  head(n = 6)
+```
+
+
+
+```{r tidying, echo=FALSE}
+question("Looking at the code above (and perhaps remembering the video), guess what `names_prefix = 'quarter_'`, does?.",
+    answer("Moves quarter_ from values in a cell to the column  name"),
+    answer("Removes `quarter_`, from `quarter_1`,`quarter_2`, `quarter_3`, and `quarter_4`.", correct = TRUE),
+    allow_retry = TRUE,
+    correct = random_praise(),
+    incorrect = random_encouragement()
+  )
+```

@@ -1,0 +1,141 @@
+---
+title: "Tutorial"
+output: learnr::tutorial
+runtime: shiny_prerendered
+---
+
+```{r setup, include=FALSE}
+library(learnr)
+library(tidyverse)
+library(ggforce)
+iris <- tibble(iris)
+```
+
+# Intro to ggplot quiz
+
+###  Complete this quiz to evaluate your comprehension of the material
+
+A similar, if not identical quiz should be completed for credit on canvas.
+
+**Today, we will focus on the** ***iris*** **dataset, which is built-in with R**  
+
+Always [`glimpse()`](https://tibble.tidyverse.org/reference/glimpse.html) first.   
+
+```{r glimpse, exercise=TRUE, eval = FALSE}
+glimpse(iris)
+```
+
+#### Q1: Distribution of one continuous variable  
+
+```{r onecontQ, echo=FALSE}
+question("Which of these are good ways to look at the distribution of a numeric variable. (pick one)",
+    answer("A barplot"),
+    answer("A boxplot"), 
+    answer("A histogram or density plot", correct = TRUE),
+    answer("A scatterplot or biplot"), 
+    allow_retry = TRUE,
+    correct = random_praise(),
+    incorrect = random_encouragement()
+  )
+```
+
+Make the plot that best answers the question above for any of the numeric variables in *iris*
+
+
+```{r onecont, exercise=TRUE, eval = FALSE}
+ggplot(iris, aes(___ = ___)) +
+  geom_____()
+```
+
+```{r onecont-solution}
+# potential answers 
+ggplot(iris, aes(x = Petal.Length)) +
+  geom_histogram()
+
+ggplot(iris, aes(x = Sepal.Width)) +
+  geom_density(fill = "pink")
+```
+
+
+#### Q2: One continuous, one categorical   
+
+
+```{r catcon, echo=FALSE}
+question("Which of the following is **A BAD** way to display the relationship between a categorical and continuous variable?",
+    answer("barplot", correct = TRUE),
+    answer("jitterplot / stripchart"),
+    answer("overlapping density plots with appropriate transparency", correct = TRUE), 
+    answer("small multiples of histograms"),
+    allow_retry = TRUE,
+    correct = random_praise(),
+    incorrect = random_encouragement()
+  )
+```
+
+
+Make one (or more) of the good plots suggested above, with any continuous variable and `Species` as a categorical.   
+
+```{r catcontplot, exercise=TRUE, eval = FALSE}
+ggplot(iris, aes(___)) +
+  ___  # and maybe more
+```
+
+
+```{r catcontplot-solution}
+ggplot(iris, aes(x = Petal.Width, fill = Species)) +
+  geom_density(alpha = 0.4)  # and maybe more
+# OR
+ggplot(iris, aes(x = Petal.Width)) +
+  geom_histogram()  +
+  facet_wrap(~Species, ncol =1)
+# OR
+ggplot(iris, aes(x = Species, y = Petal.Width)) +
+  geom_jitter(width = .25, height = 0, alpha = .5) 
+```
+  
+  
+
+#### Q2: Two continuous, one categorical     
+
+```{r}
+ggplot(iris, aes(x = Sepal.Length, y = Sepal.Width, color = Species))+
+  geom_point()
+```
+
+```{r numcat1, echo=FALSE}
+question("In the plot above, which species increases its sepal width most strongly with its sepal length?",
+    answer("setosa", correct = TRUE),
+    answer("Versicolor"),
+    answer("virginica"),
+    allow_retry = TRUE,
+    correct = random_praise(),
+    incorrect = random_encouragement()
+  )
+```
+
+
+```{r numcat2, echo=FALSE}
+question("In the plot above, what do you think went in `aes()`",
+    answer("x = Sepal.Width,  y = Species,       color = Sepal.Length"),
+    answer("x = Sepal.Width,  y = Sepal.Length,  color = Species"),
+    answer("x = Species,      y = Sepal.Width,   color = Sepal.Length"),
+    answer("x = Species,      y = Sepal.Length,  color = Sepal.Width"),
+    answer("x = Sepal.Length, y = Sepal.Width,   color = Species", correct = TRUE),
+    allow_retry = TRUE,
+    correct = random_praise(),
+    incorrect = random_encouragement()
+  )
+```
+
+
+```{r numcat3, echo=FALSE}
+question("In the plot above, what geom was used",
+    answer("jitter"),
+    answer("point", correct = TRUE),
+    answer("line"),
+    answer("histogram"),
+    allow_retry = TRUE,
+    correct = random_praise(),
+    incorrect = random_encouragement()
+  )
+```

@@ -212,22 +212,25 @@ knitr::include_graphics('images/files.jpeg')
 ```
 
 
-```{block2, type='rmdtip'}
-If you want to be super cool and get the most out of `R`, I suggest starting an [`R` project](https://r4ds.had.co.nz/workflow-projects.html) for each project folder. This is great practice, but might not be appropriate at the intro level. 
+I **highly recommend treating this course as a project**, so make a folder on your computer called `applied_biostats` and a folder in there called data. If you do this, your life will be better. 
+
+
+```{r, echo=FALSE, out.width="50%"}
+include_graphics("images/applied_biostats_folder.jpeg")
 ```
-
-
 
 
 ## Assignment {-}
 
-The assignment is on canvas.  YB ADD LINK. It consists of three parts   
+The assignment is to be turned in on [canvas](https://canvas.umn.edu/courses/225135/quizzes/407366), it has questions revolving around.
 
 1.  Identify a dataset on your computer (ideally one that is important to you if you have one), or one you've come across in another class, or online etc... Does it follow best practices in spreadsheet setup? Explain why or why not.  
 
 2. Make up a small dataset, either from simple observations in your world or from your imagination following best practices in spreadsheet setup.    
 
-3. Quiz questions that are the same as those below. If you try them first here, you'll be sure to enter the right answers on canvas.  
+3. Quiz questions that are the same as those below. If you try them first here, you'll be sure to enter the right answers on [canvas](https://canvas.umn.edu/courses/225135/quizzes/407366).  
+
+4. Reflecting on Kate Laskowski's video.  
 
 
 ## Quiz {-}
@@ -238,10 +241,4 @@ knitr::include_app('https://brandvain.shinyapps.io/intro2data/', height = '500px
 
 
 
-
---- JK ideas
-Determine which of the following studies are experimental. If they are, explain why. If they are not, explain why not, or describe how they could be modified to be experimental? 
-a) ...
-
-Consider the final panel of the cartoon above. What could be modified in the panel to make the study experimental? What could be modified in the panel to exemplify sampling error instead of bias? 
 

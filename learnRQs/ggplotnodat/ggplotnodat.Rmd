@@ -1,0 +1,28 @@
+---
+title: "Tutorial"
+output: learnr::tutorial
+runtime: shiny_prerendered
+---
+
+```{r setup, include=FALSE}
+library(learnr)
+library(tidyverse)
+library(ggforce)
+iris <- tibble(iris)
+```
+
+## What
+
+
+```{r huh, echo=FALSE}
+question("What do you notice about the image above (select all that apply)",
+    answer("Count is mapped onto the y-axis (see axis label and values)"),
+    answer("log10_brainwt is mapped onto the x-axes (see axis label and values)", correct = TRUE),
+    answer("Besides the range and some breaks, there is no information about mamallian body wieght", correct = TRUE), 
+    answer("This plot is perfect"),
+    allow_retry = TRUE,
+    correct = random_praise(),
+    incorrect = random_encouragement()
+  )
+```
+

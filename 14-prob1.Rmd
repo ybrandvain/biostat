@@ -660,7 +660,7 @@ This is the basis for Bayes theorem, which we revisit in Chapter \@ref(prob2).
 
 ## Probabilitic thinking by simulation: Quiz and Summary  
 
-Go through all "Topics" in the `learnR` tutorial, below. Nearly identitical will be homework on canvas.
+Go through all "Topics" in the `learnR` tutorial, below. Nearly identical will be homework on canvas.
 
 ```{r, echo=FALSE}
 include_app("https://brandvain.shinyapps.io/prob1/",height = '800')

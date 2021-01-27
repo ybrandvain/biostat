@@ -144,8 +144,8 @@ This is a good time to remember the other assignment and read [pages 104-112 and
 
 One last important consideration of sampling is the independence of samples.   
 
-- Samples are independent if sampling one individual does not change the probability of sampling another.  
-- Samples are dependent (also called non-independent) if sampling one individual does not change the probability of sampling another.    
+- Samples are independent if sampling one individual **does not change** the probability of sampling another.  
+- Samples are dependent (also called non-independent) if sampling one individual  **changes the probability** of sampling another.      
 
 
 

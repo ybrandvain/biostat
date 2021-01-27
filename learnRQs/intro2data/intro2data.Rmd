@@ -65,7 +65,7 @@ include_graphics("https://github.com/ybrandvain/biostat/blob/master/images/name4
 ```
 
 ```{r colnames, echo=FALSE}
-question("Which of the spreadsheets has a bad coumn name?",
+question("Which of the spreadsheets has a bad column name?",
   answer("A"),
   answer("B", correct = TRUE),
   correct = random_praise(),

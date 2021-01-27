@@ -32,10 +32,13 @@ These notes accompany portions of Chapter 6  --- *Hypothesis Testing* --- of our
 
 
 
+
 <span style="color: Blue;font-size:22px;">   Motivating scenarios:  </span>  <span style="color: Black;font-size:18px;">  ***(1)*** We want to know understand the standard by which scientists take results as serious vs. chalking them up to sampling error. ***(2)*** We are visiting a doctor, reading a newspaper, or a reading a scientific paper, and we are told results are "statistically significant", or have a P-Value of XXX and want to know what that means. ***(3)*** We have done a statistical analysis and want to guard against a simple explanation that our seemingly exceptional results are attributable to sampling error. </span> 
 
-**There is one MAJOR GOAL here. You should understand a p-value and it's limitations. But  to brak this down.**     
+
+**There is one MAJOR GOAL here. You should understand a p-value and it's limitations. But  to break this down.**     
 **Learning goals: By the end of this chapter you should be able to**   
+
 
 
 
@@ -47,7 +50,7 @@ include_url("https://www.youtube.com/embed/-kBtJow_pc0", height = "200")
 - Explain the motivation for Null Hypothesis Significance Testing (NHST).    
 - Explain the role of a test statistic in hypothesis testing.    
 - Describe a p-value in relation to the sampling distribution under the null.  
-- Explain what a false positive and a false negative is and how likely we are to observe ne or the other as samples get larger.      
+- Explain what a false positive and a false negative is and how likely we are to observe one or the other as samples get larger.      
 - Explain why a p-value is not "the probability that the null is true".   
 - Explain the concept of statistical power and how it relates to the sample size and effect size.             
 
@@ -452,7 +455,7 @@ This is a good time to remember the other assignment and read the [Statement on 
 
 
 
-## **Why do we still use null hypothesis significance testing?** {-}
+#### **Why do we still use null hypothesis significance testing?** {-}
 
 > Q: Why do so many colleges and grad schools teach p = 0.05?  
 > A: Because that’s still what the scientific community and journal editors use.   
@@ -485,7 +488,7 @@ include_app("https://brandvain.shinyapps.io/nhst/",height = '800')
 
 
 
-## Hypthesis testing: Definitions  {-}     
+## Hypothesis testing: Definitions  {-}     
 
 
 

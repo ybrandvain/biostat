@@ -1,0 +1,134 @@
+# Shuffling labels to generate a null {#perm1}   
+
+```{r, echo = FALSE, warning=FALSE, message=FALSE}
+library(tidyverse)
+library(DT)
+library(knitr)
+library(blogdown)
+library(beyonce, warn.conflicts=F, quietly=T)
+library(stringr)
+library(tweetrmd)
+library(emo)
+library(tufte)
+library(cowplot)
+library(lubridate)
+library(ggthemes)
+library(ggforce)
+library(datasauRus)
+library(ggridges)
+library(randomNames)
+library(infer)
+library(tiktokrmd)
+library(ggridges)
+library(colorspace)
+```
+
+
+
+```{block2, type='rmdnote'}
+The closest thing to these note is section 8 in chapter 13 of  our textbook.   **The reading below is required,**  @whitlock2020 is  not.    
+```
+
+
+
+<span style="color: Blue;font-size:22px;">   Motivating scenarios:  </span>  <span style="color: Black;font-size:18px;">   You want to make the ideas of a null sampling distribution and a p-value more concrete  and learn a very robust way to test null hypotheses while you're at it. </span> 
+
+**Learning goals: By the end of this chapter you should be able to**   
+- Explain what a permutation is   
+- Explain why permuting many times generates a sampling distribution under the null   
+- Use `R` to permute data to see if two samples means differ.   
+- Identify that we use permutation (shuffling) to generate null distributions, and bootstrapping (resampling with replacement) to estimate uncertainty.  
+- Generalize the idea of permutation as a way to test most null models.    
+
+
+
+
+```{block2, type='rmdwarning'}
+No additional reading is assigned.     But [this paper](https://peerj.com/articles/9089/)) by my colleague here [@fieberg2020] helped lays out why this is a good way to do and teach staistics.   
+```
+
+
+## Set-up: One simple trick to generate a null distribution
+
+
+```{r, echo=FALSE}
+tweet_embed("https://twitter.com/kdc509/status/1353808281563619333")
+```
+
+
+In Chapter \@ref(hypoth), we discussed the idea behind in null hypothesis significance testing.  
+
+Specifically the challenge is to figure out how often we would see what we saw if some boring *null hypothesis* was true.  
+
+A key step in this process id comparing our observed "*test statistic*" to its sampling distribution when the null hypothesis is true. 
+
+Later in the course we will dal with special cases for which mathematicians have estimated a sampling distribution under some set of assumptions.  
+
+But a really clean way to generate a null distribution is to rearrange your data randomly, as if nothing where happening. **Permutation** aka randomly shuffling the connection between observations, is a straightforward way to generate the null. What's more, unlike the math tricks we cover later, this approach makes almost no assumptions -- it just makes the standard assumptions of random and independent sampling  without bias.  
+
+In this chapter we focus in permuting to test for differences between groups, but permutation is super flexible and can be used for most problems!
+
+
+### Motivation:  
+
+One of the most common statistical hypotheses we ask are "Do these two samples differ." For example,   
+
+- Do people who get a vaccine have worse side effects than people getting a placebo?   
+- Does planting a native garden attract pollinators?   
+
+So how do we go about asking these questions from data?  
+
+### Case study: Mate choice & fitness in frogs  
+
+There are plenty of reasons to choose your partner carefully. In much of the biological world  a key reason is "evolutionary fitness" - presumably organisms evolve to choose mates that will help them make more children. This could, for example explain Kermit's resistance in one of the [more complex love stories of our time](https://www.insider.com/miss-piggy-and-kermit-relationship-timeline-2018-12), as frogs and pigs are unlikely to make healthy children.   
+
+To evaluate this this idea @swierk2019, identified a males top choice out of two female wood frogs and then had them mate with the preferred or unpreferred female and counted the number of hatched eggs. 
+
+
+```{r, echo=FALSE,out.extra= 'allowfullscreen', out.width="30%", out.extra='style="float:right; padding:10px"'}
+include_graphics("images/woodfrog.jpg")
+```
+
+**Concept check**   
+
+- Is this an experimental or observational study?       
+- Are there any opportunities for bias? Explain!   
+- What is the biological hypothesis?   
+- What is the statistical null?   
+
+Here are the raw data   
+
+```{r}
+frogs <- read.csv("data/Swierk_Langkilde_BEHECO_1.csv")
+
+DT::datatable(frogs,
+              options = list(autoWidth = TRUE,pageLength = 5, lengthMenu = c(5, 25, 50)
+))
+```
+
+```{r}
+include_graphics("https://media.giphy.com/media/pRHkn0CC08Wn6/giphy.gif")
+```      
+
+- Well, can visualize patters (Chapters \@ref(viz1), \@ref(goodfigs), and  \@ref(betteRfigs)).  
+- we estimate parameters from samples of each group (Chapter \@ref(summaRy)).      
+- But we know that because of sampling error (Chapter \@ref(sampling)), two random samples from the same population will differ by chance.      
+- We can quantify uncertainty by calculating standard errors and confidence intervals (Chapter \@ref(uncertainty)).   
+- We want to build a null distribution to test if our data would be super unlikely if the null where true (\@ref(hypoth)).    
+
+## Review: samples  
+
+
+In chapters \@ref(intro) and  \@ref(summaRy) we talked about estimation as a major goal of statistics -- we hope to summarize what we see in the world to estimate population parameters from a sample.     
+
+But we also learned, in chapters \@ref(intro), \@ref(sampling), and \@ref(uncertainty), that all estimates are subject to sampling error. **Our goal in null hypothesis significance testing is to see if results are easily explained by sampling error.** Let's work though a concrete example: 
+
+So, say we did an experiment: we gave the Moderna Covid vaccine to 15,000 people and a placebo to 15,000 people. This experimental design is meant to  
+
+- Imagine if the population that got the Covid vaccine, or it did not.   
+- Calculate parameters of interest (e.g. the probability of contracting Covid, or the frequency of severe Covid among those who caught Covid), or the frequency of severe reactions etc.. in the vaccinated and unvaccinated population.   
+- Compare these parameters across **populations** with and without the placebo.    
+
+
+for paired t-test
+https://datadryad.org/stash/dataset/doi:10.5061/dryad.82t1k

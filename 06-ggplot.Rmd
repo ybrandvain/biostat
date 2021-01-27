@@ -11,8 +11,6 @@ library(emo)
 ```
 
 
-YB TDO: videos, assignment, cheatsheet
-
 
 ```{block2, type='rmdnote'}
 These notes accompany portions of Chapter 2 — Displaying Data — of our textbook, which we revisit in Section 9. The reading below is required, @whitlock2020 is not.
@@ -32,7 +30,7 @@ These notes accompany portions of Chapter 2 — Displaying Data — of our textb
 
 
 ```{block2, type='rmdwarning'}
-There is no external reading for this chapter, but watch the embedded vidoes, and complete all embedded learnRexcercises. Then go to canvas to fill out the evaluation.  
+There is no external reading for this chapter, but watch the embedded vidoes, and complete all embedded learnRexcercises. Then go to canvas to fill out the evaluation.  You will need to make three very different types of plots from the `mpg` data. 
 ```
 
 ##  A quick intro to data visualization.  
@@ -47,7 +45,7 @@ include_graphics("https://github.com/allisonhorst/stats-illustrations/raw/master
 ```
 
 
-We generally think of two extremes goals of data visualization  
+We generally think of two extremes of the goals of data visualization  
 
 - In **exploratory visualizations** we aim to identify any interesting patterns in the data, we also conduct quality control to see if there are patterns indicating mistakes or biases in our data, and to think about appropriate transformations of data. On the whole, our goal in exploratory data analysis is to understand the stories in the data.    
 
@@ -69,14 +67,14 @@ Later in the term we will show how we can use `ggplot2` to make high quality exp
 
 ### Centering plots on biology
 
-Whether developing an exploratory plot, you should think hard about the biology you hope to convey before jumping into a plot. Ask yourself   
+Whether developing an exploratory or exploratory plot, you should think hard about the biology you hope to convey before jumping into a plot. Ask yourself   
 
 - What do you hope to learn from this plot?  
 - Which is the response variable (we usually place that on the y-axis)?  
 - Are data numeric or categorical?     
      - If they are categorical are they ordinal, and if so what order should they be in?   
 
-The answers to these questions should guide our data visualization strategy, as this is a key step in our statistical analysis of a dataset. The best plots should evoke an immediate understanding of the (potentially complex) data. Put another way, a plot (be it exploratory of explanatory) should highlight both the biological question and its answer.
+The answers to these questions should guide our data visualization strategy, as this is a key step in our statistical analysis of a dataset. The best plots should evoke an immediate understanding of the (potentially complex) data. Put another way, a plot should highlight both the biological question and its answer.
 
 **Before jumping into making a plot in R, it is often useful to take this step back, think about your main biological question, and take a pencil and paper to sketch some ideas and potential outcomes.** I do this to prepare my mind to interpret different results, and to ensure that I’m using R to answer my questions, rather than getting sucked in to so much Ring that I forget why I even started. With this in mind, we're ready to get introduced to `ggplot`ing!
 
@@ -133,7 +131,7 @@ plot(msleep_plot1)                                             #
 So, that didn’t go as expected :( — there just a blank grey background. But look more closely, what do you notice?      
 
 ```{r, echo=FALSE}
-include_app("https://brandvain.shinyapps.io/aes01/")
+include_app("https://brandvain.shinyapps.io/ggplotnodat/")
 ```
 
 **We make a more useful plot by adding a `geom` layer.**
@@ -483,6 +481,25 @@ ggplot(msleep_data_ordervore, aes(x = log10_bodywt, y = log10_brainwt))+
 We have used the `aes()` argument to provide information. For example, in Figure 5.15 we used color to show a diet by typing aes(..., color = vore). But what if we just want a fun color for data points. We can do this by specifying color outside of the aes argument. Same goes for other attributes, like size etc, or transparency (alpha)…
 
 
+## ggplot  Assignment
+
+Read the chapter  
+
+Watch the [video](https://www.youtube.com/watch?v=cqcQT44mJTM&feature=youtu.be) about getting started with ggplot
+
+Complete RStudio’s [primer on data visualization basics](https://rstudio.cloud/learn/primers/1.1).    
+
+Complete the glimpse intro (4.3.1) and the quiz. 
+
+Make three plots from the `mpg` data and describe the patterns they highlight.  
+
+Fill out the quiz on canvas, which is very simlar to the one below.
+
+### ggplot2 quiz
+
+```{r, echo=FALSE}
+include_app("https://brandvain.shinyapps.io/ggplot1/")
+```
 
 ## ggplot2 review / reference   
 
@@ -494,7 +511,6 @@ There is no need to memorize anything, check out [this handy cheat sheet](https:
 
 include_graphics("https://d33wubrfki0l68.cloudfront.net/21d683072b0c21cbd9b41fc0e37a587ad26b9525/cbf41/wp-content/uploads/2018/08/data-visualization-2.1.png")
 ```
-
 
 
 #### ggplot2: common functions, aesthetics, and geoms

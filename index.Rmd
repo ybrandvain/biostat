@@ -13,15 +13,7 @@ description: "Course notes for applied Biostats."
 ---
 
 
-```{r, echo = FALSE, message=FALSE}
-library(knitr)
-library(tidyverse)
-library(blogdown)
-library(tweetrmd)
-library(tufte)
-library(emo)
-library(here)
-```
+
 
 ```{r call.packages, echo=FALSE, message=FALSE}
 call.packages <- function(list.packages) {
@@ -49,15 +41,24 @@ install.github <- function(pkgs, repos) {
 }
 install.github(pkgs = "tweetrmd",repos = "gadenbuie/tweetrmd")
 install.github(pkgs = "emo",repos = "hadley/emo")
+install.github(pkgs = "tweetrmd",repos = "gadenbuie/tweetrmd")
+install.github(pkgs = "emo",repos = "hadley/emo")
+install.github(pkgs = "beyonce",repos = "dill/beyonce")
 
-pkgs.list = c("knitr","tidyverse","blogdown",
-              "tweetrmd","tufte","emo","here")
-call.packages(pkgs.list)
+pkgs.list = c("knitr","tidyverse","blogdown","colorspace",
+              "tweetrmd","tufte","emo","here",
+              "DT","beyonce","stringr","cowplot",
+              "lubridate","ggthemes","ggforce",
+              "datasauRus","ggridges","randomNames","infer")
 ```
 
 # (PART) Introduction to this course {-}
 
 # Preface {-}
+
+
+**Key links:** [Canvas](https://canvas.umn.edu/courses/225135), [Detailed schedule in progress](https://docs.google.com/document/d/1NFDJlFkvB8Lg2w0GS00coKCrjfHYLjGpKkt-GLGdrEU/edit?usp=sharing), [Rough schedule](https://docs.google.com/spreadsheets/d/1oVgknnzJg4SnLZeLCYa8fSH0xdE-uC-6p_jCRghAI7Y/edit#gid=0). 
+
 
 ## A book of (com)passion {-}
 

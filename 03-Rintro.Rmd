@@ -100,12 +100,10 @@ include_graphics("https://d33wubrfki0l68.cloudfront.net/948e2a62a1eab719f3cad476
 ## 3.2 Installing R and tidyverse (or not)  
 
 **We use R version 4.0.0 or above, and tidyverse version 1.3.0 or above.**  
-You can either download and install R, RStudio, and tidyverse onto your computer (see [Installing RStudio](#oncomp) for more info), or you can do all the coursework with RStudio Cloud without installing anything on your computer (see [Getting on RStudio Cloud](#onthecloud) for more info). Which option is right for you? It depends (see below). I suggest doing both and seeing which yuo prefer.
+You can either download and install R, RStudio, and tidyverse onto your computer (see [Installing RStudio](#oncomp) for more info), or you can do all the coursework with RStudio Cloud without installing anything on your computer (see [Getting on RStudio Cloud](#onthecloud) for more info). Which option is right for you? It depends (see below). I suggest doing both and seeing which you prefer.
 
 ### Getting on RStudio Cloud {#onthecloud}  
-Using RStudio Cloud allows you to use R and RStudio without installing anything on your computer. Additionally, if you log into our course project on RStudio Cloud you will not need to install any packages or load any files except those you want for fun of for your independent project at the end of term.
-
-DETAILS YANIV
+Using RStudio Cloud allows you to use R and RStudio without installing anything on your computer. Additionally, if you log into our course project on RStudio Cloud you will not need to install any packages or load any files except those you want for fun or for your independent project at the end of term. 
 
 #### Advantages to RStudio Cloud  {#cloadadvant -}  
 - From my experiencing teaching this course, about 5% of students have computers or computer systems where installing R is challenging, now you don’t have to.  
@@ -114,15 +112,15 @@ DETAILS YANIV
 
 - Some computer setups make installing tidyverse or other specific R packages somewhat painful. RStudio Cloud removes this pain.  
 
-- Using the course project gauntness that you’ll get the same environment as the prof and TA, making it easier for them to help you.   
+- Using the course project guarantees that you’ll get the same environment as the prof and TA, making it easier for them to help you.   
 
 ####  Disadvantages to RStudio Cloud {-}  
 
-- The biggest disadvantage of RStudio cloud is that it's expensive and I only paid for a certain amount of usage, so please use it only if you're having issues using R on your computer.    
-- Sometimes the system can get overwhelmed. This is pretty rare, but once a student was trying to use RStudioCloud during the international RStudio convention. The RStudio Cloud couldn’t handle all the traffic and went down that day.    
+- **The biggest disadvantage of RStudio cloud is that it's expensive if we all use it and I only paid for a certain amount of usage, so please use it only if you're having issues using R on your computer.** Please e-mail   me f you would like to use it!   
+- Sometimes the system can get overwhelmed. This is pretty rare, but once a student was trying to use RStudioCloud during the international RStudio convention. The RStudio Cloud could not handle all the traffic and went down that day.    
 - You need an internet connection to use R. This can be a bummer if you don’t always have a reliable one.  
 - Some people (🖐) like having everything on their computer and struggle thinking about / working with folders on a cloud.    
-- Using the course project on RStudio Cloud might prevent you from learning how with load data, download packages etc.  
+- Using the course project on RStudio Cloud might prevent you from learning how to load data, download packages etc.  
 
 
 ### Installing RStudio  {#oncomp}    
@@ -197,7 +195,7 @@ We can also use R for asking logical questions. For example:
 - 'Does four divided by four equal one?' like this `4/4 == 1` (note the two equals signs), which returns `TRUE`.    
 - 'Does four divided by four not equal one?' like this `4/4 != 1` (note an exclamation point, then an equals sign), which returns `FALSE`.    
 - 'Is four divided by four less than or equal to one?' like this `4/4 <= 1` (note an less than sign followed by the equals sign), which returns `TRUE`.  
-- 'Is four divided by four greater than or equal to one?' like this `4/4 >= 1` (note an exclamation point, then an equals sign), which returns `TRUE`.   
+- 'Is four divided by four greater than or equal to one?' like this `4/4 >= 1` (note an greater then sign, then an equals sign), which returns `TRUE`.   
 
 ###  Vectors in R 
 
@@ -271,7 +269,7 @@ num_vec <- c(4, 9, 16)
 include_graphics("images/RStudioEnvironment.jpeg")
 ```
 
-With these variables assigned, we can do simple math, ask logical questions , use them as arguments for functions. For example `sqrt(x = num_vec)` returns `2, 3, 4`.
+With these variables assigned, we can do simple math, ask logical questions , use them as arguments for functions. For example `sqrt(x = num_vec)` returns `2, 3, 4`. <span style="color: lightgrey;">   Note, this is the same as typing `sqrt(num_vec)` and with just one argument (`x`) for the function, this is totally unnecessary. When there are more arguments it is good practice to include the argument name and the equals sign, as this makes code easier to read, and more likely to work (otherwise R assumes we put things in a specific order).</span>
 
 All variables assigned should be in your environment window, or you can use the [`ls()`](https://stat.ethz.ch/R-manual/R-devel/library/base/html/ls.html) function to ask R for them.
 
@@ -281,18 +279,18 @@ include_graphics("images/ls.jpeg")
 
 
 
-#### Converting betwee types of vectors {-}   
+#### Converting between types of vectors {-}   
 
 - `logical` to `numeric` -- A convenient trick in R is that `TRUE` equals one and `FALSE` equals zero. So `sum(c(TRUE, FALSE))` returns `1`, and `mean(c(TRUE, FALSE))` returns `0.5`.  
 - `factor` to `character` (and vice versa) -- This usually works without incident, so you can convert a factor, `factor_vec <- factor(c("a","x"))`, to a character like this: `char_vec <- as.character(factor_vec)`.   
 - `factor` to `numeric` -- This will return the numeric ID associated with levels, so `as.numeric(factor_vec)` returns `1, 2`.   
-- `numeric` to `factor` -- **DONT DO THIS, UNEXPECTEDLY BAD THINGS WILL HAPPEN**.  
+- `numeric` to `factor` -- **DON'T DO THIS, UNEXPECTEDLY BAD THINGS WILL HAPPEN**.  
 
 ### Writing R scripts and beyond  
 
 A great thing about R is that you can remember and share exactly what you have done by saving your work as a script. In doing so it’s best practice to type your name, date and the goal of the analysis at the top (with a `#` to tell R this isn’t code), plus a description of your goals. Regular comments throughout, help make your code more usable.
 
-To make a new R `Script`, click on `File`, the `New File`, and then `R Script`.
+To make a new R `Script`, click on `File`, then `New File`, and then `R Script`.
 
 
 ```{r, echo=FALSE, out.width='60%'}
@@ -312,11 +310,79 @@ We only need to install a package once, but we need to load all packages we are 
 So, for example, type the following to load the tidyverse package
 
 
-```{r}
+```{r, echo=FALSE, out.width='60%'}
+include_graphics("images/loadtidyverse.gif")
+```
+
+You should see messages like I did upon loading the tidyverse library. You should also see in the Packages tab, that you now have a check next to `dplyr`, `forcats`, `ggplot2`, `purrr`, `readr` `tibble`, and `tidyr`, as these are all loaded with `tidyverse`.  
+
+## Preparing for success 
+
+Follow these `R`ules to help make this class and your life easier. 
+
+### Today!   {-}   
+
+1. **Make a folder** for this course and include a subfolder called data (as I said in the last chapter).   
+
+```{r, echo=FALSE,out.width="60%"}
+include_graphics("images/applied_biostats_folder.jpeg")
+```
+
+2.  Open `R` right now and make a *project* called `applied_biostats` in the existing folder, `applied_bioststats`.   
+
+```{r,echo=FALSE,out.width="60%"}
+include_graphics("images/makingaproject.jpeg")
+```
+
+### Everyday for class homework etc!   {-}   
+
+
+1. Double click the `applied_biostats.Rproj` to open RStudio, rather than opening RStudio directly (or if you insist, open the project after you open RStudio).   
+
+2. Open a new script.   
+
+3. Write the date and what we are working on  in a comment (that is, after a hash `#`)
+
+4. Load all packages you will need (almost always tidyverse, sometimes more)
+
+5. Before doing anything else, save the script in your applied_biostats folder with a nice name (e.g. `class_02_intro_to_R.R`).  
+
+6. Go do your thing!      
+
+```{r, eval=FALSE}
+#  Jane 21 2021
+#  Good practces
 library(tidyverse)
 ```
 
-You should see messages like I did upon loading the tidyverse library.
+## Observations and suggeastions for learning R / computer stuff   
+
+Teaching this class for years, I've learned a few things about leaning R that you should know.  
+
+### Observations
+
+- Some people pick R up fast, other slowly.    
+- The speed at which students get familiar with R is unrelated to intelligence.  
+- Everyone who keeps trying gets there eventually.  
+- Despair and feeling low/dumb are the things that get people jammed up.    
+
+### Suggestions  
+
+- Don’t worry. Keep trying. But TAKE BREAKS.   
+- Step away from the computer as much as possible, code & make plans on scratch paper.  
+- Be patient & understanding with yourself and your friends.  
+- Be creative.  
+- Ask for help.  
+- When something works (or it doesn’t) take time to figure out how / why.  
+- Fight the urge to compare yourself (negatively or positively) to others.  
+
+Today at the RStudio conference, Hadley Whickham, conrasted the "automatic negative thoughts" we feel some time in coding to the "balanced alternative" that we want to get to.  
+
+```{r,echo=FALSE, out.width = "60%"}
+include_graphics("images/automaticVbalanced.jpeg")
+```
+
+
 
 ## RStudio primer
 
@@ -325,3 +391,15 @@ Be sure to complete [this primer](https://rstudio.cloud/learn/primers/1.2) from 
 ```{r, primer12, fig.cap = 'Primer on programming basics: Complete the RStudio programming basics tutorial [from the RStudio website](https://rstudio.cloud/learn/primers/1.2)',echo=FALSE}
 include_app("https://rstudio.cloud/learn/primers/1.2")
 ```
+
+
+
+
+## Intro to R and RStudio: Quiz   
+
+Complete the quiz below, a nearly  identical quiz will be on [canvas](https://canvas.umn.edu/courses/225135/quizzes/410138).
+
+```{r, echo=FALSE}
+include_app("https://brandvain.shinyapps.io/intro2r/",height = '800')
+```
+

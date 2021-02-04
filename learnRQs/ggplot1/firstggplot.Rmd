@@ -64,7 +64,7 @@ ggplot(iris, aes(x = Sepal.Width)) +
 question("Which of the following is **A BAD** way to display the relationship between a categorical and continuous variable?",
     answer("barplot", correct = TRUE),
     answer("jitterplot / stripchart"),
-    answer("overlapping density plots with appropriate transparency", correct = TRUE), 
+    answer("overlapping density plots with appropriate transparency"), 
     answer("small multiples of histograms"),
     allow_retry = TRUE,
     correct = random_praise(),

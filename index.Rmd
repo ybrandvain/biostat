@@ -50,6 +50,8 @@ pkgs.list = c("knitr","tidyverse","blogdown","colorspace",
               "DT","beyonce","stringr","cowplot",
               "lubridate","ggthemes","ggforce",
               "datasauRus","ggridges","randomNames","infer")
+library(tweetrmd)
+library(knitr)
 ```
 
 # (PART) Introduction to this course {-}

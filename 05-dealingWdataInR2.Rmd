@@ -1,4 +1,4 @@
-# Handling data in `R`  {#rdata2}
+# Combining dplyr verbs for handling data in `R` and a brief intro to `ggplot`  {#rdata2}
 
 
 ```{r, echo = FALSE, message=FALSE}
@@ -11,44 +11,20 @@ library(emo)
 ```
 
 
-
-<span style="color: Red;font-size:40px;">   In progress not ready for class yet </span> 
-
-<!--
-
-
-
-```{r, echo=FALSE, message=FALSE, warning = FALSE}
-grades <- tibble(
-  last_name  = c("Horseman", "Carolyn"), 
-  first_name = c("BoJack", "Princess"),
-  exam_1     = c(70, 97)/2, 
-  exam_2     = c(73, 95)/2
-)
-
-tidy_grades <-pivot_longer(data = grades, # Our data set
-             cols = c(exam_1, exam_2),    # The data we want to combine
-             names_to = "exam",           # The name of the new column in which we put old names.
-             values_to = "score"          # The name of the new column in which we put the values.  
-             )
-```
-
-
-
-
 ```{block2, type='rmdtip'}
-This is a lot getting started, remember our goal here is exposure, not mastery. Mastery will come as the term progresses. 
+Here we build on our last chapter by combining operations with a pipe `%>%`, we also introduce the [`group_by()`](https://dplyr.tidyverse.org/reference/group_by.html)  and [`summarise()`](https://dplyr.tidyverse.org/reference/summarise.html) functions, and dip our toes into ggploting.     
 ```
 
 
 
 <span style="color: Blue;font-size:22px;">   Motivating scenarios:  </span>  <span style="color: Black;font-size:18px;"> We just got our data, how do we get it into `R` and explore? </span> 
 
-**Learning goals: By the end of this chapter you should be able to get data  into `R` and explore it**. Specifically, students will be able to:
+**Learning goals: By the end of this chapter you should be better able to get data  into `R` and explore it**. Specifically, students will be able to:
 
-- *Load data into `R` and make their own tibbles.*       
-- *[`filter`](https://dplyr.tidyverse.org/reference/filter.html), [`mutate`](https://dplyr.tidyverse.org/reference/mutate.html), [`arrange`](https://dplyr.tidyverse.org/reference/arrange.html), and [`select`](https://dplyr.tidyverse.org/reference/select.html) data with the [`dplyr`](https://dplyr.tidyverse.org/) package.*   
-- *(Optional) Tidy data with the [`tidyr`](https://tidyr.tidyverse.org/) package.*   
+- *Chain operations with the pipe `%>%`.*       
+- *Take estimates with [`summarise()`](https://dplyr.tidyverse.org/reference/summarise.html).*    
+- *Isolate groups with `group_by()`.*     
+- *Make simple plots with ggplot2*     
 
 
 
@@ -56,90 +32,24 @@ This is a lot getting started, remember our goal here is exposure, not mastery. 
 ```{block2, type='rmdwarning'}
 There is no external reading for this chapter, but   
 
-- Watch the one required videos from Stat 545 -- one about using [dplyr](https://www.youtube.com/watch?v=Gms3zSPqCk8) and one optional one about [tidying data](https://www.youtube.com/embed/qivE6exNsZI) embeded in the text (feel free to skip the videos featuring me),  and
-- Complete the `learnR` tutorials and quizes embeded in this chapter.        
-- And canvas assignment which goes over the quiz, readings, tutorials and videos. 
+- Watch the last two and a half minutes of the veido Stat 545 -- about using [dplyr](https://www.youtube.com/watch?v=Gms3zSPqCk8) from the last course,  and one about [getting comfortable with ggplot](https://www.youtube.com/watch?v=cqcQT44mJTM).
+- Complete the `learnR` tutorial we began last chapter, and a new one on [Data Visualization Basics](https://rstudio.cloud/learn/primers/1.1).          
+- Canvas assignment which goes over the quiz, readings, tutorials and videos.    
+- Consider dataset for first major assignment.  
 ```
 
+## Review
 
+In the previous chapter we learned how to do a bunch of things to data. For example, in our toad dataset, below, we   
 
+- Use the [`mutate()`](https://dplyr.tidyverse.org/reference/mutate.html) function made a new column for `BMI` by dividing weight by height.  
+- Sort the data with the [`arrange()`](https://dplyr.tidyverse.org/reference/arrange.html) function.  
 
-## Intro
+We also saw how we could [`select()`](https://dplyr.tidyverse.org/reference/select.html) columns, and [`filter()`](https://dplyr.tidyverse.org/reference/filter.html) for rows based on logical statements.      
 
-Through the rest of this chapter we will buy in fully to the tidyverse, so make sure it's installed and load it at the top of your script by typing and entering `library(tidyverse)`.   In the next portions of this section, we focus on how to load and process data with tidyverse tools in `R`.
+**We did each of these things one at a time, often reassigning variables a bunch. Now, we see a better way, we combine operations with the pipe `%>%` operator.**
 
-
-
-
-But first, we describe the primary structure that holds data in the tidyverse, a `tibble`. A tibble is a data structure in which each column is a vector and (ideally) entries in a row are united by relating to the same observation (e.g. individual at a time). Each variable associated with an observation is a column (i.e. a vector), and all so while all entries in a column must be of the same class,  each column in a tibble can have its own class. Tibbles do not ensure that our data are tidy but they do make this easier.
-
-
-
-
-If you have spent time in base `R` you are likely familiar with matrices, arrays, and data frames - don't even worry about these. A tibble is much like a data frame, but has numerous features that make them easier to deal with. If you care, see [chapter 10 of R for Data Science](https://r4ds.had.co.nz/tibbles.html) [@grolemund2018] for more info. Anyways, in this course we will focus on vectors and tibbles, ignoring arrays and matrices, and avoiding lists for as long as possible.
- 
-
-
-### First primer   
-
-***Now is a great time to complete the [Primer on tibbles](https://rstudio.cloud/learn/primers/2.1)***,  embedded below (Fig. \@ref(fig:primer21)).   
-
-
-
-```{r primer21, fig.cap = 'The RStudio [Primer on tibbles](https://rstudio.cloud/learn/primers/2.1)', echo=FALSE} 
-include_app("https://rstudio.cloud/learn/primers/2.1")
-```
-
-
-## Getting Data into `R`    
-
-Getting data into R is often the first challenge we run into in our first R analysis. The video (Fig: \@ref(fig:intoR)) and text below should help you get started. 
-
-
- 
-```{r intoR, fig.cap='Getting data into R (6 in and 6 seconds).', echo=FALSE, out.extra = 'allowfullscreen', out.width="40%", out.extra='style="float:right; padding:10px"'}
-include_url("https://www.youtube.com/embed/d7gYc1o2M3c" )
-```
-
-
-
-
-
-
-### Loading data 
-
-
-
-Ideally, your data are stored as a `.csv`, and if so you can read data in with the [`read_csv()`](https://readr.tidyverse.org/reference/read_delim.html) function. `R` can deal with other formats as well. Notably, using the function [`readxl::read_excel()`](https://readxl.tidyverse.org/reference/read_excel.html) allows us to read data from *Excel*, and can take the Sheet of interest as an argument in this function. 
-
-Here's an example of how to read data into `R`.
-
-```{r, eval=FALSE}
-library(tidyverse)
-toad_data <- read_csv(file = "science_projects/Toads/data/toad_data.csv")
-```
-
-The bit that says `science_projects/Toads/data/` points `R` to the correct folder, while `toad_data.csv` refers to the file we're reading into `R` and assigning to `toad_data`. Using tab-completion in RStudio makes finding our way to the file less terrible. But you can also point and click your way to data (see below). If you do, be sure to copy and paste the code you see in the code preview into the script so you can recreate your analysis.
-  
-
-
-```{r fig.cap='', echo=FALSE}
-knitr::include_graphics('images/loadingdata.jpeg')
-```
-
-
-```{block2, type='rmdtip'}
-As above, best practices for loading data make use of R [projects](https://r4ds.had.co.nz/workflow-projects.html), so feel free to learn more. But for now, we're focused on *good enough* practices. 
-```
-
-
-
-
-### Entering data into `R` 
-
-We can create tibbles manually. I present the simplest and most common way this is done.  
-
-```{r}
+```{r, echo=FALSE}
 toad_data <- tibble(             # This makes the data
   individual = c("a", "b", "c"),
   species    = factor(c("Bufo spinosus", "Bufo bufo", "Bufo bufo")),
@@ -151,138 +61,18 @@ toad_data <- tibble(             # This makes the data
 toad_data                        # This shows the data
 ```
 
+## The pipe `%>%` operator  
 
-Feel free to [read about more ways to make tibbles](https://r4ds.had.co.nz/tibbles.html) if you desire. Many of these options are fun and useful,  but a distraction from our major mission
+Say you want to string together a few things -- like you want make a new tibble, called `sorted_bufo_bufo` by:    
 
-## Dealing with data in `R`
+- Only retaining *Bufo bufo* samples        
+- Calculating `BMI`      
+- Sorting by BMI,  and   
+- Getting rid of the column with the species name. 
 
+The pipe operator, [`%>%`](https://magrittr.tidyverse.org/reference/pipe.html), makes this pretty clean by allowing us to pass results from one operation to another.  
 
-
-```{r Tips04, fig.cap='**Watch [this video](https://www.youtube.com/watch?v=91LmBj29-Sc)** introducing `dplyr` (6 min and 45 sec), from [STAT 545](https://stat545.com/) -- a grad level data science class at the University of British Columbia. We will borrow from this course occasionally.', echo=FALSE, out.extra= 'allowfullscreen'}
-include_url("https://www.youtube.com/embed/Gms3zSPqCk8")
-```
-
-
-```{r fig.cap='', out.width='30%', echo=FALSE, out.extra='style="float:right; padding:10px"'}
-knitr::include_graphics('https://github.com/allisonhorst/stats-illustrations/raw/master/rstats-artwork/dplyr_wrangling.png')
-```
-
-Looking at the `toad.data` tibble above, we can get a sense of the utility of a tibble. We can see, not only the first few values of the data set, but also the class of each variable (`chr` for character, `fct` for factor, `dbl` for double -- a continuous class of data). 
-
-### Viewing and glimpsing tibbles {#glimpse}
-
-To see the entire dataset in a spreadsheet, type [`view(toad_data)`](https://tibble.tidyverse.org/reference/view.html). While this is not useful for the small toad_data we made, it could be more useful for the `starwars` data set already in tidyverse. Have a look with `view(starwars)`.
-
-The [`glimpse()`](https://tibble.tidyverse.org/reference/glimpse.html) function is another useful way to explore a new, large data set. For example
-
-
-
-
-```{r, echo=FALSE}
-knitr::include_app('https://brandvain.shinyapps.io/glimpseintro/', height = '500px')
-```
-
-
-
-
-While these are among the very handy tidyverse functions, the real utility of tidyverse is that it gives us a unified way to  deal with data. Usually when we get data we want to handle/clean it, summarize it, visualize the results and develop a statistical model from it. This is where tidyverse really shines! 
-
-We first focus on handling data with the `dplyr` package. Today we'll talk about using it to `filter`, `arrange`, and `mutate` our data, and to `select` columns of interest.
-
-
-
-
-
-
-```{r fig.cap='From [`R` for data Science](https://r4ds.had.co.nz/) [@grolemund2018]', echo=FALSE}
-knitr::include_graphics('https://d33wubrfki0l68.cloudfront.net/571b056757d68e6df81a3e3853f54d3c76ad6efc/32d37/diagrams/data-science.png')
-```
-
-
-```{r  echo = FALSE}
-include_tweet("https://twitter.com/LucyStats/status/1087770108443815936", hide_thread=TRUE)
-```
-
-
-
-
-
-### `mutate` your data   
-
-```{r fig.cap='', out.width='30%', echo=FALSE, out.extra='style="float:right; padding:10px"'}
-knitr::include_graphics('https://github.com/allisonhorst/stats-illustrations/raw/master/rstats-blanks/dplyr_mutate_blank.png')
-```
-
-
-
-
-In our toad_data, we have height and weight. Let's add a column for  BMI (weight divided by height) with  the [`mutate()`](https://dplyr.tidyverse.org/reference/mutate.html) function.
-
-```{r}
-toad_data <- mutate(toad_data, BMI = height / weight)
-toad_data
-```
-
-
-
-### `arrange` rows  
-
-You might want to sort BMI from lowest to highest, or vice-versa. The [`arrange()`](https://dplyr.tidyverse.org/reference/arrange.html) function is here for you!  
-
-```{r}
-arrange(toad_data, BMI)       # arrange from lowest to highest
-arrange(toad_data, desc(BMI)) # arrange from highest to lowest
-```
-
-### `filter` your data  
-
-
-
-```{r fig.cap='', out.width='70%', echo=FALSE}
-knitr::include_graphics('https://raw.githubusercontent.com/allisonhorst/stats-illustrations/master/rstats-artwork/dplyr_filter.jpg')
-```
-
-
-
-
-Say we only wanted to deal with individuals of the species,  *Bufo bufo*. We can [`filter()`](https://dplyr.tidyverse.org/reference/filter.html) our data to only have them! 
-
-```{r}
-filter(toad_data, species == "Bufo bufo" )
-```
-
-We can filter by any set of logical questions like greater than `>`, greater than or equal to `>=`, less than `<`, not equal `!=`, in a vector `%in%` etc... (see Ch \@ref(intro2r) for more info).   
-
-
-
-### `select` your columns 
-
-Let's say we didn't care about the height or weight, and we just wanted individual, species, sound, and BMI. We can  [`select()`](https://dplyr.tidyverse.org/reference/select.html) those columns as follows: 
-
-
-```{r}
-select(toad_data, individual, species, sound, BMI)
-```
-
-A negative sign in `select` means remove, so `select(toad_data, -height, - weight)` will give the same result as the code above. 
-
-
-```{r}
-select(toad_data, -height, -weight)
-```
-
-
-
-
-#### `pull()` vectors from tibbles
-Some things we do in `R` require vectors to be pulled out of tibbles. We can achieve this with the [`pull()`](https://dplyr.tidyverse.org/reference/pull.html) function. For example, to get the BMI as a vector, type  
-
-`pull(toad_data, var = BMI)`  
-
-### An aside on the pipe `%>%` operator  
-
-Say you want to string together a few things -- like you want make a new tibble, called s`orted_bufo_bufo` by removing *Bufo spinosus* samples, sorting by BMI, getting rid of the column with the species name. The pipe operator, [`%>%`](https://magrittr.tidyverse.org/reference/pipe.html), makes this pretty clean by allowing us to pass results from one operation to another
-
+[`%>%`](https://magrittr.tidyverse.org/reference/pipe.html) basically tells R to take the data and keep going!  
 
 
 
@@ -290,181 +80,213 @@ Say you want to string together a few things -- like you want make a new tibble,
 ```{r}
 sorted_bufo_bufo <- toad_data     %>% # initial data
   filter(species == "Bufo bufo")  %>% # only Bufo bufo
+  mutate(BMI = height / weight)   %>% # calculate BMI
   arrange(BMI)                    %>% # sort by BMI
   select(-species)                    # remove species
 
 sorted_bufo_bufo
 ```
 
+### Why did I introduce piping in a separate class?   
+
+My sense is combining skills is a whole different thing that learning them independently. 
+
+I'm hoping that by separating the tools from the pipeline we can wrap our heads around both. 
+
+Also, as a bonus, we get more practice.  
 
 
-#### `group_by()` to perform operations by values of a (set of) column(s).   
+```{block2, type='rmdtip'}
+Piping a bunch of things together is super fun -- but it also means that each line offers an opportunity to mess up.  
 
-We can also conduct operations by value of a variable. Say we wanted to know each specie's smallest BMI. We would want to [`group_by()`](https://dplyr.tidyverse.org/reference/group_by.html) species. So, for example,  we could type:  
+To make sure each line works, I type one line at a time, checking the output each time.   
+
+Once I finish I then go back to the top to add the variable assignment.  
+```
+
+#### **Watch the end of the STAT 545 video** {-}
 
 
-
-
-```{r}
-toad_data                          %>% # initial data
-  group_by(species)                %>% # group by species
-  mutate(min_BMI = min(BMI))       %>% # add a column for min_BMI
-  ungroup()                            # remove groupings  
+```{r Tips04b, fig.cap='**Watch the laste two and a half minutes of [this video from last class](https://www.youtube.com/watch?v=91LmBj29-Sc)**, as he introduces the pipe operator.', echo=FALSE, out.extra= 'allowfullscreen'}
+include_url("https://www.youtube.com/embed/Gms3zSPqCk8?start=309")
 ```
 
 
-**Be sure to ungroup after  you're done or a group will stick together.** 
+#### **Complete the final section on pipes in the RStudio primer 2.2** {-}
 
-We can combine this with a [`filter()`](https://dplyr.tidyverse.org/reference/filter.html) to get the lowest BMI for each species
+If you didn't finish last time, do it now
 
-```{r}
-toad_data                          %>% # initial data
-  group_by(species)                %>% # group by species
-  mutate(min_BMI = min(BMI))       %>% # add a column for min_BMI
-  ungroup()                        %>% # remove groupings
-  filter(BMI == min_BMI)               # just keep lowest BMI 
-```
-
-### Second primer   
-
-
-***Now is a great time to complete the [Primer on isolating data with dplyr](https://rstudio.cloud/learn/primers/2.2)***,  embedded below (Fig. \@ref(fig:primer22)).   
-
-
-
-```{r primer22, fig.cap = 'The RStudio [Primer on isolating data with dplyr](https://rstudio.cloud/learn/primers/2.2)', echo=FALSE} 
+```{r primer22b, fig.cap = 'Complete the final section of the RStudio [Primer on isolating data with dplyr](https://rstudio.cloud/learn/primers/2.2)', echo=FALSE} 
 include_app("https://rstudio.cloud/learn/primers/2.2")
 ```
 
+## `group_by()`
 
-## Think about reproducibility  
-
-Science is iterative, social / collaborative, and builds on previous work. You should know that   
-
-(1) Your first analysis is almost never your last.    
-(2) Your will need to be able to explain EXACTLY what you did to others.   
-(3) People might want to take you've done, understand it, and do it again on this or another data set, perhaps changing it a bit. 
-
-Think about this when you work in `R`. I suggest asking yourself the following questions:   
-(1) Could I explain what my code is doing to a colleague? What if I hadn't looked at it in a month?  Could someone who's pretty good with `R` look at my code and understand what I was trying to do?    
-(2) Could my code work well (within minimal changes) on another data set? How about on another computer?   
-If your work is fully reproducible, the answers should all be yes.   
-
-One of the great things about scripting-based analyses that you can do in `R` (or similar programs) is that it facilitates us answering "yes" to most of these questions --- take advantage of this.   Always save your `R` script. Use enough commenting (`#`) to make sure it makes sense. Make sure it works from start to finish without anything in your `R` environment. etc...  
+One of the benefits of tidy data is that it makes it easy to separately do things based one the value of a variable. To do this, we [`group_by()`](https://dplyr.tidyverse.org/reference/group_by.html)  the variable(s) of interest, being sure to [`ungroup()`] when we're done. Check this example to see what I mean... 
 
 
-
-
-###  Assignment {-}
-
-1. Complete RStudio's primers [on working with tibbles](https://rstudio.cloud/learn/primers/2.1) and [isolating data with `dplyr`](https://rstudio.cloud/learn/primers/2.2)
-
-2. Complete the glimpse intro (\@ref(glimpse)) and the quiz (\@ref(Quiz)).  
-
-3. Fill out the quiz on canvas, which is very simlar to the one below.
-
-
-
-
-
-###  Quiz {#Quiz}
-
-You know the drill... on [canvas](https://canvas.umn.edu/courses/225135/quizzes/410542)  
-
-```{r, echo=FALSE}
-knitr::include_app('https://brandvain.shinyapps.io/datainr/', height = '500px')
-```
-
-
-## Functions covered  in *Collecting and storing data + handling and visualizing it in `R`* 
-All require the tidyverse package
-
-
-### Functions for loading, formatting, and exploring data  
-
-```{block2, type='rmdcode'}
-[`tibble()`](https://tibble.tidyverse.org/reference/tibble.html): Entering data as a tibble. Give each column a name and assign its values with an equals sign, =. Separate columns with a comma ,.   
-[`glimpse()`](https://tibble.tidyverse.org/reference/glimpse.html): Show the name of every column in your data frame, as well as their class and first few values.      
-[`view()`](https://tibble.tidyverse.org/reference/view.html):   Look at your entire tibble as a scrollable spreadsheet.   
-[`read_csv()`](https://readr.tidyverse.org/reference/read_delim.html):  Reads a dataset saved as a .csv into R.  
-[`readxl::read_excel()`](https://readxl.tidyverse.org/reference/read_excel.html): Reads a  dataset saved as a .xlsx into R. You can also specify the sheet with *sheet =*.   
-[`pivot_longer()`](https://tidyr.tidyverse.org/reference/pivot_longer.html): Allows use to tidy data.    
-[`pivot_wider()`](https://tidyr.tidyverse.org/reference/pivot_wider.html): Allows use to go from tidy to wide data.   
-```
-
-
-### Functions for dealing with data   
-
-```{block2, type='rmdcode'}
-[`mutate()`](https://dplyr.tidyverse.org/reference/mutate.html): Add a new column, usually as some function of existing columns.   
-[`arrange()`](https://dplyr.tidyverse.org/reference/arrange.html): Sort rows from low to high (or from high to low with `arrange(`[`desc()`](https://dplyr.tidyverse.org/reference/desc.html)`)`) values of a specified column.     
-[`filter()`](https://dplyr.tidyverse.org/reference/filter.html):  Limit your dataset to those with certain values in specifed columns.  
-[`select()`](https://dplyr.tidyverse.org/reference/select.html): Select columns of interest (or remove ones you do not care about with `select(-))` from your tibble.    
-[`pull()`](https://dplyr.tidyverse.org/reference/pull.html):  Extract a column from a tibble as a vector.       
-[`%>%`](https://magrittr.tidyverse.org/reference/pipe.html): Passes your answer down.   
-[`group_by()`](https://dplyr.tidyverse.org/reference/group_by.html): Conduct operatins separaely b values of a column  (or columns).   
-```
-
-
-
-### dplyr cheat sheet
-
-There is no need to memorize anything, check out this [handy cheat sheet](https://github.com/rstudio/cheatsheets/raw/master/data-transformation.pdf)!
-
-```{r fig.cap='download the [dplyr cheat sheet](https://github.com/rstudio/cheatsheets/raw/master/data-transformation.pdf)', echo=FALSE}
-knitr::include_graphics('https://d33wubrfki0l68.cloudfront.net/db69c3d03699d395475d2ac14d64f611054fa9a4/e98f3/wp-content/uploads/2018/08/data-transformation.png')
-```
-
-
-
-
-
-
-
-## OPTIONAL Tidying data   
-
-
-
-
-```{r fig.cap='Tidy tools require tidy data', echo=FALSE, out.width='80%'}
-knitr::include_graphics('https://github.com/allisonhorst/stats-illustrations/raw/master/rstats-artwork/tidydata_3.jpg')
-#include_tweet("https://twitter.com/LucyStats/status/1148634381352726528",hide_thread=TRUE)
-```
-
-
-
-In Ch. \@ref(data1), we saw that it is best to keep data in a tidy format, and in Section \@ref(tidyverse) we noted that Tidyverse tools have a unified grammar and data structure.  From the name, tidyverse, you could probably guess that tidyverse tools require tidy data -- data in which every variable is a column and each observation is a row. What if the data you loaded  are untidy? The [`pivot_longer`](https://tidyr.tidyverse.org/reference/pivot_longer.html) function in the [`tidyr`](https://tidyr.tidyverse.org/) package (which loads automatically with tidyverse) can help! Take this example dataset, about `grades` in last year's course. 
 
 ```{r, echo=FALSE}
 grades <- tibble(
-  last_name  = c("Horseman", "Carolyn"), 
-  first_name = c("BoJack", "Princess"),
-  exam_1     = c(70, 97)/2, 
-  exam_2     = c(73, 95)/2
+  last_name  = c("Horseman", "Horseman", "Carolyn", "Carolyn"), 
+  first_name = c("BoJack", "BoJack","Princess","Princess"),
+  exam       = c(1, 2, 1, 2),
+  grade     = c(70, 63, 97, 85), 
 )
 
 grades
 ```
 
-This is not tidy. If it were tidy each observation would be a score on an exam. So we need to move exam to another column. We can do this!!!
+
+
+Say we had student's grades (above), and we wanted to curve it so the highest score was a hundred, by finding the highest grade on each exam, dividing scores by this grad, and multiplying by 100. We could do this by typing   
 
 ```{r}
-tidy_grades <-pivot_longer(data = grades, # Our data set
-             cols = c(exam_1, exam_2),    # The data we want to combine
-             names_to = "exam",           # The name of the new column in which we put old names.
-             values_to = "score"          # The name of the new column in which we put the values.  
-             )
-
-tidy_grades
+grades                             %>% 
+  group_by(exam)                   %>%
+  mutate(high_score = max(grade))  %>%
+  ungroup()                        %>%
+  mutate(curved_grade = 100 * grade / high_score)
 ```
 
-This function name, [`pivot_longer`](https://tidyr.tidyverse.org/reference/pivot_longer.html), makes sense because another name for tidy data is *long format*. You can use the [`pivot_wider`](https://tidyr.tidyverse.org/reference/pivot_wider.html) function to get data into a *wide format*.
+## Summaries in R
 
-Learn more about tidying messy data in Fig. \@ref(fig:tidying):
+The [`summarise()`](https://dplyr.tidyverse.org/reference/summarise) function in R reduces a data set to summaries that you ask it for. So, we can use tell R to summarize these data as follows.
 
-```{r tidying, fig.cap='Tidying data (first 5 min and 40 seconds are required).',  echo=FALSE, out.extra= 'allowfullscreen'}
-include_url("https://www.youtube.com/embed/qivE6exNsZI?end=340")
+```{r, warning=FALSE, message=FALSE}
+grades                                %>%
+  group_by(exam)                      %>%
+  summarise(high_score = max(grade))
+```
+
+Note that we lost all the other information as we summarized, only retaining our groups name(s) and the summarised value(s).  
+
+
+We can use this function with basically any way to take summarize an estimate from a sample.
+  
+
+## The idea of `ggplot`   
+
+
+```{r fig.cap = "Watch [this video](https://www.youtube.com/watch?v=cqcQT44mJTM) about getting started with ggplot2 (7 min and 17 sec), from STAT 545", echo=FALSE, out.extra= 'allowfullscreen'}
+include_url("https://www.youtube.com/embed/cqcQT44mJTM")
 ```
 
 
--->
+`ggplot` is built on a framework for building plots called the grammar of graphics. A major idea here is that plots are made up of data that we map onto aesthetic attributes.
+
+Lets unpack this sentence, because there's a lot there. Say we wanted to make a very simple plot e.g. observations for categorical data, or a simple histogram for a single continuous variable. Here we are mapping this variable onto a single aesthetic attribute – the x-axis.
+
+```{block2, type='rmdnote'}
+There’s way more nuance / awesomeness / power / ideas behind ggplot2 which we will reveal *just in time* over the term, but here we get going with the essential concepts. If you want to learn more about `ggplot` in one place, check out the [ggplot2 book](https://ggplot2-book.org/) [@wickham2016] and/or the [socviz book](https://socviz.co/) [@healy2018].
+```
+
+
+### Our first ggplot
+So, let's do this with a data set [`msleep`](https://ggplot2.tidyverse.org/reference/msleep.html) built in to tidyverse, which contains interesting information about a bunch of mammals. One question we might have is - how much variability is there in mammal brain size, and what explains this variation? Let’s look to find out...
+
+
+#### Data prep and transformation {-} 
+
+Before making these plots, we'll use the [`mutate()`]() function 
+to $log_{10}$  transform `brainwt` and `bodywt`. For this data set, this makes patterns easier to see. Later we’ll see when this is a good or bad idea and how to do this while we are plotting, but let's hold off on that for now.
+
+
+```{r}
+msleep <- msleep %>%
+  mutate(log10_brainwt = log10(brainwt), 
+         log10_bodywt  = log10(bodywt))
+
+```
+
+#### Mapping aesthetics to variables  {-} 
+
+
+So first we need to think of the variables we hope to map onto an aesthetic. Here, the only variable from the data set we are considering is how many hours an organism is awake per day. This is a continuous variable, which we hope to map on to the x-axis. We do so like this:
+
+```{r, fig.height=1, fig.cap ="Uhh ohhh"}
+msleep_plot1 <- ggplot(data = msleep, aes(x = log10_brainwt)) # save plot
+plot(msleep_plot1)                                             #
+```
+
+So, that didn’t go as expected :( — there just a blank grey background. But look more closely, what do you notice?      
+
+```{r, echo=FALSE}
+include_app("https://brandvain.shinyapps.io/ggplotnodat/")
+```
+
+**We make a more useful plot by adding a `geom` layer.**
+
+#### Adding geom layers {-}
+`geoms` explain to R what we want to see: points, lines, histograms etc.. In chapter YANIV ADD we will see how to add data summaries and trendlines. As we discuss below, a histogram is a great way to visualize variability, so lets add that as a `geom``.
+
+
+```{r first-fig, fig.cap = 'Our first ggplot!', fig.width=3, fig.height=1.7, warning=FALSE}
+msleep_histogram <- msleep_plot1 +
+  geom_histogram(bins =10, color = "white")
+
+plot(msleep_histogram)
+```
+
+Yay! OK - we're off. Below we explore a bunch more geom and how they relate to the type of variables we’re interested in! But first, one more awesome feature of `ggplot` -- faceting.
+
+#### Adding facets
+
+In the bible of data visualization, the Visual Display of Quantitative Information, @tufte1983, introduced the idea of "small multiples" as a way to efficiently visualize data in many dimensions, by making many small graphs for different values of categorical variables. 
+
+> Small multiples are economical: once viewers understand the design of one [chart], they have immediate access to the data in all the other [charts]. [...] as the eye moves from one [chart] to the next, the constancy of the design allows the viewer to focus on changes in the data rather than on changes in graphical design.
+> `r tufte::quote_footer('--- Edward Tufte')`
+
+In `ggplot` we can build small multiples as facets, with the [`facet_wrap()`](https://ggplot2.tidyverse.org/reference/facet_wrap.html) and [`facet_grid()`](https://ggplot2.tidyverse.org/reference/facet_grid.html) functions.  
+
+```{r, fig.width=8, fig.cap = 'Our first ggplot!', fig.height=3, warning=FALSE}
+msleep_histogram +
+  facet_wrap(~vore, ncol =3) 
+```
+
+#### An aside -- saving and adding to plots   
+
+Above, we built a ggplot one component at a time, saving each move and visualizing it with the plot function. This isn’t necessary — we can recreate Fig. \@ref(fig:first-fig) as follows:
+
+```{r, eval=FALSE}
+ggplot(data = msleep, aes(x = log10_brainwt)) +
+  geom_histogram(bins =10, color = "white")                            +
+  facet_wrap(~vore, ncol =3) 
+```
+
+It is up to you if you want to save intermediate efforts in a plot.
+
+
+### `ggplot2` primer   
+
+To get more of a sense of how to use ggplot, complete the [Primer on Data Visualization Basics primer](https://rstudio.cloud/learn/primers/1.1) embedded below. This will get you a solid foundation in R which we will build off in this lecture and in the coming weeks.
+
+```{r, primer11, fig.cap = 'The RSutdio [Primer on Data Visualization Basics primer](https://rstudio.cloud/learn/primers/1.1)', echo=FALSE}
+include_app("https://rstudio.cloud/learn/primers/1.1")
+```
+
+
+## Homework
+
+
+- Watch the last two and a half minutes of the veido Stat 545 -- about using [dplyr](https://www.youtube.com/watch?v=Gms3zSPqCk8) from the last course,  and one about [getting comfortable with ggplot](https://www.youtube.com/watch?v=cqcQT44mJTM).  
+- Complete the `learnR` tutorial we began last chapter, and a new one on [Data Visualization Basics](https://rstudio.cloud/learn/primers/1.1).            
+- Canvas assignment which goes over the quiz, readings, tutorials and videos.      
+- Consider dataset for first major assignment.    
+
+### Quiz
+
+
+
+```{r, echo=FALSE}
+include_app("https://brandvain.shinyapps.io/moredatainr/")
+```
+
+## More functions for dealing with data   
+
+```{block2, type='rmdcode'}
+[`%>%`](https://magrittr.tidyverse.org/reference/pipe.html): Passes your answer down.   
+[`group_by()`](https://dplyr.tidyverse.org/reference/group_by.html): Conduct operatins separaely by values of a column  (or columns).  
+[`summarise()`](https://dplyr.tidyverse.org/reference/summarise): Reduce a data set to its (group) summaries. 
+```
+

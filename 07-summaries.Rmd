@@ -34,7 +34,7 @@ These notes accompany portions of Chapter 3 — Describing Data — of our textb
 
 
 ```{block2, type='rmdwarning'}
-The other reading assignment for class is to watch the [video about data summaries](https://www.youtube.com/watch?v=mc-6-v2c4WM) from Calling Bullshit [@bergstrom2020]. FIX  
+The other reading assignment for class is to watch the [video about data summaries](https://www.youtube.com/watch?v=mc-6-v2c4WM) from Calling Bullshit [@bergstrom2020]. 
 ```
 
 ##  Four things we want to describe
@@ -46,16 +46,16 @@ While there are many features of a dataset we may hope to describe, we mostly fo
 - The **spread** of the data: e.g. range, variance, etc...   
 - **Associations** between variables: e.g. correlation, covariance, etc...    
 
-Today we focus mainly on the spread and location of the data, but regularly bring up the shape of the data, as the meaning of other summaries depend on the shape of the data. We save summaries of associations between variables for later chapters. YB FIX.
+Today we focus mainly on the spread and location of the data, but regularly bring up the shape of the data, as the meaning of other summaries depend on the shape of the data. We save summaries of associations between variables for later chapters. 
 
 
 ```{block2, type='rmdnote'}
 
-Whenever we have are summarizing data, we are making an estimate from a sample, and do not have a parameter form a population.
+Whenever weare summarizing data, we are making an estimate from a sample, and do not have a parameter from a population.
 
 In stats we use Greek letters to describe parameter values, and the English alphabet to show estimates from our sample.
 
-We usually call summaries from data *sample means*, *sample variance* etc. to remind everyone that these are estimates, not parameters. For some   calculations (e.g. the variance) the equations to calculate the estimate from a population differ slightly from equations to calculate the parameter from a population, because otherwise estimates would be biased.
+We usually call summaries from data *sample means*, *sample variance* etc. to remind everyone that these are estimates, not parameters. For some   calculations (e.g. the variance) the equations to calculate the parameter from a population differ slightly from equations to calculate the parameter from a population, because otherwise estimates would be biased.
 ```
 
 
@@ -88,7 +88,7 @@ bindin <- read_csv(bindin_link)
 include_url("https://www.youtube.com/embed/mc-6-v2c4WM")
 ```
  
-We hear and say the word, "Average", often. What do we mean when we say it? "Average" is an imprecise term for a middle or typical value. More precisely we talk about.   
+We hear and say the word, "Average", often. What do we mean when we say it? "Average" is an imprecise term for a middle or typical value. More precisely we talk about:     
 
 -  **Mean** (aka  $\overline{x}$):  The expected value. The weight of the data. We find this by adding up all values and dividing by the sample size. In math notation, this is  $\frac{\Sigma x_i}{n}$, where  $\Sigma$ means that we sum over the first $i = 1$, second $i = 2$ ... up until the $n^{th}$ observation of  $x$, $x_n$. and divide by  $n$, where  $n$ is the size of our sample.   
 
@@ -175,12 +175,12 @@ bindin                                                   %>%
             median_fert = median(percentAAfertilization))
 ```
 
-So, it looks like females from sperm from the AA population fertilizes eggs from the AA population in  $\approx 79\%$ of attempts, sperm from the AA population fertilizes eggs from the BB population in  $\approx 40\%`$ of attempts. These answers are pretty similar whether we look at the median or mean. Later in the term, we look into evaluating how weird it would be to see this extreme of a difference if the females where from the same (statistical) populations.
+So, it looks like AA sperm successfully fertilize AA eggs $\approx 79\%$ of attempts, while sperm from the AA population fertilizes eggs from the BB population in  $\approx 40\%`$ of attempts. These answers are pretty similar whether we look at the median or mean. Later in the term, we look into evaluating how weird it would be to see this extreme of a difference if the females where from the same (statistical) populations.
 
 
 
 ```{block2, type='rmdnote'}
-If you type the code above, R will say something like `summarise(…, .groups ="drop_last")`. R is saying that it does not know what groups you want it to drop when you are summarizing (if you’re grouping by more than one thing, which we a are not). To make this go away, type:   
+If you type the code above, R will say something like `summarise(…, .groups ="drop_last")`. R is saying that it does not know which groups you want it to drop when you are summarizing (if you’re grouping by more than one thing, which we a are not). To make this go away, type:   
 
 `summarise(..., .groups = "drop_last")` to drop the last thing in [`group_by()`](https://dplyr.tidyverse.org/reference/group_by.html),  
 `summarise(..., .groups = "drop")` to drop all things in [`group_by()`](https://dplyr.tidyverse.org/reference/group_by.html),    
@@ -225,7 +225,7 @@ ggplot(river.length , aes(x=river_length))+
 ```
 
 We notice two related things about Figure \@ref(fig:medianmean):   
-1. There are a bunch of extremely large values.   
+1. There are a numerous extremely large values.   
 2. The median is substantially less than the mean.    
 
 We call data like that in Figure \@ref(fig:medianmean) **Right skewed**, while data with an excess of extremely small values, and with a median substantially greater than the mean are Left **skewed**.    
@@ -317,22 +317,24 @@ Common measurements of width are the
 - **Coefficient of variation**: A unitless summary of the standard deviation facilitating the comparison of variances between variables with different means.   
 
 
-#### Measures of width: Range and Interquartile range (IQR)  {#iqr}
+### Measures of width: Range and Interquartile range (IQR)  {#iqr}
 
 We call the range and the interquartile range nonparametric because we can’t write down a simple equation to get them, but rather we describe a simple algorithm to find them (sort, then take the difference between things).
 
 Let's use a **boxplot** to illustrate these summaries.
 
-```{r, eval=FALSE}
+```{r, riverboxoplot, fig.cap = 'Boxplot of river lengths, note that the y axis increases on a log scale (enabled with `scale_y_continuous(trans = "log10")`. As we will see later in the term, this is often a good way to present and analyze right skewed data.', fig.width=3, fig.height=2.5}
 ggplot(river.length , aes(x=1, y=river_length))+
   geom_boxplot() +
   xlim(c(0,2))   + 
-  scale_y_continuous(trans = "log10") +
-  ggtitle("Boxplot of river lengths")
-```
-
-```{r, riverboxoplot, fig.cap = 'Boxplot of river lengths, not that the y axis increases on a log scale (enabled with `scale_y_continuous(trans = "log10")`. As we will see later in the term, this is often a good way to present and analyze right skewed data.',echo=FALSE}
-include_graphics("images/river-boxplot-1.png")
+  scale_y_continuous(trans = "log10", limits = c(100,10000)) +
+  annotation_logticks(sides = "l",base = 10, size = .2)+ # put log ticks on bottom "b" and left )
+  ggtitle("Boxplot of river lengths") +
+  # this last bit is me having fun to add the labels for quantile
+  # you wont ned t do this, but I shared some fun tricks there
+  geom_text(data = .  %>% summarise(river_length=quantile(river_length,probs =seq(0,1,.25)),
+                           quantile = c("min", "Q1","median","Q3","max"),),
+            aes(x = 1.5, label = quantile),hjust = 0, size=2.5)
 ```
 
 
@@ -341,7 +343,7 @@ include_graphics("images/river-boxplot-1.png")
 
 - We calculate the **interquartile range (IQR)** by subtracting Q1 from Q3 (as shown in  Fig. \@ref(fig:riverboxoplot)). The IQR is less dependent on sample size than the range, and is therefore a less biased measure of the width of the data.    
 
-##### Calculating the range and IQR in R.  
+#### Calculating the range and IQR in R.  
 
 Staying with the `rivers` data set, let's see how we can calculate these summaries in R. As I showed with the mean, I'll first worth through example codes that shows all the steps and helps use understand what we are calulating, before showing R shortcuts.
 
@@ -361,7 +363,7 @@ river.length %>%
 ```
 
 
-##### Range and interquartile range in R Quiz {-}
+#### Range and interquartile range in R Quiz {-}
 
 ```{r, echo=FALSE}
 include_app("https://brandvain.shinyapps.io/nonparametric/")
@@ -372,7 +374,7 @@ include_app("https://brandvain.shinyapps.io/nonparametric/")
 
 The variance, standard deviation, and coefficient of variation all communicate how far individual observations are expected to deviate from the mean. However, because (by definition) the differences between all observations and the mean sum to zero ($\Sigma x_i = 0$), these summaries work from the squared difference between observations and the mean.
 
-To work through these ideas and calculations, let's return to the bindin data sorted from lowest to highest percent fertilization, and looking only a females from the bb population (we called this `bindin.BB`). As a reminder, the mean percentage of BB females’ eggs fertilized by AA males was 0.41. Before any calculations, lets make a simple plot to help investigate these summaries:
+To work through these ideas and calculations, let's return to the bindin data sorted from lowest to highest percent fertilization, and looking only a females from the BBpopulation (we called this `bindin.BB`). As a reminder, the mean percentage of BB females’ eggs fertilized by AA males was 0.41. Before any calculations, lets make a simple plot to help investigate these summaries:
 
 ```{r, bindinvar1, fig.cap = 'Visualizing variability. **A)** The red dots show the proportion of each females (from population BB) eggs fertilized by males from population AA. The solid black lines show the difference between these values and the mean (<span style="color: Blue;">  dotted blue line</span>). **B)** The proportion of each females (from population BB) eggs fertilized by males from population AA is shown on the x-axis. The y-axis shows the squared difference between each observation and the sample mean (<span style="color: Blue;">dotted blue line</span>). The solid black line highlights the extent of these values.', echo=FALSE}
 include_graphics("images/bindin-var-1.png")
@@ -384,20 +386,23 @@ include_graphics("images/bindin-var-1.png")
 
 $$s^2=\frac{SS_x}{n-1}=\frac{\Sigma(x_i-\overline{x})^2}{n-1}$$. 
 
+Here's how I like to think the steps:   
+
+1. Getting a measure of the individual differences from the mean, then  
+2. Squaring those diffs to get all the values positive,    
+3. Adding all those up, then dividing them to get something close to the mean of the differences.   
+4. Instead of dividing by N though, we use N-1 to adjust for sample sizes (as we get larger numbers, the -1 gets diminishingly less consequential).    
+
 We know that this dataset contains seven observations and so  $n-1 = 7-1=6$, so let's work towards calculating the Sums of Squares x, $SS_x$.   
 
-Figure \@ref{fig:bindinvar1}A highlights each value of  $x_i - \overline{x}$ 
-as the length of each line. Figure \@ref{fig:bindinvar1B plots the square of these values, $(x_i-\overline{x})^2$  on the y, again highlighting these squared deviations with a line. So to find  $SS_x$    
+Figure \@ref(fig:bindinvar1)A highlights each value of  $x_i - \overline{x}$ 
+as the length of each line. Figure \@ref(fig:bindinvar1)B plots the square of these values, $(x_i-\overline{x})^2$  on the y, again highlighting these squared deviations with a line. So to find  $SS_x$    
  
 
 - We take these values  $SS_x = `r paste(paste("(",pull(bindin.BB[,2]) ," - ", mean(pull(bindin.BB[,2])) ,")","^2",sep = ""),collapse = " + ")`$.   
-
 - After subtracting the mean from each observation, we find: $`r paste(paste("(",pull(bindin.BB[,2])  -mean(pull(bindin.BB[,2]) ),")^2",sep = ""),collapse = " + ")`$.     
-
 - After squaring these values, we find:   $`r paste(round(pull((bindin.BB[,2])  -mean(pull(bindin.BB[,2]))) ^2, digits = 4), collapse = " + ")`$.   
-
 - And adding these all up, we find:    $SS_x = `r sum(pull((bindin.BB[,2])  -mean(pull(bindin.BB[,2]))) ^2)`$.   
-
 - Finally we now plug these values into the equation for the sample variance,  $s^2=\frac{SS_x}{n-1} = \frac{`r sum(pull((bindin.BB[,2])  -mean(pull(bindin.BB[,2]))) ^2)`}{7-1} = `r round(sum(pull((bindin.BB[,2])  -mean(pull(bindin.BB[,2]))) ^2) /6, digits = 4)`$.
 
 #### **Calculating the sample standard deviation:** {-}   
@@ -496,12 +501,14 @@ Where $N$ is the population size.
 ```{block2, type='rmdnote'}
 🤔 ?Why? 🤔 do we divide the sum of squares by $n-1$   to calculate the sample variance, and but divide it by $N$ to calculate the population variance?  
 
- Estimate of the variance are biased to be smaller than they actually are if we divide by n (because samples goes into estimating the mean too). Dividing by `n-1` removes this bias. But if you have a population you are not estimating the mean, you are calculating it, so you divide by N. In any case, this does not matter too much as sample sizes get large.
+ Estimate of the variance are biased to be smaller than they actually are if we divide by n (because samples go into estimating the mean too). Dividing by `n-1` removes this bias. But if you have a population you are not estimating the mean, you are calculating it, so you divide by N. In any case, this does not matter too much as sample sizes get large.
 ```
 
 ## Rounding and number of digits, etc...   
 
-How many digits should you present when presenting summaries? The answer is be reasonable. Consider how much precision you would you care about, and how precise your estimate is. If i get on a scale and it says I weigh 207.12980423544  pounds. I would probably say 207 or 207.1 because scales are generally not accurate to that level or precision.   
+How many digits should you present when presenting summaries? The answer is: be reasonable.   
+
+Consider how much precision you would you care about, and how precise your estimate is. If i get on a scale and it says I weigh 207.12980423544  pounds. I would probably say 207 or 207.1 because scales are generally not accurate to that level or precision.   
 
 To actually get R value’s from a tibble we have to [`pull()`](https://dplyr.tidyverse.org/reference/pull.html) out the vector and [`round()`](https://stat.ethz.ch/R-manual/R-devel/library/base/html/Round.html) as we see fit. If we don’t [`pull()`](https://dplyr.tidyverse.org/reference/pull.html), we have to trust that tidyverse made a smart, biologically informed choice of digits -- which seems unlikely. If we do not round, R gives us soooo many digits beyond what could possibly be measured.
 

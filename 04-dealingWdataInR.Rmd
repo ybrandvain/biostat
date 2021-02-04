@@ -50,7 +50,7 @@ This is a lot getting started, remember our goal here is exposure, not mastery. 
 ```{block2, type='rmdwarning'}
 There is no external reading for this chapter, but   
 
-- Watch the one required videos from Stat 545 -- one about using [dplyr](https://www.youtube.com/watch?v=Gms3zSPqCk8) and one optional one about [tidying data](https://www.youtube.com/embed/qivE6exNsZI) embeded in the text (feel free to skip the videos featuring me),  and
+- Watch the required videos from Stat 545 -- one about using [dplyr](https://www.youtube.com/watch?v=Gms3zSPqCk8) and about [tidying data](https://www.youtube.com/embed/qivE6exNsZI) embeded in the text (feel free to skip the videos featuring me),  and
 - Complete the `learnR` tutorials and quizes embeded in this chapter.        
 - And canvas assignment which goes over the quiz, readings, tutorials and videos. 
 ```
@@ -286,6 +286,53 @@ Note - we won't be working on the last part `%>%` aka 'piping' until next class 
 include_app("https://rstudio.cloud/learn/primers/2.2")
 ```
 
+## Tidying  messy data   
+
+
+
+
+```{r fig.cap='Tidy tools require tidy data', echo=FALSE, out.width='80%'}
+knitr::include_graphics('https://github.com/allisonhorst/stats-illustrations/raw/master/rstats-artwork/tidydata_3.jpg')
+#include_tweet("https://twitter.com/LucyStats/status/1148634381352726528",hide_thread=TRUE)
+```
+
+
+
+In Ch. \@ref(data1), we saw that it is best to keep data in a tidy format, and in Section \@ref(tidyverse) we noted that Tidyverse tools have a unified grammar and data structure.  From the name, tidyverse, you could probably guess that tidyverse tools require tidy data -- data in which every variable is a column and each observation is a row. What if the data you loaded  are untidy? The [`pivot_longer`](https://tidyr.tidyverse.org/reference/pivot_longer.html) function in the [`tidyr`](https://tidyr.tidyverse.org/) package (which loads automatically with tidyverse) can help! Take this example dataset, about `grades` in last year's course. 
+
+```{r, echo=FALSE}
+grades <- tibble(
+  last_name  = c("Horseman", "Carolyn"), 
+  first_name = c("BoJack", "Princess"),
+  exam_1     = c(70, 97)/2, 
+  exam_2     = c(73, 95)/2
+)
+
+grades
+```
+
+This is not tidy. If it were tidy each observation would be a score on an exam. So we need to move exam to another column. We can do this!!!
+
+```{r}
+tidy_grades <-pivot_longer(data = grades, # Our data set
+             cols = c(exam_1, exam_2),    # The data we want to combine
+             names_to = "exam",           # The name of the new column in which we put old names.
+             values_to = "score"          # The name of the new column in which we put the values.  
+             )
+
+tidy_grades
+```
+
+This function name, [`pivot_longer`](https://tidyr.tidyverse.org/reference/pivot_longer.html), makes sense because another name for tidy data is *long format*. You can use the [`pivot_wider`](https://tidyr.tidyverse.org/reference/pivot_wider.html) function to get data into a *wide format*.
+
+Learn more about tidying messy data in Fig. \@ref(fig:tidying):
+
+```{r tidying, fig.cap='Tidying data (first 5 min and 40 seconds are relevant).',  echo=FALSE, out.extra= 'allowfullscreen'}
+include_url("https://www.youtube.com/embed/qivE6exNsZI?end=340")
+```
+
+
+
 
 ## Think about reproducibility  
 
@@ -365,51 +412,5 @@ knitr::include_graphics('https://d33wubrfki0l68.cloudfront.net/db69c3d03699d3954
 
 
 
-
-
-## OPTIONAL Tidying data   
-
-
-
-
-```{r fig.cap='Tidy tools require tidy data', echo=FALSE, out.width='80%'}
-knitr::include_graphics('https://github.com/allisonhorst/stats-illustrations/raw/master/rstats-artwork/tidydata_3.jpg')
-#include_tweet("https://twitter.com/LucyStats/status/1148634381352726528",hide_thread=TRUE)
-```
-
-
-
-In Ch. \@ref(data1), we saw that it is best to keep data in a tidy format, and in Section \@ref(tidyverse) we noted that Tidyverse tools have a unified grammar and data structure.  From the name, tidyverse, you could probably guess that tidyverse tools require tidy data -- data in which every variable is a column and each observation is a row. What if the data you loaded  are untidy? The [`pivot_longer`](https://tidyr.tidyverse.org/reference/pivot_longer.html) function in the [`tidyr`](https://tidyr.tidyverse.org/) package (which loads automatically with tidyverse) can help! Take this example dataset, about `grades` in last year's course. 
-
-```{r, echo=FALSE}
-grades <- tibble(
-  last_name  = c("Horseman", "Carolyn"), 
-  first_name = c("BoJack", "Princess"),
-  exam_1     = c(70, 97)/2, 
-  exam_2     = c(73, 95)/2
-)
-
-grades
-```
-
-This is not tidy. If it were tidy each observation would be a score on an exam. So we need to move exam to another column. We can do this!!!
-
-```{r}
-tidy_grades <-pivot_longer(data = grades, # Our data set
-             cols = c(exam_1, exam_2),    # The data we want to combine
-             names_to = "exam",           # The name of the new column in which we put old names.
-             values_to = "score"          # The name of the new column in which we put the values.  
-             )
-
-tidy_grades
-```
-
-This function name, [`pivot_longer`](https://tidyr.tidyverse.org/reference/pivot_longer.html), makes sense because another name for tidy data is *long format*. You can use the [`pivot_wider`](https://tidyr.tidyverse.org/reference/pivot_wider.html) function to get data into a *wide format*.
-
-Learn more about tidying messy data in Fig. \@ref(fig:tidying):
-
-```{r tidying, fig.cap='Tidying data (first 5 min and 40 seconds are relevant).',  echo=FALSE, out.extra= 'allowfullscreen'}
-include_url("https://www.youtube.com/embed/qivE6exNsZI?end=340")
-```
 
 

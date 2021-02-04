@@ -84,108 +84,18 @@ tweetrmd::tweet_embed("https://twitter.com/webbshasta/status/1263894431268106241
 ```
 
 
-## The idea of `ggplot`   
-
-
-```{r fig.cap = "Watch [this video](https://www.youtube.com/watch?v=cqcQT44mJTM) about getting started with ggplot2 (7 min and 17 sec), from STAT 545", echo=FALSE, out.extra= 'allowfullscreen'}
-include_url("https://www.youtube.com/embed/cqcQT44mJTM")
-```
-
-
-`ggplot` is built on a framework for building plots called the grammar of graphics. A major idea here is that plots are made up of data that we map onto aesthetic attributes.
-
-Lets unpack this sentence, because there's a lot there. Say we wanted to make a very simple plot e.g. observations for categorical data, or a simple histogram for a single continuous variable. Here we are mapping this variable onto a single aesthetic attribute – the x-axis.
-
-```{block2, type='rmdnote'}
-There’s way more nuance / awesomeness / power / ideas behind ggplot2 which we will reveal *just in time* over the term, but here we get going with the essential concepts. If you want to learn more about `ggplot` in one place, check out the [ggplot2 book](https://ggplot2-book.org/) [@wickham2016] and/or the [socviz book](https://socviz.co/) [@healy2018].
-```
-
-
-### Our first ggplot
-So, let's do this with a data set [`msleep`](https://ggplot2.tidyverse.org/reference/msleep.html) built in to tidyverse, which contains interesting information about a bunch of mammals. One question we might have is - how much variability is there in mammal brain size, and what explains this variation? Let’s look to find out...
-
-
-#### Data prep and transformation {-} 
-
-Before making these plots, we'll use the [`mutate()`]() function 
-to $log_{10}$  transform `brainwt` and `bodywt`. For this data set, this makes patterns easier to see. Later we’ll see when this is a good or bad idea and how to do this while we are plotting, but let's hold off on that for now.
-
+### Remembering out set up from last chapter {-}
 
 ```{r}
 msleep <- msleep %>%
   mutate(log10_brainwt = log10(brainwt), 
          log10_bodywt  = log10(bodywt))
 
-```
-
-#### Mapping aesthetics to variables  {-} 
-
-
-So first we need to think of the variables we hope to map onto an aesthetic. Here, the only variable from the data set we are considering is how many hours an organism is awake per day. This is a continuous variable, which we hope to map on to the x-axis. We do so like this:
-
-```{r, fig.height=1, fig.cap ="Uhh ohhh"}
 msleep_plot1 <- ggplot(data = msleep, aes(x = log10_brainwt)) # save plot
-plot(msleep_plot1)                                             #
-```
 
-So, that didn’t go as expected :( — there just a blank grey background. But look more closely, what do you notice?      
-
-```{r, echo=FALSE}
-include_app("https://brandvain.shinyapps.io/ggplotnodat/")
-```
-
-**We make a more useful plot by adding a `geom` layer.**
-
-#### Adding geom layers {-}
-`geoms` explain to R what we want to see: points, lines, histograms etc.. In chapter YANIV ADD we will see how to add data summaries and trendlines. As we discuss below, a histogram is a great way to visualize variability, so lets add that as a `geom``.
-
-
-```{r first-fig, fig.cap = 'Our first ggplot!', fig.width=3, fig.height=1.7, warning=FALSE}
 msleep_histogram <- msleep_plot1 +
   geom_histogram(bins =10, color = "white")
-
-plot(msleep_histogram)
 ```
-
-Yay! OK - we're off. Below we explore a bunch more geom and how they relate to the type of variables we’re interested in! But first, one more awesome feature of `ggplot` -- faceting.
-
-#### Adding facets
-
-In the bible of data visualization, the Visual Display of Quantitative Information, @tufte1983, introduced the idea of "small multiples" as a way to efficiently visualize data in many dimensions, by making many small graphs for different values of categorical variables. 
-
-> Small multiples are economical: once viewers understand the design of one [chart], they have immediate access to the data in all the other [charts]. [...] as the eye moves from one [chart] to the next, the constancy of the design allows the viewer to focus on changes in the data rather than on changes in graphical design.
-> `r tufte::quote_footer('--- Edward Tufte')`
-
-In `ggplot` we can build small multiples as facets, with the [`facet_wrap()`](https://ggplot2.tidyverse.org/reference/facet_wrap.html) and [`facet_grid()`](https://ggplot2.tidyverse.org/reference/facet_grid.html) functions.  
-
-```{r, fig.width=8, fig.cap = 'Our first ggplot!', fig.height=3, warning=FALSE}
-msleep_histogram +
-  facet_wrap(~vore, ncol =3) 
-```
-
-#### An aside -- saving and adding to plots   
-
-Above, we built a ggplot one component at a time, saving each move and visualizing it with the plot function. This isn’t necessary — we can recreate Fig. \@ref(fig:first-fig) as follows:
-
-```{r, eval=FALSE}
-ggplot(data = msleep, aes(x = log10_brainwt)) +
-  geom_histogram(bins =10, color = "white")                            +
-  facet_wrap(~vore, ncol =3) 
-```
-
-It is up to you if you want to save intermediate efforts in a plot.
-
-
-### `ggplot2` primer   
-
-To get more of a sense of how to use ggplot, complete the [Primer on Data Visualization Basics primer](https://rstudio.cloud/learn/primers/1.1) embedded below. This will get you a solid foundation in R which we will build off in this lecture and in the coming weeks.
-
-```{r, primer11, fig.cap = 'The RSutdio [Primer on Data Visualization Basics primer](https://rstudio.cloud/learn/primers/1.1)', echo=FALSE}
-include_app("https://rstudio.cloud/learn/primers/1.1")
-```
-
-
-
 
 ## Common types of plots   
 

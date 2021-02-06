@@ -481,7 +481,7 @@ bindin.BB %>%
 ##### Calculating width quiz {-}
 
 ```{r, echo=FALSE}
-knitr::include_app("https://brandvain.shinyapps.io/sdvar/")
+knitr::include_app("https://brandvain.shinyapps.io/final/")
 ```
 
 

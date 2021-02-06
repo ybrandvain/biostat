@@ -51,7 +51,7 @@ In addition to this reading,  the other assignment is to read pages [pages 104-1
 
 I went to a small college called College of The Atlantic. Because it is small, but can be accurately censused let's consider the academic population of this school -- consisting of all students and faculty.  College of The Atlantic prided itself on its student to faculty ratio -- there were 349 students and 41 faculty (so a 10.5\% of the academic  community are faculty).   
 
-The calculation above is a **population parameter** it is the true value of the student to faculty ratio at the College of the Atlantic. This number could change (e.g. as student drop out or faculty get hired), and could be argued (e.g. do we count FTEs or number of people?), but as described it is known exactly as it is calculated by taking a census of the entire population.   
+The calculation above is a **population parameter** it is the true value of the student to faculty ratio at the College of the Atlantic. This number could change (e.g. as students drop out or faculty get hired), and could be argued (e.g. do we count FTEs or number of people?), but as described it is known exactly as it is calculated by taking a census of the entire population.   
 
 In frequentist statistics, **population parameters are the TRUTH** or the world out there as it really is, either from a population census, or from some process which will generate data with certain characteristics (e.g. flipping a coin, recombining chromosomes, responding to a drug etc...). In our example, the entire census data is presented in Figure \@ref(fig:coa). 
 
@@ -60,7 +60,7 @@ In frequentist statistics, **population parameters are the TRUTH** or the world 
 coa <- read_csv("collegeOfAtlantic.csv")
 ```
 
-```{r coa, fig.cap = 'Student and Faculty of College of the Atlantic (names are generated randomly, and do not reflect actual community members). Da', echo = FALSE}
+```{r coa, fig.cap = 'Student and Faculty of College of the Atlantic (names are generated randomly, and do not reflect actual community members). Download data [here](https://raw.githubusercontent.com/ybrandvain/biostat/master/data/collegeOfAtlantic.csv)', echo = FALSE}
 rm(list = ls())
 coa <- tibble(id = 1:390,
           name = randomNames(390),
@@ -98,13 +98,13 @@ DT::datatable(coa_sample, options = list(pageLength = 5, lengthMenu = c(5, 10, 2
 **Review of sampling**   
 
 
-Of course, if we already had a well characterize population, there would be no need to sample -- we would just know actual parameters, and there would be no need to do statistics.   But this is rarely feasible or a good idea, and we're therefore stuck taking samples and doing statistics.  
+Of course, if we already had a well characterized population, there would be no need to sample -- we would just know actual parameters, and there would be no need to do statistics.   But this is rarely feasible or a good idea, and we're therefore stuck taking samples and doing statistics.  
 
 As such, **being able to imagine the process of sampling** -- how we sample, what can go wrong in sampling **is perhaps the most important  part of being good at statistics.** I recommend walking around and imagining sampling in your free time.
 
 
 ```{block2, type='rmdnote'}
-As discussed in Section \@ref(intro), sampling does not always mean taking a subsample from a larger population. For example, in an experiment we interfere with a system and see how this intervention changes some outcome things, or in flipping a coin we generate a new outcome that had not yet happened. Nonetheless, we can use the metaphor of sampling in all of these cases.
+As discussed in Section \@ref(intro), sampling does not always mean taking a subsample from a larger population. For example, in an experiment we interfere with a system and see how this intervention changes some outcome, or in flipping a coin we generate a new outcome that had not yet happened. Nonetheless, we can use the metaphor of sampling in all of these cases.
 ```
 
 
@@ -119,7 +119,7 @@ Say we were interested to know if students or faculty spent more time on faceboo
 But maybe faculty who spent more time on facebook would be less likely to  answer this than students (or faculty who did not spend much time on facebook). Now we have to deal with bias in our sampling. This is why polling is so hard :(.
 
 
-But it's often even worse -- we don't have a list of possible subject to pick from at random -- so what do we do?  An online survey? A phone call? Go to the cafeteria? You can see that each of these could introduce some  deviation between the rue population parameters and the sample estimate. This deviation is called [**sampling bias**](#samplingBias) and it can ruin all of the fancy statistical tricks we use to recognize sampling error.  
+But it's often even worse -- we don't have a list of possible subject to pick from at random -- so what do we do?  An online survey? A phone call? Go to the cafeteria? You can see that each of these could introduce some  deviation between the true population parameters and the sample estimate. This deviation is called [**sampling bias**](#samplingBias) and it can ruin all of the fancy statistical tricks we use to recognize sampling error.  
 
 
 Say we are interested to estimate the proportion of College of the Atlantic's academic community that are faculty. If we go to a place where students are more likely to hang out then faculty, or vice versa, our estimate will be biased.
@@ -150,7 +150,7 @@ One last important consideration of sampling is the independence of samples.
 
 
 
-Say we are interested to estimate the proportion of College of the Atlantic's academic community that are faculty. If we go to a place where students and faculty are on average, equally likely to hang out, but faculty hang out with faculty and students hang out with students our sample will be dependent -- sampling one faculty would mean it's more likely to sample another.  
+Say we are interested to estimate the proportion of College of the Atlantic's academic community that are faculty. If we go to a place where students and faculty are on average, equally likely to hang out, but faculty hang out with faculty and students hang out with students, so our sample will be dependent -- sampling one faculty would mean it's more likely to sample another.  
 
 Near the end of the term, we'll consider ways of accounting for nonindependence. For now, know that dependence changes the process of sampling  and requires us to build more complex models.   
 
@@ -190,18 +190,18 @@ All of the material in the rest of this chapter -- and about a half of the rest 
 
 OK, say you collected data for a very good study, and you're very excited about it (as well you should be!). **`r ji("tada")` CONGRATS!`r ji("tada")` Stand in awe of yourself and your data** -- data is awesome and it is how we understand the world. 
 
-But then get to thinking. We know that the law of sampling error means that estimates from our data will differ from the truth by chance. So, we start to imagine ''what could have other outcomes have been if the fates blew slightly differently?''
+But then get to thinking. We know that the law of sampling error means that estimates from our data will differ from the truth by chance. So, we start to imagine ''what could other outcomes have been if the fates blew slightly differently?''
 
 The **sampling distribution** is  our tool for accessing the alternate realities that could have been. The sampling distribution is a histogram of estimates we would get if we took a random sample of size $n$ repeatedly.  By considering the sampling distribution we recognize the potential spread of our estimate. 
 
 
 
 ```{block2, type='rmdnote'}
-I keep saying how important sampling and he sampling distribution is. So, when, why, and how do we use it in statistics??? There are two main ways. 
+I keep saying how important sampling and the sampling distribution is. So, when, why, and how do we use it in statistics??? There are two main ways. 
 
-- First, when we make an estimate from a sample, we build a sampling distribution around this estimate to describe uncertainty in this estimate (Section @\ref(uncertainty)).  
+- First, when we make an estimate from a sample, we build a sampling distribution around this estimate to describe uncertainty in this estimate (Section \@ref(uncertainty)).  
 
-- Second, in null hypotheses significance testing (Section \@ref(test)) we compare our statistics to its sampling distribution under the null, to see how readily it could have been caused by sampling error.   
+- Second, in null hypotheses significance testing (Section \@ref(hypoth)) we compare our statistics to its sampling distribution under the null, to see how readily it could have been caused by sampling error.   
 
 Thus the sampling distribution plays a key role in two of the major goals of statics - estimation and hypothesis testing.  
 ```
@@ -284,7 +284,7 @@ ggplot(coa.sampling.dist, aes(x = prop))                  +
 
 #### Building a sampling distribution by simulation
 
-If we have some sense (or hypothesis) of how our population might behave wa can simulate data from it. Like most programming languages, `R`  allows or incredibly complex simulations (I've simulated whole genomes), but for now, let's simulate the process of sampling with the [`sample()`](https://stat.ethz.ch/R-manual/R-devel/library/base/html/sample.html) function.
+If we have some sense (or hypothesis) of how our population might behave, we can simulate data from it. Like most programming languages, `R`  allows for incredibly complex simulations (I've simulated whole genomes), but for now, let's simulate the process of sampling with the [`sample()`](https://stat.ethz.ch/R-manual/R-devel/library/base/html/sample.html) function.
 
 For example, we can generate a sample from a population in which I hypothesized that 10.5\% of the academic community was faculty.
 
@@ -356,7 +356,7 @@ We will make use of a few classic sampling distribution over this course, includ
 
 ## Standard error   
 
-The **standard error**, *which equals the standard deviation of the sampling distribution, describes the expected variability due to sampling error of a sample from a population*. Recall from Chapter [summaRy], that the sample standard deviation, $s$ is the square root  of the average squared difference between a value and the mean ($s = \frac{\Sigma (x_i - \overline{x})^2}{n}$), where we divide by $n-1$ instead of $n$ to get an unbiased estimate. For our calculation here, $x_i$ represents the estimated mean of the $i^{th}$ sample, $\overline{x}$ is the population mean (.104 for our faculty proportion example), and $n$  is the number of replicates (`n.reps` in our code above).    
+The **standard error**, *which equals the standard deviation of the sampling distribution, describes the expected variability due to sampling error of a sample from a population*. Recall from Chapter [summaRy], that the sample standard deviation, $s$ is the square root  of the average squared difference between a value and the mean ($s = \sqrt{\frac{\Sigma (x_i - \overline{x})^2}{n-1}}$), where we divide by $n-1$ instead of $n$ to get an unbiased estimate. For our calculation here, $x_i$ represents the estimated mean of the $i^{th}$ sample, $\overline{x}$ is the population mean (.104 for our faculty proportion example), and $n$  is the number of replicates (`n.reps` in our code above).    
 
 
 The standard error is a critical description of uncertainty in an estimate (See Section \@ref(uncertainty)).  If we have a sampling distribution, w can calculate it as follows. 
@@ -372,12 +372,12 @@ summarise(coa.sampling.dist, standard.error = sd(prop))
 
 We cannot eliminate sampling error, but we can do things to decrease it. Here are two ways we can reduce sampling error:   
 
-1. **Decrease the standard deviation in a sample**. We only have so much control over this, because nature is variable, but more precis measurements,  more homogenous experimental conditions, and the like can decrease the variability in a sample. 
+1. **Decrease the standard deviation in a sample**. We only have so much control over this, because nature is variable, but more precise measurements,  more homogeneous experimental conditions, and the like can decrease the variability in a sample. 
 
 2. **Increase the sample size**. As the sample size increases, our sample estimate gets closer and closer to the true population parameter. This is known as the law of large numbers.  Remember that changing the sample size will not decrease the variability in our sample, it will simply decrease the expected difference between the sample estimate and the population mean.    
   
 
-The webapp (Figure @\ref(fig:samplingwebapp), below) from @whitlock2020 below allows us to simulate a sampling distribution from a normal distribution (we return to  a normal distribution in Section \@ref(normal)). Use it  to explore how sample size ($n$) and variability (population standard deviation, $\sigma$) influence the extent of sampling error. To do so,    
+The webapp (Figure \@ref(fig:samplingwebapp)) from @whitlock2020 below allows us to simulate a sampling distribution from a normal distribution (we return to  a normal distribution later). Use it  to explore how sample size ($n$) and variability (population standard deviation, $\sigma$) influence the extent of sampling error. To do so,    
 
 1. First click the *sample one individual*  button a  few times. When you get used to that,   
 2. Click *complete the sample of ten*, and then *calculate mean*. Repeat that a few times until you're used to it.   
@@ -432,7 +432,7 @@ ggplot(coa.samples.by.n, aes(x = prop, fill = `Worth reporting`))               
     geom_histogram(binwidth = 1/30, color = "white", size = .1)        +
     ggtitle("Sampling distribution of COA faculty ratio")   + 
     facet_wrap(~sample.size, labeller = "label_both")+
-    geom_vline(xintercept = 41/390, color = "red", lty = 2) + 
+    geom_vline(xintercept = 41/390, color = "red", lty = 2) + # adding a vertical line at the true populatin parameter 
     annotate(x = .12, y = 50000, geom = "text", hjust = 0,
              label = "Parameter", color = "red", alpha = .5) +
   scale_fill_manual(values = c("lightgrey","black"))
@@ -452,7 +452,7 @@ Say you have a new and exciting idea -- say a pharmaceutical intervention to cur
 
 - **What if you found something very subtle??** -- the drug might have helped, but you can't really tell. Maybe you'd keep working on it, but more likely you would drop it and move on to a more promising target. 
 
-After reading this Section, you know that these two outcomes could happen for two drugs with the exact same effect (see Figure \@ref(smallN)). This combination of sampling and human nature has the unfortunate consequence that reported results are often biased towards extreme outcomes. This issue, known as the **file drawer problem** (because underwhelming results are kept in a drawer somewhere until some mythical day when we have time and energy to share them), means that most published results are overestimated, modest effects are under-reported, and follow up studies tend show weaker effects than early studies.  Importantly, this happens even if all experiments themselves are performed without bias, and insisting on statistical significance  (Section \@ref(test)) does not help.   
+After reading this Section, you know that these two outcomes could happen for two drugs with the exact same effect (see Figure \@ref(fig:smallN)). This combination of sampling and human nature has the unfortunate consequence that reported results are often biased towards extreme outcomes. This issue, known as the **file drawer problem** (because underwhelming results are kept in a drawer somewhere until some mythical day when we have time and energy to share them), means that most published results are overestimated, modest effects are under-reported, and follow up studies tend show weaker effects than early studies.  Importantly, this happens even if all experiments themselves are performed without bias, and insisting on statistical significance  (Section \@ref(hypoth)) does not help.   
 
 
 

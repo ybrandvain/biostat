@@ -41,7 +41,7 @@ If you want a different (or another) presentiation of this material, I highly re
 
 
 ```{block2, type='rmdwarning'}
-In addition to this reading,  the other assignment is to read pages [pages 104-112 and 126-133](https://drive.google.com/uc?export=download&id=1QIPjMf1xPEnE8pLdAwnChCgpeuaThX0T) about sampling bias from Calling Bullshit [@bergstrom2020] and [Interleaf 2: psuedo-replication](https://drive.google.com/uc?export=download&id=1MBTwopPWgNzEHFmJC1aUKuqak8pAni4X) from the Analysis of Biological Data [@whitlock2020], and complete the sampling Quiz (Section \@ref(samplingQuiz)).  
+In addition to this reading,  the other assignment is to read pages [pages 104-112 and 126-133](https://drive.google.com/uc?export=download&id=1QIPjMf1xPEnE8pLdAwnChCgpeuaThX0T) about sampling bias from Calling Bullshit [@bergstrom2020] and [Interleaf 2: psuedo-replication](https://drive.google.com/uc?export=download&id=1MBTwopPWgNzEHFmJC1aUKuqak8pAni4X) from the Analysis of Biological Data [@whitlock2020], and complete the [Sampling Quiz](https://bookdown.org/ybrandvain/Applied-Biostats/sampling.html#samplingQuiz).  
 ```
 
 

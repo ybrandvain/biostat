@@ -313,7 +313,7 @@ We have to be extra carful of missing values when doing math ourselves. If  we  
 
 Each function in a package must be unique. But functions in different packages can have the same name and do different things. This means we might b using a totally different function than we think.  If we're lucky this results in an error, and we can fix it. If we're unlucky, this results in a bad mistake.  
 
-We can avoid this mistake by typing the package name and two colons and then th function name (e.g. `dplyr::filter`) before using any function. But this is quite tedious. Installing and loading the [`conflicted package`](https://www.tidyverse.org/blog/2018/06/conflicted/), which tellsus  when we use a function that is used by more than one packages loaded, resulting in a warning that we can fix!
+We can avoid this mistake by typing the package name and two colons and then the function name (e.g. `dplyr::filter`) before using any function. But this is quite tedious. Installing and loading the [`conflicted package`](https://www.tidyverse.org/blog/2018/06/conflicted/), which tellsus  when we use a function that is used by more than one packages loaded, resulting in a warning that we can fix!
 
 
 

@@ -46,7 +46,7 @@ The closest thing to these note is section 8 in chapter 13 of  our textbook.   *
 
 
 ```{block2, type='rmdwarning'}
-No additional reading is assigned.     But [this paper](https://peerj.com/articles/9089/)) by my colleague here [@fieberg2020] helped lays out why this is a good way to do and teach staistics.   
+No additional reading is assigned.     But [this paper](https://peerj.com/articles/9089/) by my colleague here [@fieberg2020] helped lays out why this is a good way to do and teach staistics.   
 ```
 
 
@@ -65,7 +65,7 @@ In Chapter \@ref(hypoth), we discussed the idea behind in null hypothesis signif
 
 
 ```{r, fig.cap="Listen to the permutation anthem [here](https://www.youtube.com/watch?v=KQ6zr6kCPj8).", echo=FALSE}
-include_url("http://gfycat.com/ifr/ColorlessScalyHermitcrab")
+include_graphics("https://i.imgur.com/TD6Hc06.gif")
 ```
 
 ### Motivation:  
@@ -389,7 +389,7 @@ But we also learned, in chapters \@ref(intro), \@ref(sampling), and \@ref(uncert
 So, say we did an experiment: we gave the Moderna Covid vaccine to 15,000 people and a placebo to 15,000 people. This experimental design is meant to  
 
 - Imagine if the population that got the Covid vaccine, or it did not.   
-- Calculate parameters of interest (e.g. the probability of contracting Covid, or the frequency of severe Covid among those who caught Covid), or the frequency of severe reactions etc.. in the vaccinated and unvaccinated population.   
+- Calculate parameters of interest (e.g. the probability of contracting Covid, or the frequency of severe Covid among those who caught Covid), or the frequency of severe reactions etc.. in the vaccinated and un vaccinated population.   
 - Compare these parameters across **populations** with and without the placebo.    
 
 

@@ -34,7 +34,7 @@ These notes accompany portions of Chapter 3 — Describing Data — of our textb
 
 
 ```{block2, type='rmdwarning'}
-The other reading assignment for class is to watch the [video about data summaries](https://www.youtube.com/watch?v=mc-6-v2c4WM) from Calling Bullshit [@bergstrom2020]. 
+The other reading assignment for class is to watch the [video about data summaries](https://www.youtube.com/watch?v=mc-6-v2c4WM) from Calling Bullshit [@bergstrom2020], [this video](https://www.youtube.com/watch?v=bPFNxD3Yg6U) from crash course on the shape of data, and [this video](https://www.youtube.com/watch?v=38BA_v7BwKk&feature=emb_logo) from stat 545 on calculating summaries in R. 
 ```
 
 ##  Four things we want to describe
@@ -152,7 +152,7 @@ bindin.BB %>%
 Note, we can choose any name we want for these summarized columns - just make sure they follow best practices described in [Chapter 2](#data1).
 ```
 
-#### Qiz: Getting summaries in R {-}   
+#### Quiz: Getting summaries in R {-}   
 
 ```{r, echo=FALSE}
 include_app("https://brandvain.shinyapps.io/one_group/")
@@ -191,12 +191,18 @@ If you type the code above, R will say something like `summarise(…, .groups ="
 
 ## Summarizing shape of data   
 
+```{r shape, fig.cap= 'The shape of distributions from [Crash Course Statistics](https://www.youtube.com/watch?v=bPFNxD3Yg6U).', echo=FALSE}
+include_url("https://www.youtube.com/embed/bPFNxD3Yg6U")
+```
+
 **Always look at the data before** interpreting or presenting a quantitative summary. A simple histogram is best for one variable, while scatterplots are a good starting place for two continuous variables.   
 
 🤔WHY? 🤔 Because knowing the shape of our data is critical for making sense of any summaries.   
 
 
 ### Shape of data: Skewness  
+
+
 
 Let us have a look at the river dataset  
 
@@ -417,7 +423,7 @@ The **sample standard deviation*, which we call  $s$,  is simply the square root
 
 #### **Calculating the sample coefficient of variation** {-}   
 
-**The sample coefficient of variation standardizes the sample variance by the sample mean**. So the sample coefficient of variation equals the sample variance divided by the sample mean, multiplied by 100, $CV = 100 \times \frac{s}{\overline{x}}$.  So for the example above the sample coefficient of variation equals $100 \times \frac{0.264}{0.41} = `r round(0.264/0.41,digits = 3)`\%$.  
+**The sample coefficient of variation standardizes the sample variance by the sample mean**. So the sample coefficient of variation equals the sample standard deviation divided by the sample mean, multiplied by 100, $CV = 100 \times \frac{s}{\overline{x}}$.  So for the example above the sample coefficient of variation equals $100 \times \frac{0.264}{0.41} = `r round(0.264/0.41,digits = 3)`\%$.  
 
 
 The variance often gets bigger as the mean increase. Take, for example, measurements of height for ten individuals calculate in pounds or stones. Because there are 14 pounds in a stone, the variance for the same measurements on the same individuals will be fourteen times bigger for measurements in pounds relative to stone. Dividing by the mean removes this effect. Because this standardization results in a unitless measure, we can then meaningfully ask questions like “What is more variable, human height or the rate or dolphin swim speed.”
@@ -551,8 +557,8 @@ river.length  %>%
 - Sample variance: $s^2   = \frac{SS_x}{n-1}$    
 - Population variance: $\sigma^2   = \frac{SS_x}{N}$    
 **Standard deviation:** The sqaure root of the variance.   
-- Sample variance:  $s=\sqrt{s^2}$.    
-- Population variance:  $\sigma=\sqrt{\sigma^2}$.       
+- Sample standard deviation:  $s=\sqrt{s^2}$.    
+- Population standard deviation:  $\sigma=\sqrt{\sigma^2}$.       
 **Coefficient of variation:** A unitless summary of the standard deviation facilitating the comparison of variances between variables with different means.  $CV = 100 \times \frac{s}{\overline{x}}$.   
 ```
 

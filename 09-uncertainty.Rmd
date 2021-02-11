@@ -348,7 +348,7 @@ firefly_boot_CI <- firefly_boot %>%
 firefly_boot_CI
 ```
 
-So we are 95% confident that the true mean is between `r round(pull(firefly_boot_CI, mean_flash)[2], digits = 1)` and `r round(pull(firefly_boot_CI, mean_flash)[2], digits = 2)`.
+So we are 95% confident that the true mean is between `r round(pull(firefly_boot_CI, mean_flash)[1], digits = 2)` and `r round(pull(firefly_boot_CI, mean_flash)[2], digits = 2)`.
 
 A confidence interval should be taken as a guide, not a bright line. There is nothing that magically makes `r round(pull(firefly_boot_CI, mean_flash)[2], digits = 2)-.1` a plausible value for the mean and `r round(pull(firefly_boot_CI, mean_flash)[2], digits = 2)+.1` implausible.
 

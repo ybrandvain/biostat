@@ -1,0 +1,74 @@
+---
+title: "Tutorial"
+output: learnr::tutorial
+runtime: shiny_prerendered
+---
+
+```{r setup, include=FALSE}
+library(learnr)
+library(tidyverse)
+library(ggmosaic)
+library(cowplot)
+iris <- tibble(iris)
+knitr::opts_chunk$set(echo = FALSE)
+library(ggthemes)
+```
+
+# Refresher
+
+###  Questions! 
+
+
+```{r quiz1, echo=FALSE}
+quiz(caption = "R tips",
+    question("When R isn't working for you you should...",
+    answer("Keep going till you fix it, you wont fix it if you don't try"),
+    answer("Quit, R isn't for you"),
+    answer("Take a break", correct = TRUE),
+    allow_retry = TRUE,
+    incorrect = "Try again!"
+  ),
+  question("If R gives you a warning, you definitely made a big mistake and output can't be trusted.",
+    answer("TRUE"),
+    answer("FALSE", correct = TRUE),
+    allow_retry = TRUE,
+    incorrect = "Try again!"
+  ),
+    question("If R gives doesn't give you a warning or error, you can be assured your answer is right.",
+    answer("TRUE"),
+    answer("FALSE", correct = TRUE),
+    allow_retry = TRUE,
+    incorrect = "Try again!"
+  )
+)
+```
+
+
+### Fix 
+
+Fix the code below so we only have data from *Iris setosa*   
+
+```{r fix, exercise=TRUE, eval = FALSE}
+filter(iris, Species = "setosa")
+```
+
+```{r fix-solution}
+# let's make river_length a column in a tibble called river.length
+filter(iris, Species = "setosa")
+```
+
+
+### Fix this code
+
+
+```{r blah, exercise=TRUE, eval = FALSE}
+ggplot(iris, aes(x = Species, y = Sepal.Width, color = "blue")) + 
+  geom_jitter(width = .3)
+```
+
+
+```{r blah-solution}
+ggplot(iris, aes(x = Species, y = Sepal.Width)) + 
+  geom_jitter(width = .3, color = "blue")
+```
+

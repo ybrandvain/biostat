@@ -10,6 +10,7 @@ biblio-style: apalike
 link-citations: yes
 github-repo: rstudio/bookdown-demo
 description: "Course notes for applied Biostats."
+
 ---
 
 
@@ -52,6 +53,7 @@ pkgs.list = c("knitr","tidyverse","blogdown","colorspace",
               "datasauRus","ggridges","randomNames","infer")
 library(tweetrmd)
 library(knitr)
+options(crayon.enabled = FALSE)   
 ```
 
 # (PART) Introduction to this course {-}

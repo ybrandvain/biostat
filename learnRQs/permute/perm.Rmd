@@ -1,0 +1,311 @@
+---
+title: "Tutorial"
+output: learnr::tutorial
+runtime: shiny_prerendered
+---
+
+```{r setup, include=FALSE}
+library(learnr)
+library(tidyverse)
+library(ggmosaic)
+knitr::opts_chunk$set(echo = FALSE)
+
+library(palmerpenguins)
+my_penguins <- penguins %>% 
+  filter(species == "Adelie",
+         !is.na(sex), 
+         island == "Torgersen") 
+library(infer)
+```
+
+# Permutation quiz
+
+## Background
+
+
+Some species display sexual size dimorphism -- in which one sex is on average larger than the other. Such a pattern can tell us about the species' ecology and mating habits. Do penguins display this sex difference in size? To start to answer thus, let's look at a subset of the palmerpenguins data set, which I'll call `my_penguins`.
+
+
+```{r, eval = FALSE, echo=TRUE}
+library(palmerpenguins)
+my_penguins <- penguins %>% 
+  filter(species == "Adelie",
+         !is.na(sex), 
+         island == "Torgersen")  
+``` 
+
+First let's visualize body size by sex
+
+```{r plot, exercise=TRUE, eval = FALSE}
+ggplot(data = my_penguins, aes(x = __, y = ___, color = sex))+
+  ____()  +
+  stat_summary(fun.data = "mean_Cl_boot", color = "black")
+```
+
+```{r plot-solution}
+ggplot(data = my_penguins, aes(x = sex, y = body_mass_g, color = sex))+
+  geom_jitter(show.legend = FALSE)  +
+  stat_summary(fun.data = "mean_cl_boot", color = "black")
+```
+
+
+Now lets estimate the sex difference in `body_mass_g` (male mass - female) from the data, and the standard deviation within each sex.
+
+
+
+```{r est, exercise=TRUE, eval = FALSE}
+# diff in means
+my_penguins %>%
+  group_by(  ____ ) %>%
+  summarize(mean_body = ___(___)) %>%
+  pivot_wider() %>%
+  pivot_wider(names_from = sex, values_from = mean_body) %>%
+  mutate(sex_diff = __ - __)
+
+# sd of each
+my_penguins %>%
+  group_by(  ____ ) %>%
+  summarize(sd_body = ___(___)) 
+```
+
+```{r est-solution}
+my_penguins %>%
+  group_by(  sex ) %>%
+  summarize(mean_body = mean(body_mass_g)) %>%
+  pivot_wider(names_from = sex, values_from = mean_body) %>%
+  mutate(sex_diff = male - female)
+```
+
+```{r obs, echo = FALSE}
+question_text("The estimated difference between male and female bedy weight of Adelie penguins  from Torgersen is (round to nearest integer)",
+ answer("639", correct = TRUE),
+ allow_retry = TRUE,   
+  correct = random_praise(),
+  incorrect = random_encouragement()
+)
+```
+
+#### Now lets think about bootrapping and permuting   
+
+
+```{r  bootrappingAndPermuting, echo=FALSE}
+quiz(caption = " bootrapping and permuting",
+    question("Every bootstrap replicate will have  (select all that apply)",
+    answer("Identical values for mean male mass"),
+    answer("Identical values for mean female mass"),
+    answer("A variable sex difference in mean body mass, deviating from the sample mean by sampling error", correct = TRUE),     
+    answer("A variable sex difference in mean body mass, deviating from the proposed mean undr the null by sampling error"),  
+    allow_retry = TRUE,
+    incorrect = "Try again!"
+  ),
+        question("Every permuted replicate will have (select all that apply)",
+    answer("Identical values for mean male mass", correct = TRUE),
+    answer("Identical values for mean female mass", correct = TRUE),
+    answer("A variable sex difference in mean body mass, deviating from the sample mean by sampling error"),     
+    answer("A variable sex difference in mean body mass, deviating from the proposed mean undr the null by sampling error", correct = TRUE),  
+    allow_retry = TRUE,
+    incorrect = "Try again!"
+  )
+)
+```
+
+
+#### Bootstrap to  Estimate Uncertainty 
+
+Say we want to estimate uncertainty in the sex difference in `body_mass_g` (male mass - female) from the data. Adapt the frog code,  below, to estimate uncertainty in the sex difference in body mass in `my_penguins` as the standard error and 95% confidence interval.      
+
+
+
+
+```{r frogs, message=FALSE, warning=FALSE, echo=TRUE, eval = FALSE}
+n_reps <- 50000
+# number nonpreferred
+n_nonpref <- frogs                            %>% 
+  summarise(sum(treatment == "nonpreferred")) %>%
+  pull()
+# bootstrap nonpreferred
+frogs.boot.nonpreferred <- frogs            %>%
+  filter(treatment == "nonpreferred")  %>%
+  rep_sample_n(size = n_nonpref, replace = TRUE, reps = n_reps) %>%
+  summarise(mean_nonpreferred = mean(hatched.eggs))
+
+# number preferred
+n_pref <- frogs                            %>% 
+  summarise(sum(treatment == "preferred")) %>%
+  pull()
+# bootstrap preferred
+frogs.boot.preferred <- frogs            %>%
+  filter(treatment == "preferred")  %>%
+  rep_sample_n(size = n_pref, replace = TRUE, reps = n_reps) %>%
+  summarise(mean_preferred = mean(hatched.eggs))
+
+# let's shove our bootstraps together!  
+frogs.boot <- full_join(frogs.boot.nonpreferred, 
+                        frogs.boot.preferred, 
+                        by = "replicate") %>% 
+  mutate(nonpref_minus_pref = mean_nonpreferred - mean_preferred)
+
+frogs.boot %>%
+  summarise(se       = __(__),
+            lower_CI = ___(__, prob = __),
+            upper_CI = ___(__, prob = __))
+```
+
+```{r boot, exercise=TRUE, eval = FALSE}
+n_reps <- 50000
+
+#bootstrap males
+
+#bootstrap females
+
+# put them together and take difference
+
+# summarize uncertainty
+
+```
+
+
+```{r boot-solution}
+n_reps <- 50000
+
+n_male <- summarise(my_penguins, sum(sex == "male")) %>%
+  pull()
+
+penguins.boot.male <- my_penguins   %>%
+  filter(sex == "male")  %>%
+  rep_sample_n(size = n_male, replace = TRUE, reps = n_reps) %>%
+  summarise(mean_male_body = mean(body_mass_g))
+
+n_female <- summarise(my_penguins, sum(sex == "female")) %>%
+  pull()
+
+penguins.boot.female <- my_penguins   %>%
+  filter(sex == "female")  %>%
+  rep_sample_n(size = n_female, replace = TRUE, reps = n_reps) %>%
+  summarise(mean_female_body = mean(body_mass_g))
+
+# let's shove our bootstraps together!  
+penguins.boot <- full_join(penguins.boot.male, penguins.boot.female, by = "replicate") %>% 
+  mutate(male_minus_female = mean_male_body - mean_female_body)
+
+## esimtate uncertainty
+penguins.boot %>%
+  summarise(se       = sd(male_minus_female),
+            lower_CI = quantile(male_minus_female, prob = 0.025),
+            upper_CI = quantile(male_minus_female, prob = 0.975))
+```
+
+
+
+```{r bootq, echo=FALSE}
+question("What plausible parameter values for the sex difference in body size (male - female) are contained in the 95% confidence interval? (check all that apply)",
+  answer("300"),
+  answer("400"),
+  answer("500", correct = TRUE),
+  answer("600", correct = TRUE),
+  answer("700", correct = TRUE),
+  allow_retry = TRUE,
+    correct = random_praise(),
+  incorrect = random_encouragement()
+)
+```
+
+
+#### Hypotheses    
+
+
+```{r hypoth, echo=FALSE}
+quiz(caption = "Hypotheses",
+    question("What is the null hypothesis?",
+    answer("Mean male and female body mass of Adelie penguins from Torgersen do not differ", correct = TRUE),
+     answer("Mean body mass of male Adelie penguins from Torgersen is greater   than mean female body mass"),
+      answer("Mean body mass of male Adelie penguins from Torgersen is smaller than mean female body mass"),     
+    answer("Mean male and female body mass of Adelie penguins from Torgersen  differs"),
+    answer("Mean body mass of male Adelie penguins from Torgersen is 638.9493
+ grams  greater  than mean female body mass"),
+    allow_retry = TRUE,
+    incorrect = "Try again!"
+  ),
+    question("What is the alternative hypothesis?",
+    answer("Mean male and female body mass of Adelie penguins from Torgersen do not differ"),
+     answer("Mean body mass of male Adelie penguins from Torgersen is greater   than mean female body mass"),
+      answer("Mean body mass of male Adelie penguins from Torgersen is smaller than mean female body mass"),     
+    answer("Mean male and female body mass of Adelie penguins from Torgersen  differs", correct = TRUE),
+    answer("Mean body mass of male Adelie penguins from Torgersen is 638.9493
+ gram's  greater  than mean female body mass"),
+    allow_retry = TRUE,
+    incorrect = "Try again!"
+  )
+)
+```
+
+
+#### Permute to  Quantify Surprise
+
+Say we wanted to  to estimate uncertainty in the sex difference in `body_mass_g` (male mass - female) from the data. Permute sex to test this null and estimate a p-value.    
+
+```{r perm, exercise=TRUE, eval = FALSE}
+n_reps <- 100000
+
+perm_dist <- my_penguins %>%
+  rep_sample_n(size = nrow(___), replace = ___, reps = n_reps) %>%
+  mutate( ___ = sample(___, replace = ___)) %>%
+  group_by(__, replicate) %>%
+  summarise(mean_mass = mean(___))%>% 
+  pivot_wider(names_from = sex, values_from = mean_mass)%>%
+  mutate(sex_diff_mass =male-female) %>%
+  ungroup()
+
+p.val <- perm_dist %>%
+  mutate(as_or_more_extreme =  __(___) __ abs(__)) %>%
+  summarise(p_val = mean(as_or_more_extreme))
+
+p.val
+
+
+perm_dist <- my_penguins %>%
+  rep_sample_n(size = nrow(my_penguins), replace = FALSE, reps = n_reps) %>%
+  mutate(sex = sample(sex, replace = FALSE)) %>%
+  group_by(sex, replicate) %>%
+  summarise(mean_mass = mean(body_mass_g)) %>% 
+  pivot_wider(names_from = sex, values_from = mean_mass)%>%
+  mutate(sex_diff_mass =male-female) %>%
+  ungroup()
+
+p.val <- perm_dist %>%
+  mutate(as_or_more_extreme =  abs(sex_diff_mass) >= abs(638.9493)) %>%
+  summarise(p_val = mean(as_or_more_extreme))
+
+p.val
+```
+
+
+```{r pvalquiz, echo=FALSE}
+quiz(caption = "Interpetting p-values",
+    question("What is our P value (approximately)?",
+    answer("nearly zero", correct = TRUE),
+    answer("Approx 0.001"),
+    answer("Approx 0.01"),
+    answer("Approx 0.1"),
+    answer("Approx 0.5"),
+    answer("nearly 1"),
+    allow_retry = TRUE,
+    incorrect = "Try again!"
+  ),
+  question("What do we do to the null hypothesis?",
+    answer("Reject it", correct = TRUE),
+    answer("Fail to reject it"),
+    allow_retry = TRUE,
+    incorrect = "Try again!"
+  ),
+    question("We can't **KNOW** if the null hypothesis is true or false, but which do you think is far more likely?)",
+    answer("Null hypothesis is true"),
+    answer("Null hypothesis is false",  correct = TRUE),
+    allow_retry = TRUE,
+    incorrect = "Try again!"
+  )
+)
+```
+
+
+**Be prepared to explain your answer to the question above**    

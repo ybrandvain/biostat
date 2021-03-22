@@ -22,6 +22,7 @@ library(infer)
 library(tiktokrmd)
 library(ggridges)
 library(colorspace)
+options(crayon.enabled = FALSE)   
 ```
 
 
@@ -38,7 +39,7 @@ The closest thing to these note is section 8 in chapter 13 of  our textbook.   *
 
 - Explain what a permutation is.    
 - Explain why permuting many times generates a sampling distribution under the null.   
-- Use `R` to permute data to see if two samples means differ.   
+- Use `R` to permute data to see if two sample means come from the different (statistical) populations.   
 - Identify that we use permutation (shuffling) to generate null distributions, and bootstrapping (resampling with replacement) to estimate uncertainty.  
 - Generalize the idea of permutation as a way to test most null models.    
 
@@ -46,7 +47,9 @@ The closest thing to these note is section 8 in chapter 13 of  our textbook.   *
 
 
 ```{block2, type='rmdwarning'}
-No additional reading is assigned.     But [this paper](https://peerj.com/articles/9089/) by my colleague here [@fieberg2020] helped lays out why this is a good way to do and teach staistics.   
+In addition to this reading and the quiz, please read (Some Natural Solutions to the p-Value Communication Problem—and Why They Won’t Work)[http://www.stat.columbia.edu/~gelman/research/published/jasa_signif_2.pdf].  
+
+But [this paper](https://peerj.com/articles/9089/) by my colleague here [@fieberg2020] helps lay out why this is a good way to do and teach statistics.   
 ```
 
 
@@ -58,9 +61,9 @@ tweet_embed("https://twitter.com/kdc509/status/1353808281563619333")
 ```
 
 
-In Chapter \@ref(hypoth), we discussed the idea behind in null hypothesis significance testing.  Specifically, **the challenge in null hypothesis significance testing is to figure out how often we would see what we saw if some boring *null hypothesis* was true**.  A key step in this process is comparing our observed "*test statistic*" to its sampling distribution when the null hypothesis is true. 
+In Chapter \@ref(hypoth), we discussed the idea behind null hypothesis significance testing.  Specifically, **the challenge in null hypothesis significance testing is to figure out how often we would see what we saw if some boring *null hypothesis* was true**.  A key step in this process is comparing our observed "*test statistic*" to its sampling distribution when the null hypothesis is true. 
 
-<span style="color: lightgrey;">Later in the course we will deal with special cases for which mathematicians have estimated a sampling distribution under some set of assumptions.  But </span> A really clean way to generate a null distribution is to shuffle your data randomly, as if nothing where happening. Unlike the math tricks we cover later, this shuffling approach, known as **permutation**, makes very few  assumptions. The most critical assumption of the permutation test is that samples are Random and independent without bias, and that the null is no association.  
+<span style="color: lightgrey;">Later in the course we will deal with special cases for which mathematicians have estimated a sampling distribution under some set of assumptions.  But </span> A really clean way to generate a null distribution is to shuffle your data randomly, as if nothing where happening. Unlike the math tricks we cover later, this shuffling approach, known as **permutation**, makes very few  assumptions. The most critical assumption of the permutation test is that samples are random, independent, and collected without bias, and that the null is no association.  
 
 
 
@@ -78,7 +81,6 @@ One of the most common statistical hypotheses we ask are "Do these two samples d
 So how do we go about asking these questions from data?  
 
 In this chapter we focus in permuting to test for differences between two groups, but *permutation is super flexible and can be used for most problems, where the null is "no association"!*
-
 
 
 ## Case study: Mate choice & fitness in frogs  
@@ -122,8 +124,9 @@ A quick exploratory plot (Chapters \@ref(viz1), \@ref(goodfigs)), helps us under
 
 
 ```{r, warning=FALSE, fig.width=3.5, fig.height=2.5, warning=FALSE, message=FALSE}
+library(ggforce)
 ggplot(frogs, aes(x = treatment, y =  hatched.eggs, color = treatment, shape = treatment  ))+
-  geom_sina(show.legend = FALSE)+
+  geom_sina(show.legend = FALSE)+ # if you don't have ggforce you can use geom_jitter
   stat_summary(color = "black",show.legend = FALSE)
 ```      
 
@@ -164,19 +167,32 @@ So the estimated means are not identical, but we also know that there is substan
 - Calculate the distribution of differences in the mean for each permutation.     
 
 ```{r, message=FALSE, warning=FALSE}
-frogs.boot.nonpreffered <- frogs            %>%
+n_reps <- 10000
+# number nonpreferred
+n_nonpref <- frogs                            %>% 
+  summarise(sum(treatment == "nonpreferred")) %>%
+  pull()
+# bootstrap nonpreferred
+frogs.boot.nonpreferred <- frogs            %>%
   filter(treatment == "nonpreferred")  %>%
-  rep_sample_n(size = nrow(frogs), replace = TRUE, reps = 10000) %>%
-  summarise(mean_nonpreffered = mean(hatched.eggs))
+  rep_sample_n(size = n_nonpref, replace = TRUE, reps = n_reps) %>%
+  summarise(mean_nonpreferred = mean(hatched.eggs))
 
-frogs.boot.preffered <- frogs            %>%
+# number preferred
+n_pref <- frogs                            %>% 
+  summarise(sum(treatment == "preferred")) %>%
+  pull()
+# bootstrap preferred
+frogs.boot.preferred <- frogs            %>%
   filter(treatment == "preferred")  %>%
-  rep_sample_n(size = nrow(frogs), replace = TRUE, reps = 10000) %>%
-  summarise(mean_preffered = mean(hatched.eggs))
+  rep_sample_n(size = n_pref, replace = TRUE, reps = n_reps) %>%
+  summarise(mean_preferred = mean(hatched.eggs))
 
 # let's shove our bootstraps together!  
-frogs.boot <- full_join(frogs.boot.nonpreffered, frogs.boot.preffered, by = "replicate") %>% 
-  mutate(nonpref_minus_pref = mean_nonpreffered - mean_preffered)
+frogs.boot <- full_join(frogs.boot.nonpreferred, 
+                        frogs.boot.preferred, 
+                        by = "replicate") %>% 
+  mutate(nonpref_minus_pref = mean_nonpreferred - mean_preferred)
 ```
 
 Here are the bootstrap results: 
@@ -192,7 +208,7 @@ DT::datatable(.,
 
 Let's summarize uncertainty. To do so, we     
 
-- Tidy the bootrapped data.   
+- Tidy the bootstrapped data.   
 - Find the standard error as the standard deviation of the bootstrapped distribution.     
 - Find the upper and lower (95%) Confidence Intervals as the extreme 2.5 percentiles of the bootstrapped distribution.  
 
@@ -217,7 +233,7 @@ ggplot(frogs.boot, aes(x = nonpref_minus_pref))+
   geom_vline(xintercept = as.vector(t(frog_uncertainty[3,3:4])), color = "blue", lty = 2)+
   annotate(geom = "text",x = -70, y = 900, label = "95% CI",color = "blue")+
   labs(title = "Bootstrap distribution",
-       x = "# eggs w. nonpreffered mate - # eggs w. preffered mate")
+       x = "# eggs w. nonpreferred mate - # eggs w. preferred mate")
 ```
 
 <span style="color: red;">**There is considerable uncertainty in our estimates**</span> -- our bootstrapped 95% confidence interval includes some cases in which preferred matings yield more hatched eggs than nonpreferred matings, in addition to cases in which nonpreferred matings yield more hatched eggs.  
@@ -236,7 +252,7 @@ include_graphics("https://media.giphy.com/media/pRHkn0CC08Wn6/giphy.gif")
 
 <span style="color: Black;font-size:46px;">**PERMUTE THE FROG**</span>
 
-In a permutation test, we generate a null distribution by shuffling the association explanatory and response variables. We then calculate a P-value by comparing the test statistic of the actual data to this null distribution we found by shuffling.  
+In a permutation test, we generate a null distribution by shuffling the association between explanatory and response variables. We then calculate a P-value by comparing the test statistic of the actual data to this null distribution we found by shuffling.  
 
 
 
@@ -245,7 +261,7 @@ In a permutation test, we generate a null distribution by shuffling the associat
 
 1. State the null ($H_0$) and alternative ($H_A$) hypotheses.   
 2. Decide on a test statistic.   
-3. Calculate the  test statistic the actual data.     
+3. Calculate the  test statistic for the actual data.     
 4. Permute the data by shuffling values of explanatory variables across observations.     
 5. Calculate the test statistic on this permuted data set.   
 6. Repeat step 3 and 4 many times to generate the sampling distribution under the null (a thousand is standard... the more permutations, the more precise the p-value).   
@@ -255,17 +271,16 @@ In a permutation test, we generate a null distribution by shuffling the associat
 
 ### Permutation: State $H_0$ and $H_A$    
 
-- $H_0$: The number of hatched eggs differs in preferred vs. non-preferred matings.     
-- $H_A$: The number of hatched eggs does not differ in preferred vs. non-preferred matings.    
+- $H_0$: The number of hatched eggs does not differ in preferred vs. non-preferred matings.   
+- $H_A$: The number of hatched eggs differs in preferred vs. non-preferred matings.          
 
-- $H_A$:     
 
 ### Permutation: Decide on a test statistic.   
 
 The test statistic for a permutation can be whatever we think best captures our biological hypothesis.  For this case, let's say the test statistic is the difference in mean number of eggs hatched in nonpreferred and preferred matings.  
 
 
-### Permutation: Calculate the  test statistic the actual data.   
+### Permutation: Calculate the  test statistic for the actual data.   
 
 In section \@ref(est)  we  found   the mean number of eggs hatched     
 
@@ -277,7 +292,7 @@ Yielding a difference of `r pull(mean_diff) %>% round(digits = 2)` between the m
 
 ### Permutation: Permute the data.    
 
-So now we permute the data by randomly shuffling "treatment" onto our observation by using the sample function. Let's make one permutation below.
+So now we permute the data by randomly shuffling "treatment" onto our observed response variable, `hatched.eggs`, by using the [`sample()`](https://stat.ethz.ch/R-manual/R-patched/library/base/html/sample.html) function. Let's make one permutation below.
 
 ```{r}
 one.perm <- select(frogs,treatment, hatched.eggs)     %>%
@@ -293,7 +308,8 @@ DT::datatable(.,options = list(autoWidth = TRUE,pageLength = 5, lengthMenu = c(5
 
 So we see that after randomly shuffling treatment onto values, some observations stay with the original treatment and some swap. This generates a null as if there is no association because we randomly shuffled, removing a biological explanation for an association.  
 
-### Permutation: Calculate the test statistic on permuted data.  
+### Permutation: Calculate the test statistic on permuted data.   
+
 Let's take the difference in means in this permuted data set.  As in section \@ref(est), to do so we  
 
 - `group_by()` (permuted) treatment   
@@ -311,7 +327,7 @@ perm.diff <- one.perm %>%
 perm.diff 
 ```
 
-So we see that our single permutation (i.e. one sample from the null distribution) revealed a difference of `r round(pull(perm.diff ), digits = 2)` eggs on average between the nonpreffered and preferred matings. REMEMBER we know there is no actual association in the permutation because we randomly shuffled. We now do the many times to find the sampling distribution under the null.  
+So we see that our single permutation (i.e. one sample from the null distribution) revealed a difference of `r round(pull(perm.diff ), digits = 2)` eggs on average between the non-preferred and preferred matings. REMEMBER we know there is no actual association in the permutation because we randomly shuffled. We now do this many times to find the sampling distribution under the null.  
 
 This permuted difference of `r round(pull(perm.diff ), digits = 2)` is  **`r ifelse( abs(pull(perm.diff ))  > abs(pull(mean_diff)) , "MORE","LESS")` extreme** than the actual difference of `r round(pull(mean_diff), digits = 2)` between treatments. 
 
@@ -360,14 +376,14 @@ ggplot(many.perm.diffs, aes(x = diff_hatched)) +
 ### Permutation:  Calculate a p-value. 
 
 
-Now that we have our observed test statistic and its sampling distribution under the null, we can calculate a p-value -- the probability that we would observes a test statistic as or more extreme than what we actually saw if the null were true.
+Now that we have our observed test statistic and its sampling distribution under the null, we can calculate a p-value -- the probability that we would observe a test statistic as or more extreme than what we actually saw if the null were true.
 
 We do this by finding the proportion of permuted replicates that are as or more extreme than the actual data. **To look at both tails (i.e. a two-tailed test) we work with absolute values - allowing us to work with one tail while incorporating both extremes**.
 
 
 
 
-```{r permdist, fig.cap= "Sampling distribution for the difference in mean eggs hatched by treatment under the null hypothesis (light blue line show the oberved value).", fig.height=3, fig.width=4}
+```{r permdist, fig.cap= "Sampling distribution for the difference in mean eggs hatched by treatment under the null hypothesis (light blue lines show the observed value).", fig.height=3, fig.width=4}
 many.perm.diffs <- many.perm.diffs %>% 
   mutate(abs_obs_dif = abs(pull(mean_diff)),
          abs_perm_dif = abs(diff_hatched),
@@ -381,7 +397,7 @@ ggplot(many.perm.diffs, aes(x = diff_hatched, fill = as_or_more_extreme )) +
   theme(legend.position = "bottom")             + 
   labs(title = "Permuted distribution")         +
   geom_vline(xintercept = c(-1,1)*pull(mean_diff), color = "lightblue") +
-  annotate(x = -125, y = 790, geom = "text", color = "lightblue", label = "Observed")+
+  annotate(x = -200, y = 7900, geom = "text", color = "lightblue", label = "Observed")+
   scale_y_continuous(limits = c(0,12000))
 ```
 
@@ -400,7 +416,7 @@ summarise(many.perm.diffs, p_value = mean(as_or_more_extreme))
 thisp <- summarise(many.perm.diffs, p_value = mean(as_or_more_extreme))%>% round(digits = 2)
 ```
 
-So, we found a p-value of `r thisp`, meaning that a world with no true association between mating treatment and eggs hatched, `r thisp*100`% of samples would be as or more extreme than what we observed in our actual sample. 
+So, we found a p-value of `r thisp`, meaning that in a world with no true association between mating treatment and eggs hatched, `r thisp*100`% of samples would be as or more extreme than what we observed in our actual sample. 
 
 As such we **fail to reject the null hypothesis** as we don't have enough evidence to support the alternative hypothesis that number of eggs hatched differs based on mating with preferred or nonpreferred frogs.  
 
@@ -409,12 +425,12 @@ As such we **fail to reject the null hypothesis** as we don't have enough eviden
 So let's take this opportunity to practice writing up a scientific result.  
 
 
-> To test the idea that mating with preferred partners increased reproductive output, we analyzed data from wood frogs (*Rana sylvatica*). In this experiment, @swierk2019, identified frog's preferred partners,  randomly assigned some frogs preferred and other on-preferred partners, and counted the number of hatched eggs in each group. These data, presented in Figure \@ref(fig:frogexplan), show that slightly fewer eggs hatched from preferred (mean = `r filter(frog_summary, treatment == "preferred") %>% pull(mean_hatched) %>% round() %>% as.numeric()`, bootstrapped 95% CI = {`r filter(frog_uncertainty, treatment == "mean_preffered") %>% pull(lower_95_ci) %>% as.numeric()%>% round()`, `r filter(frog_uncertainty, treatment == "mean_preffered") %>% pull(upper_95_ci) %>% as.numeric()%>% round()`}) than non nonpreferred couples (mean = `r filter(frog_summary, treatment == "nonpreferred") %>% pull(mean_hatched) %>% round() %>% as.numeric()`, bootstrapped 95% CI = {`r filter(frog_uncertainty, treatment == "mean_nonpreffered") %>% pull(lower_95_ci) %>% as.numeric()%>% round()`, `r filter(frog_uncertainty, treatment == "mean_nonpreffered") %>% pull(upper_95_ci) %>% as.numeric()%>% round()`}), but there was large variability within each couple ($sd_\text{preferred} = `r filter(frog_summary, treatment == "preferred") %>% pull(sd_hatched) %>% round() %>% as.numeric()`$, $sd_\text{nonpreferred} = `r filter(frog_summary, treatment == "nonpreferred") %>% pull(sd_hatched) %>% round() %>% as.numeric()`$). This small difference in means was not significant (two-tailed permutation-based p-value = 0.30) -- as such we cannot reject the null hypothesis and conclude that there is no evidence to suggest that preferred and nonpreferred woodfrog couples hatch different numbers of eggs.
+> To test the idea that mating with preferred partners increased reproductive output, we analyzed data from wood frogs (*Rana sylvatica*). In this experiment, @swierk2019, identified frogs' preferred partners,  randomly assigned some frogs preferred and other non-preferred partners, and counted the number of hatched eggs in each group. These data, presented in Figure \@ref(fig:frogexplan), show that slightly fewer eggs hatched from preferred (mean = `r filter(frog_summary, treatment == "preferred") %>% pull(mean_hatched) %>% round() %>% as.numeric()`, bootstrapped 95% CI = {`r filter(frog_uncertainty, treatment == "mean_preferred") %>% pull(lower_95_ci) %>% as.numeric()%>% round()`, `r filter(frog_uncertainty, treatment == "mean_preferred") %>% pull(upper_95_ci) %>% as.numeric()%>% round()`}) than non nonpreferred couples (mean = `r filter(frog_summary, treatment == "nonpreferred") %>% pull(mean_hatched) %>% round() %>% as.numeric()`, bootstrapped 95% CI = {`r filter(frog_uncertainty, treatment == "mean_nonpreferred") %>% pull(lower_95_ci) %>% as.numeric()%>% round()`, `r filter(frog_uncertainty, treatment == "mean_nonpreferred") %>% pull(upper_95_ci) %>% as.numeric()%>% round()`}), but there was large variability within each couple ($sd_\text{preferred} = `r filter(frog_summary, treatment == "preferred") %>% pull(sd_hatched) %>% round() %>% as.numeric()`$, $sd_\text{nonpreferred} = `r filter(frog_summary, treatment == "nonpreferred") %>% pull(sd_hatched) %>% round() %>% as.numeric()`$). This small difference in means was not significant (two-tailed permutation-based p-value = 0.30) -- as such we cannot reject the null hypothesis and conclude that there is no evidence to suggest that preferred and nonpreferred woodfrog couples hatch different numbers of eggs.
 
 
 
 
-```{r frogexplan, fig.cap='No evidence that the number of hatched eggs differed in nonpreffered vs prefffered matings (two-tailed permutation based p-value = 0.30). Emojis show raw data, points show groups means, and lines disply bootsrtapped 95% confidence intervals.', fig.height=2.5, fig.width=4, echo = FALSE}
+```{r frogexplan, fig.cap='No evidence that the number of hatched eggs differed in nonpreferred vs preferred matings (two-tailed permutation based p-value = 0.30). Emojis show raw data, points show groups means, and lines display bootstrapped 95% confidence intervals.', fig.height=2.5, fig.width=4, echo = FALSE}
 
 library(emojifont)
 frogs %>%
@@ -428,11 +444,11 @@ frogs %>%
   labs(x = "Mating partner",  y = "# eggs hatched")  
 ```
 
-## How to dealing with nonindependence by permutation   
+## How to deal with nonindependence by permutation   
 
-Permutation can solve so many stats problems. But if data are complex (e.g. more than one explanatory variable), we need to think about how to shuffle data to test these hypothesis we're interested in, and not some confound. 
+Permutation can solve so many stats problems. But if data are complex (e.g. more than one explanatory variable), we need to think about how to shuffle data to test these hypotheses we're interested in, and not some confounding factor. 
 
-For example, our frog experiment was actually conducted over two years, and the design was slightly unbalanced -- there were more non-preferred than preferred couples in 2013. So our p-value above is a bit wrong - as the difference in years could confounds our answer. 
+For example, our frog experiment was actually conducted over two years, and the design was slightly unbalanced -- there were more non-preferred than preferred couples in 2013. So our p-value above is a bit wrong - as the difference in years could confound our answer. 
 
 ```{r,message=FALSE, warning=FALSE}
 frogs %>% 
@@ -492,21 +508,25 @@ year_perm %>%
 This more appropriate p-value still exceeds our traditional $\alpha$ threshold of 0.05, but is way closer to it, and so while we would still formally "fail to reject the null hypothesis", we might be somewhat more willing to entertain the idea that frogs lay more eggs with nonpreferred mates from this correct p-value than from the one calculated without considering the effect of year.
 
 
-## ADD QUIZ HERE  
+## Permute quiz   
+
+```{r, echo=FALSE}
+include_app("https://brandvain.shinyapps.io/permute/",height = '800' )
+```
 
 ## Advanced / Optional  
 
 ### The infer package can permute for us!  
 
-I prefer doing more of the coding myself because it's more flexible and I know what's happening (for example, frm my quick skim of the [`infer` vignette](https://infer.netlify.app/articles/infer.html), I couldn't quickly figure out how to permute conditional on year), but see the code below and the [infer package website](https://infer.netlify.app/) if you want to use their functions.
+I prefer doing more of the coding myself because it's more flexible and I know what's happening (for example, from my quick skim of the [`infer` vignette](https://infer.netlify.app/articles/infer.html), I couldn't quickly figure out how to permute conditional on year), but see the code below and the [infer package website](https://infer.netlify.app/) if you want to use their functions.
 
-```{r}
-frogs_diff_hatch  <- frogs %>% 
+```{r, message=FALSE, warning=FALSE}
+frogs_diff_hatch  <- frogs          %>% 
   specify(hatched.eggs ~ treatment) %>%
   calculate(stat = "diff in means")
 
 null_distn <- frogs %>%
-   specify(hatched.eggs ~ treatment) %>%
+   specify(hatched.eggs ~ treatment)  %>%
    hypothesize(null = "independence") %>%
    generate(reps = 10000, type = "permute") %>%
    calculate(stat = "diff in means")
@@ -519,10 +539,10 @@ null_distn %>%
 
 ### Large data sets 
 
-As in the bootstrap example, copying a large dataset 10000 times and then permute can challenge R. If your data set is too big, you'll need to permute on observation at a time. As in the bootstrap example, we do this by writing a function to permute once, and then use the [`replicate()`](https://stat.ethz.ch/R-manual/R-devel/library/base/html/lapply.html) function to permute many times.   For example
+As in the bootstrap example, copying a large dataset 10000 times and then permuting can challenge R. If your data set is too big, you'll need to permute one observation at a time. As in the bootstrap example, we do this by writing a function to permute once, and then use the [`replicate()`](https://stat.ethz.ch/R-manual/R-devel/library/base/html/lapply.html) function to permute many times.   For example
 
 
-```{r}
+```{r, message=FALSE, warning=FALSE}
 conditionalPermute <- function(dataset, response, explanatory, condition){
   dataset                                                      %>% 
     group_by({{condition}})                                    %>%
@@ -563,3 +583,8 @@ frogs %>%
 
 
 
+
+
+```{r, echo=FALSE}
+rm(list = ls())
+```

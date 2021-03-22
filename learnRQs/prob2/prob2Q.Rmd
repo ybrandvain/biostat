@@ -1,0 +1,267 @@
+---
+title: "Tutorial"
+output: learnr::tutorial
+runtime: shiny_prerendered
+---
+
+```{r setup, include=FALSE}
+library(learnr)
+library(tidyverse)
+library(ggmosaic)
+knitr::opts_chunk$set(echo = FALSE)
+```
+
+# Probabilistic math quiz  
+
+## Background
+
+In the last chapter, we imagined there is some disease spreading, and people concerned about the disease take a test with the following behavior:   
+
+- The test correctly reports someone uninfected as uninfected in 0.995 of tests.   
+- The test correctly reports someone infected as infected in 0.94 of tests.  
+
+
+
+### Simulate disease
+
+Last chapter we tested these people, and find the number that are    
+
+1. healthy and diagnosed as healthy.       
+2. healthy and diagnosed as sick.    
+2. sick and diagnosed as healthy.   
+3. sick and diagnosed as sick.   
+
+Remember 
+
+- That we use the [`case_when`](https://dplyr.tidyverse.org/reference/case_when.html) function to simulate conditional probabilities.    
+- The test correctly reports someone uninfected as uninfected in 0.995 of tests.   
+- The test correctly reports someone infected as infected in 0.94 of tests.    
+- Two in one hundred people have the disease.   
+<span style="color:lightgrey;">Note these answers will differ slightly from before because we are running the simulation again. </span>
+
+```{r sim2, exercise=TRUE, eval = FALSE}
+n_tests  <- 10000
+p_testsick_givensick       <- 0.94
+p_testhealthy_givenhealthy <- 0.995
+p_sick                      <- 0.02
+
+sickness <- tibble(
+  actual_status = sample(c("sick","healthy"), size = n_tests,  replace = TRUE, prob = c(p_sick, 1 - p_sick))) %>%
+    group_by(actual_status) %>%
+    mutate(test_status = case_when(
+      actual_status == "sick" ~ sample(c("sick","healthy"),
+            prob = c(___, 1 - ___), 
+            replace = TRUE, size = n()),  
+      actual_status == "healthy" ~  sample(c("sick","healthy"),
+            prob = c(1 - ___, ___), 
+            replace = TRUE,  size = n()))) %>%
+  ungroup()
+
+### Counting all combinations of outcomes
+sickness %>%
+  group_by(___, ___) %>%
+  summarise(count = n(), .groups = "drop")
+
+
+
+#### We will make a plot with the mosaic plot  function in base R. 
+# These plots are nice, but hard to make in ggplot. 
+# Build off of this code if you ever want to build one. 
+# Mosaic plots are discussed in more detail in the textbook
+table(sickness) %>% 
+  mosaicplot(color = c("firebrick","blue"), 
+             main = "", xlab = "actual status", ylab = "test status")
+```
+
+```{r sim2-solution}
+n_tests  <- 10000
+p_testsick_givensick       <- 0.94
+p_testhealthy_givenhealthy <- 0.995
+p_sick                     <- 0.02
+
+sickness <- tibble(
+  actual_status = sample(c("sick","healthy"), size = n_tests,  replace = TRUE, prob = c(p_sick, 1 - p_sick))) %>%
+    group_by(actual_status) %>%
+    mutate(test_status = case_when(
+      actual_status == "sick" ~  sample(c("sick","healthy"),
+              prob = c(p_testsick_givensick , 1 - p_testsick_givensick ),
+              replace = TRUE, size = n()),  
+      actual_status == "healthy" ~ sample(c("sick","healthy"),
+              prob = c(1 - p_testhealthy_givenhealthy, p_testhealthy_givenhealthy),
+              replace = TRUE, size = n()))) %>%
+  ungroup()
+
+### Counting all combinations of outcomes
+sickness %>%
+  group_by(test_status, actual_status) %>%
+  summarise(count = n(), .groups = "drop")
+
+#### We will make a plot with the mosaic plot  function in base R. 
+# These plots are nice, but hard to make in ggplot. 
+# Build off of this code if you ever want to build one. 
+# Mosaic plots are discussed in more detail in the textbook
+table(sickness) %>% 
+  mosaicplot(color = c("firebrick","blue"), 
+             main = "", xlab = "actual status", ylab = "test status")
+```
+
+### Exact solutions with math  
+
+
+
+#### Oops  
+
+##### Right diagnosis   
+
+
+**Right diagnosis** Imagine that in one day, 10 healthy people get tested. Find the probability that  all ten get a (correct) negative result (to four digits past the decimal)).   
+
+
+```{r calculator0, exercise=TRUE, eval=FALSE}
+p_testsick_givensick       <- 0.94
+p_testhealthy_givenhealthy <- 0.995
+p_sick                      <- 0.02
+
+```
+
+
+
+
+<div id="calculator0-hint">
+**Hint:** We get correctly diagnosed as healthy by getting one true positive AND another true positive, and another... 
+
+Because we multiply each independent probability, the probability of $n$ consecutive outcomes, each with probability $p$ is  $p^n$.
+
+More generally, the probability of a sequence of outcomes is $\prod_{i=1}^{n}  p_i$, with   $p^n$ as a special case for when the probability of each event in your sequence is the same.  
+</div>
+
+
+
+
+```{r exponent, echo = FALSE}
+question_text("All ten get a (correct) negative result (to four digits past the decimal))",
+ answer("0.9511", correct = TRUE),
+ answer( ".9511", correct = TRUE),
+    allow_retry = TRUE,
+    correct = random_praise(),
+    incorrect = random_encouragement()
+)
+```
+
+
+##### Wrong diagnosis   
+
+**Wrong diagnosis** Imagine that in one day, 10 healthy people get tested. Find the probability that   at lease one  gets an (incorrect) positive result (to four digits past the decimal)   
+
+
+For math   
+
+```{r calculator1, exercise=TRUE, eval=FALSE}
+p_testsick_givensick       <- 0.94
+p_testhealthy_givenhealthy <- 0.995
+p_sick                      <- 0.02
+
+```
+
+
+<div id="calculator1-hint">
+**Hint:** The probability of not something equals 1 minus the probability of that thing. 
+
+So this should be 1 - the answer above.  
+</div>
+
+
+
+
+```{r not, echo = FALSE}
+question_text("At lease one  gets an (incorrect) positive result (to four digits past the decimal)",
+ answer("0.0489", correct = TRUE),
+ answer( ".0489", correct = TRUE),
+    allow_retry = TRUE,
+    correct = random_praise(),
+    incorrect = random_encouragement()
+)
+```
+
+#### Use the mutliplication rule to find 
+
+The proportion of people who are  healthy but diagnosed with the disease  (to four digits past the decimal)"
+
+```{r calculator2, exercise=TRUE, eval=FALSE}
+p_testsick_givensick       <- 0.94
+p_testhealthy_givenhealthy <- 0.995
+p_sick                      <- 0.02
+
+```
+
+
+<div id="calculator2-hint">
+**Hint:** Multiply the probability that someone is healthy by the probability a healthy person gets a false positive.    
+</div>
+
+
+
+```{r multiplication, echo = FALSE}
+question_text("The proportion of people who are  healthy but diagnosed with the disease  (to four digits past the decimal)",
+ answer("0.0049", correct = TRUE),
+ answer( ".0049", correct = TRUE),
+    allow_retry = TRUE,
+    correct = random_praise(),
+    incorrect = random_encouragement()
+)
+```
+
+#### Use the law of total probability to find 
+
+Use math to find the proportion of people diagnosed with the disease (to four digits)
+
+```{r calculator3, exercise=TRUE, eval=FALSE}
+p_testsick_givensick       <- 0.94
+p_testhealthy_givenhealthy <- 0.995
+p_sick                      <- 0.02
+
+```
+
+
+<div id="calculator3-hint">
+**Hint:** People can be diagnosed if they are healthy and get a FALSE positive OR if they are sick and get a true positive. Theses are mutually exclusive so we add the probabilities without fear of double counting.
+</div>
+
+
+
+```{r totalProb, echo = FALSE}
+question_text("The proportion of people diagnosed with the disease (to four digits)",
+ answer("0.0237", correct = TRUE),
+ answer( ".0237", correct = TRUE),
+  allow_retry = TRUE,
+  correct = random_praise(),
+  incorrect = random_encouragement()
+)
+```
+
+
+#### Use Baye's theorem  to find 
+
+The proportion of people diagnosed with the disease who actually have it (with four digits past the decimal). That is: number diagnosed and sick / number diagnosed
+
+```{r calculator4, exercise=TRUE, eval=FALSE}
+p_testsick_givensick       <- 0.94
+p_testhealthy_givenhealthy <- 0.995
+p_sick                      <- 0.02
+
+```
+
+
+
+
+
+```{r bayes, echo = FALSE}
+question_text("The proportion of people diagnosed with the disease who actually have it (with four digits past the decimal). That is: number diagnosed and sick / number diagnosed ",
+ answer("0.7932", correct = TRUE),
+ answer( ".7932", correct = TRUE),
+  allow_retry = TRUE,   
+  correct = random_praise(),
+  incorrect = random_encouragement()
+)
+```
+

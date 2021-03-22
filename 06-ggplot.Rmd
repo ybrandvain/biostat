@@ -8,6 +8,7 @@ library(tweetrmd)
 library(tufte)
 library(cowplot)
 library(emo)
+options(crayon.enabled = FALSE)   
 ```
 
 
@@ -490,4 +491,8 @@ Faceting allows us to use the concept of small multiples [@tufte1983] to highlig
 For one facetted variable: `facet_wrap(~ <var>, nocl = )`  
 
 For two facetted variable: `facet_grid(<var1>~ <var2>)`, where one is shown by rows, and is shown by columns.  
+```
+
+```{r, echo=FALSE}
+rm(list = ls())
 ```

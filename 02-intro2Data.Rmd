@@ -8,6 +8,7 @@ library(blogdown)
 library(tweetrmd)
 library(tufte)
 library(emo)
+options(crayon.enabled = FALSE)   
 ```
 
 <span style="color: Blue;font-size:22px;">   Motivating scenario:  </span>  <span style="color: Black;font-size:18px;"> We start at the beginning of a study -- how do we set up a good way to keep track of data that will allow us to focus on understanding and analyzing our data, not reorganizing and rearranging it? </span> 
@@ -242,3 +243,6 @@ knitr::include_app('https://brandvain.shinyapps.io/intro2data/', height = '500px
 
 
 
+```{r, echo=FALSE}
+rm(list = ls())
+```

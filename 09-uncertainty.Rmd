@@ -18,6 +18,7 @@ library(datasauRus)
 library(ggridges)
 library(randomNames)
 library(infer)
+options(crayon.enabled = FALSE)   
 ```
 
 
@@ -447,3 +448,9 @@ boots <- replicate(n = 1000, oneBootMoreVar(my_tibble = iris))
 ### Use existing R packages to  bootstrap for you
 
 We have used a small part of what the infer package can do. It can do much more for us, including bootstrapping (rather than simply copying our tibble). Read more [here](https://teachdatascience.com/infer/).  
+
+
+
+```{r, echo=FALSE}
+rm(list = ls())
+```

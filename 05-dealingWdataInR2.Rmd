@@ -8,6 +8,7 @@ library(blogdown)
 library(tweetrmd)
 library(tufte)
 library(emo)
+options(crayon.enabled = FALSE)   
 ```
 
 
@@ -290,3 +291,6 @@ include_app("https://brandvain.shinyapps.io/moredatainr/")
 [`summarise()`](https://dplyr.tidyverse.org/reference/summarise): Reduce a data set to its (group) summaries. 
 ```
 
+```{r, echo=FALSE}
+rm(list = ls())
+```

@@ -21,6 +21,7 @@ library(infer)
 library(tiktokrmd)
 library(ggridges)
 library(colorspace)
+options(crayon.enabled = FALSE)   
 ```
 
 
@@ -132,6 +133,13 @@ Steps 1-3 are pretty straightforward,
 We cannot perfectly align biological and statistical hypotheses, but a good study will try its best to!
 
 Unfortunately as scientists we're  usually out to evaluate  support for an  exciting scientific hypothesis, but in frequentist statistics we do  this in a totally backwards way, by looking into the plausibility of a boring statistical hypothesis known as the **null hypothesis**.
+
+
+```{r, echo=FALSE}
+tt_url <- "https://www.tiktok.com/@canoodleson/video/6876512852643990789"
+tt <- tiktok_embed(tt_url)
+tiktok_html(tt)
+```
 
 
 
@@ -538,3 +546,8 @@ $$\text{Posterior Probability} = \frac{\text{Likelihood}(\text{Model}|\text{Data
 
 Notably, this also mean that we can study "credible intervals" -- regions with a 95% probability of containitng the true population parameter, as opposed to "confidence intervals" which cannot do this. 
 
+
+
+```{r, echo=FALSE}
+rm(list = ls())
+```

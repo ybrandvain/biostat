@@ -1,0 +1,440 @@
+---
+title: "Tutorial"
+output: learnr::tutorial
+runtime: shiny_prerendered
+---
+
+```{r setup, include=FALSE}
+library(learnr)
+library(sortable)
+library(tidyverse)
+library(knitr)
+library(kableExtra)
+library(ggmosaic)
+library(cowplot)
+library(infer)
+library(broom)
+knitr::opts_chunk$set(echo = FALSE)
+link <- "https://whitlockschluter3e.zoology.ubc.ca/Data/chapter12/chap12q23HyenaGiggles.csv"
+hyenas <-  read_csv(link) %>%
+  rename_all( str_remove,  "IndividualGiggleVariation") %>%
+  mutate(subord_minus_dom = subordinate -  dominant,
+         sign = case_when(subord_minus_dom > 0 ~ "+",
+                          subord_minus_dom < 0 ~ "-"))
+```
+
+# t quiz  
+
+
+## t fundamentals      
+
+The difference between a t-value and a z-value is 
+
+```{r zVt, echo = FALSE}
+question("The difference between a t-value and a z-value is",
+ answer("The z assumes the mean is zero, the t does not"),
+ answer("The z assumes that samples come from a normal distribution, the t does not"),
+ answer("The z assumes that we know the true population standard deviation, the t does not",correct = TRUE),
+ allow_retry = TRUE,   
+  correct = random_praise(),
+  incorrect = random_encouragement()
+)
+```
+
+```{r normassump, echo = FALSE}
+question("If our sample is not perfectly normal",
+ answer("We cannot use t-based tests, as the assume normality, and are not useful if data aren't normal"),
+ answer("This has no impact on t - that's why we us a t-distribution instead of a z distribution"),
+ answer("We can use t-based tests so long as the sample is sufficiently large, and the deviations from normality aren't too big, so the central limit theorem bails us out.", correct = TRUE),
+ allow_retry = TRUE,   
+  correct = random_praise(),
+  incorrect = random_encouragement()
+)
+```
+
+```{r zvt2, echo = FALSE}
+question("When will the z-distribution look most like the z-distribution",
+ answer("When the sample size is large", correct = TRUE),
+ answer("When the standard deviation is small"),
+ answer("When data are normal."),
+ answer("Never, these are very different distributions."),
+ allow_retry = TRUE,   
+  correct = random_praise(),
+  incorrect = random_encouragement()
+)
+```
+
+
+```{r descript, echo = FALSE}
+question("Which is the best summary of the effect size for normally distributed data",
+ answer("The p-value"),
+ answer("The difference between the parameter and its null value"),
+ answer("The difference between the parameter and its null value, standardized by the standard error"),
+ answer("The difference between the parameter and its null value, standardized by the standard deviation", correct = TRUE),
+ allow_retry = TRUE,   
+  correct = random_praise(),
+  incorrect = random_encouragement()
+)
+```
+
+
+
+
+
+
+## Setup 
+
+
+```{r}
+include_url("https://www.youtube.com/embed/FQaSRKP8Dho")
+```
+
+We’re not sure about the function of laughter, but there are some ideas that it could function to show dominance or subordinates. [Mathevon and colleagues](https://bmcecol.biomedcentral.com/articles/10.1186/1472-6785-10-9) looked into this idea in hyenas. They found natural pairs of hyenas hanging out and noted which of the two was dominant and which was subordinate. They provided a measure of giggling (big number means more giggles).   
+
+
+Because these data come naturally paired, we can conduct a t-test on the difference between pairs by testing the null hypothesis that this difference is zero (this is called a paired t-test but calculations are the same as we did in the chapter).  
+
+### I load and plot the data here
+
+```{r, echo=TRUE, message=FALSE, warning=FALSE, fig.height=2}
+link <- "https://whitlockschluter3e.zoology.ubc.ca/Data/chapter12/chap12q23HyenaGiggles.csv"
+hyenas <-  read_csv(link) %>%
+  rename_all( str_remove,  "IndividualGiggleVariation") %>%
+  mutate(subord_minus_dom = subordinate -  dominant,
+         sign = case_when(subord_minus_dom > 0 ~ "+",
+                          subord_minus_dom < 0 ~ "-"))
+
+long_hyenas <-  hyenas %>% 
+  pivot_longer(cols = c("subordinate","dominant"), names_to = "dom", values_to = "giggles")
+
+slope_o_graph <-   ggplot(long_hyenas,aes(x = dom, y = giggles, group = pair, 
+                                          label = pair, color = sign)) +
+  geom_text(nudge_x = c(.1,-.1), show.legend = FALSE)+
+  geom_line() + 
+  theme(legend.position = "none")
+
+diff_graph <- ggplot(hyenas,  aes(x = "", y = subord_minus_dom))+
+  geom_jitter(aes(color = sign),height = 0, width = .1, size = 3, alpha = .6)+
+  geom_hline(yintercept = 0)   +
+  stat_summary(fun.data = "mean_cl_normal")
+
+plot_grid(slope_o_graph, diff_graph, rel_widths = c(4,5))
+```
+
+
+
+```{r guess, echo = FALSE}
+question("From the plots above, it looks like",
+ answer("Subordinates giggle more than dominants", correct = TRUE),
+ answer("Dominants giggle more than subordinates"),
+ answer("No obvious patterns emerge"),
+ allow_retry = TRUE,   
+  correct = random_praise(),
+  incorrect = random_encouragement()
+)
+```
+
+### Let's evaluate normality assumptions   
+
+```{r, echo=TRUE, fig.height=2, fig.width=2.5}
+ggplot(hyenas, aes(sample = subord_minus_dom))+
+  geom_qq() +
+  geom_qq_line()
+```
+
+
+```{r normalassumptions, echo = FALSE}
+question("From the plot above, it looks like",
+ answer("The data likely deviate somewhat from normality, but a t-test is probably ok", correct = TRUE),
+ answer("The data deviate strongly from normality and any test assuming normality cannot be trusted"),
+ allow_retry = TRUE,   
+  correct = random_praise(),
+  incorrect = random_encouragement()
+)
+```
+
+
+## Analyze  
+
+
+To start calculate  the number of pairs, degrees pf freedom, the mean difference between subordinant an dominant, the standard deviation about this, Cohen's d, a standard error, and a t-value.
+
+```{r math, exercise=TRUE, eval = FALSE}
+hyenas %>%
+  summarise(n = n(),
+            df = ___,
+            mean_diff = mean(subord_minus_dom),
+            sd_diff   = __(__),
+            cohens_d  = __ / __,
+            se_diff   = _ / _ ,
+            t         = _,
+            )
+```
+
+```{r math-solution}
+hyenas %>%
+  summarise(n = n(),
+            df = n - 1,
+            mean_diff = mean(subord_minus_dom),
+            sd_diff   = sd(subord_minus_dom),
+            cohens_d  = mean_diff / sd_diff,
+            se_diff   = sd_diff / sqrt(n) ,
+            t         = mean_diff / se_diff)
+```
+
+
+```{r z1, echo = FALSE}
+question("The difference between in laughter between subordinant and dominant hyenas is ___ standard deviations away from the zero.",
+ answer("0.0906"),
+ answer(".0954"),
+ answer("0.949", correct = TRUE),
+ answer("0.0318"),
+ answer("2.85", message = "you entered the standard error, not standard deviation, and therefore returned t, not Cohen's d"),
+ allow_retry = TRUE,   
+  correct = random_praise(),
+  incorrect = random_encouragement()
+)
+```
+
+
+#### Uncertainty    
+
+We find the 95% CI as the mean $\pm$ ?1? times the critical t-value at $\alpha = 0.05$.
+
+
+
+
+```{r ci1, echo = FALSE}
+question("?1? is.",
+ answer("Cohen's d"),
+ answer("The standard deviation"),
+ answer("The variance"),
+ answer("t"),
+ answer("The standard error", correct = TRUE),
+ allow_retry = TRUE,   
+  correct = random_praise(),
+  incorrect = random_encouragement()
+)
+```
+
+
+For this two tailed, 95% confidence interval, the critical t-value is 
+
+```{r q1, exercise=TRUE, eval = FALSE}
+_(p = _, df = _, lower.tail = _)
+```
+
+<div id="pmath-hint">
+**Hint:** Use qt, and be sure we divide alpha by two. 
+</div>
+
+
+#### Find the p value   
+
+Use `pt()` to find the p-value
+
+```{r pmath, exercise=TRUE, eval = FALSE}
+
+```
+
+<div id="pmath-hint">
+**Hint:** Be sure to multiply pt() by 2. 
+</div>
+
+
+**Confirm your p-value with the t.test function**   
+
+```{r pfun, exercise=TRUE, eval = FALSE}
+t.test(x = pull(hyenas, __), mu = __)
+
+### or  
+
+t.test(x = pull(hyenas, __), y = pull(hyenas, __  ), paired = TRUE)
+```
+
+```{r pfun-solution}
+t.test(x = pull(hyenas, subord_minus_dom), mu = 0)
+
+### or  
+
+t.test(x = pull(hyenas, subordinate), y = pull(hyenas, dominant  ), paired = TRUE)
+```
+
+```{r p, echo = FALSE}
+quiz(caption = "P-value", 
+  question("From the calculations above, the p-value (allow some rounding error bc we copied and pasted it) is",
+ answer("0.9904"),
+ answer("0.0095"),
+ answer("0.0107"),
+ answer("0.0191"),
+ answer("0.0215", correct = TRUE),
+ allow_retry = TRUE,   
+  correct = random_praise(),
+  incorrect = random_encouragement()), 
+  question("The number above is",
+ answer("The probability that the null hypothesis generated the data (or something more extreme)"),
+ answer("The probability that the null hypothesis is true"), 
+ answer("The probability that a sample from the null hypothesis would be as or more extreme than the data", correct = TRUE),
+ allow_retry = TRUE,   
+  correct = random_praise(),
+  incorrect = random_encouragement()
+),  
+question("Therefore, according to traditional statistical practice",
+ answer("Proceed as if the null is false (and more specifically interpret the data as supporting the side of the distribution our value falls on), while recognizing that there is a real chance we're wrong", correct = TRUE),
+ answer("Proceed as if the null is true, while recognizing that there is a real chance we're wrong"),
+ answer("Reserve all judgement until we prove that the null is true (or false)"),
+  allow_retry = TRUE,   
+  correct = random_praise(),
+  incorrect = random_encouragement()
+))
+```
+
+### Assumptions of a paired t-test 
+
+
+```{r assum, echo = FALSE}
+question("Say I had data from another two dominant individuals and another two subordinate individuals, but they were not from a pair. Would it be legit to randomly pair them and do a paired t-test?.",
+ answer("Yes"),
+ answer("No", correct = TRUE),
+ allow_retry = TRUE,   
+  correct = random_praise(),
+  incorrect = random_encouragement()
+)
+```
+
+
+
+## t alternatives 
+
+We can of course, permute and bootstrap to estimate uncertainty and test null hypotheses.   Most often, we use these techniques when data violate assumptions of normality.   
+
+### Bootstrapping  paired data to estimate uncertainty 
+
+The t distribution offers one way to estimate uncertainty in the difference between paired data. We can also estimate uncertainty in our estimate of this difference by simply resampling the differences (stored in the column, `subord_minus_dom`) with replacement.  
+
+
+```{r boot, exercise=TRUE, eval = FALSE}
+library(infer)
+n_reps <- 100000
+
+# bootstrap
+boots <- hyenas %>%
+  rep_sample_n(size = nrow(hyenas), replace = _, reps = n_reps) %>%
+  summarise(mean_diff = mean(subord_minus_dom))
+
+# estimate uncertainty
+boots %>%
+  summarise(se = _),
+            lower_95CI = _,
+            upper_95CI = _)
+```
+
+
+```{r boot-solution}
+library(infer)
+n_reps <- 100000
+
+# bootstrap
+boots <- hyenas %>%
+  rep_sample_n(size = nrow(hyenas), replace = TRUE, reps = n_reps) %>%
+  summarise(mean_diff = mean(subord_minus_dom))
+
+# estimate uncertaint
+boots %>%
+  summarise(se = sd(mean_diff),
+            lower_95CI = quantile(mean_diff, prob = 0.025),
+            upper_95CI = quantile(mean_diff, prob = 0.975))
+```
+
+
+
+### Permuting paired data
+
+```{r perm, exercise=TRUE, eval = FALSE}
+library(infer)
+n_reps <- 10000
+perms  <- long_hyenas %>%
+  select(-subord_minus_dom) %>%
+  rep_sample_n(size = nrow(long_hyenas), replace = FALSE, reps = 10000) %>%
+  group_by(replicate,pair) %>%
+  mutate(dom = sample(dom, replace = FALSE)) %>%
+  pivot_wider(values_from = giggles, names_from = dom) %>%
+  mutate(subord_minus_dom = subordinate - dominant ) %>%
+  group_by(replicate) %>%
+  summarise(mean_diff = mean(__))  
+
+# find a p-vlaue  
+observed_diff <- 0.0905555
+
+perms %>% 
+  mutate(as_or_more = __(__)  >= abs(__)) %>%
+  summarise(p_val = ___(_))
+```
+
+
+```{r perm-solution}
+library(infer)
+n_reps <- 10000
+perms  <- long_hyenas %>%
+  select(-subord_minus_dom) %>%
+  rep_sample_n(size = nrow(long_hyenas), replace = FALSE, reps = 10000) %>%
+  group_by(replicate,pair) %>%
+  mutate(dom = sample(dom, replace = FALSE)) %>%
+  pivot_wider(values_from = giggles, names_from = dom) %>%
+  mutate(subord_minus_dom = subordinate - dominant ) %>%
+  group_by(replicate) %>%
+  summarise(mean_diff = mean(subord_minus_dom))  
+
+# find a p-vlaue  
+observed_diff <- 0.0905555
+
+perms %>% 
+  mutate(as_or_more = abs(mean_diff)  >= abs(observed_diff)) %>%
+  summarise(p_val = mean(as_or_more))
+```
+
+
+```{r permq, echo = FALSE}
+question("Compared to the p-value from t.test, the permutation based p value is",
+ answer("way smaller -- one of them is definitely off"),
+ answer("a bit smaller, but doesn't change my biological interpretation"),
+ answer("basically the same"),
+ answer("a bit bigger, but doesn't change my biological interpretation", correct = TRUE),
+ answer("way bigger -- one of them is definitely off"),
+ allow_retry = TRUE,   
+  correct = random_praise(),
+  incorrect = random_encouragement()
+)
+```
+
+
+### A sign test  
+
+As discussed in the chapter, we can use a binomial test, where the "number of successes" is the number of values greater than the null, the number of trials is the number of observations (in this case pairs), and the null probability of success is 0.5. Use the numbers provided below to conduct this test.     
+
+
+```{r, echo=TRUE}
+hyenas %>%
+    summarise(n         = n(),
+              successes = sum(sign == "+"))
+```
+
+
+**Conduct a sign test**
+
+```{r binom, exercise=TRUE, eval = FALSE}
+binom.test()
+```
+
+
+
+```{r binomq, echo = FALSE}
+question("Assuming a traditional alpha threshold of 0.05, we ____ the null hypothesis.",
+ answer("Reject"),
+ answer("Accept",message = "Remember, we never accept the null, we only fail to reject it."),
+ answer("Fail to reject", correct = TRUE),
+ allow_retry = TRUE,   
+  correct = random_praise(),
+  incorrect = random_encouragement()
+)
+```

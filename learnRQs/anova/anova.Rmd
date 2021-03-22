@@ -1,0 +1,349 @@
+---
+title: "Tutorial"
+output: learnr::tutorial
+runtime: shiny_prerendered
+---
+
+```{r setup, include=FALSE}
+library(learnr)
+library(sortable)
+library(tidyverse)
+library(knitr)
+library(kableExtra)
+library(ggmosaic)
+library(cowplot)
+library(infer)
+library(broom)
+knitr::opts_chunk$set(echo = FALSE)
+
+crabs <-  read_csv("https://whitlockschluter3e.zoology.ubc.ca/Data/chapter15/chap15q27FiddlerCrabFans.csv") %>% na.omit() %>% 
+  mutate(crabType = fct_reorder(crabType, .x = bodyTemperature, .fun = mean, .desc = TRUE)) %>%
+  arrange(crabType)
+
+crab_lm <- lm(bodyTemperature ~  crabType, crabs)
+```
+
+# anova quiz  
+
+
+
+## Setup
+
+Fiddler males have a greatly enlarged "major" claw, which is used to attract females and to defend a burrow. Darnell and Munguia (2011) suggested that this appendage might also acts as a heat sink, keeping males cooler while out of the burrow on hot days. To test this, they placed four groups of crabs into separate plastic cups and supplied a source of radiant heat (60-watt light bulb) from above. The four groups were intact male crabs; male crabs with the major claw removed; male crabs with the other (minor) claw removed (control), and intact female ﬁddler crabs. They measured body temperature of crabs every 10 minutes for 1.5 hours. These measurements were used to calculate a rate of heat gain for every individual crab in degrees C/log minute. 
+
+
+Rates of heat gain for all crabs are  loaded here as `crabs` but can be downloaded from this [link](https://whitlockschluter3e.zoology.ubc.ca/Data/chapter15/chap15q27FiddlerCrabFans.csv)
+
+#### glimpse
+
+Get a sense of the `crabs` data's  structure with the `glimpse()` function
+
+```{r glimpse, exercise=TRUE, eval = FALSE}
+
+```
+
+I reformat the data  as follows
+
+```{r, echo=TRUE, eval=TRUE}
+crabs <- crabs %>% 
+  mutate(crabType = fct_reorder(crabType, .x = bodyTemperature, .fun = mean, .desc = TRUE))
+```
+
+```{r, message=FALSE, warning=FALSE, fig.heigt = 4.75, fig.width=5.5, echo=FALSE}
+a <- ggplot(read_csv("https://whitlockschluter3e.zoology.ubc.ca/Data/chapter15/chap15q27FiddlerCrabFans.csv") %>% na.omit(), 
+       aes(x =  crabType, y = bodyTemperature, color = crabType )) +
+  geom_jitter(size = 2, alpha = .4, width = .2,height = 0, show.legend = FALSE)   + 
+  stat_summary(fun.data = "mean_cl_normal", color = "black")  
+
+b <-  ggplot(crabs,  aes(x =  crabType, y = bodyTemperature, color = crabType )) +
+  geom_jitter(size = 2, alpha = .4, width = .2,height = 0, show.legend = FALSE)   + 
+  stat_summary(fun.data = "mean_cl_normal", color = "black")  
+
+plot_grid(a,b, labels = c("a","b"), ncol = 1)
+```
+
+**HUH**
+
+```{r fct_reorder, echo = FALSE}
+question("(Pick the best answer) What did `mutate(crabType = fct_reorder(crabType, .x = bodyTemperature, .fun = mean, .desc = TRUE))` do?",
+ answer("Nothing"),
+ answer("Changed the y-value"),
+ answer("Changed group labels"),
+ answer("Ordered groups from highest to lowest temperature", correct = TRUE),
+ allow_retry = TRUE,   
+  correct = random_praise(),
+  incorrect = random_encouragement()
+)
+```
+
+#### Summarise the data 
+
+Find the mean, variance, and size of each sample  
+
+```{r sum1, exercise=TRUE, eval = FALSE}
+crabs %>%
+  __() %>%
+  __()
+```
+
+
+```{r sum1-solution}
+crabs %>%
+  group_by(crabType) %>%
+  summarise(n = n(),
+     mean_temp = mean(bodyTemperature),
+     var_temp   = var(bodyTemperature))
+```
+
+
+
+```{r var, echo = FALSE}
+quiz(caption = "Which group has the greatest variance", 
+     question("Which group has the greatest variance",
+         answer("male minor removed"),
+         answer("intact male", correct = TRUE),
+         answer("male major removed "),
+         answer("famale"),
+  allow_retry = TRUE,   
+  correct = random_praise(),
+  incorrect = random_encouragement()),
+     question("How much does variance differ between groups",
+         answer("Its exactly the same"),
+         answer("Less than two-fold", correct = TRUE),
+         answer("Between two and five-fold"),
+         answer("Between five and ten-fold"),
+         answer("More than ten-fold"),
+  allow_retry = TRUE,   
+  correct = random_praise(),
+  incorrect = random_encouragement()),
+       question("With this difference in variance among groups, the assumption of homoscedasticity is",
+         answer("Probably not a major concern", correct = TRUE),
+         answer("Somewhat worrisome, but we can plow ahead anyways"),
+         answer("A big concern, we should transform or find a better test"),
+  allow_retry = TRUE,   
+  correct = random_praise(),
+  incorrect = random_encouragement())
+)
+```
+
+
+## Decompose variance
+
+```{r, eval=TRUE, echo=FALSE, fig.height=2.2}
+a <- ggplot(mutate(crabs, id = 1:n(), mean_temp = mean(bodyTemperature)) , 
+            aes(x = id, y = bodyTemperature, color = crabType))+
+  geom_point(alpha = .5)+
+  geom_hline(aes(yintercept = mean_temp))+
+  geom_segment(aes( xend = id, yend = mean_temp ), 
+               color = "black", alpha = .5)+ 
+    theme( axis.text.x = element_blank(), axis.ticks.x = element_blank())+
+  labs(x = "")
+
+b<-ggplot(mutate(augment(crab_lm), id = 1:n(), mean_temp = mean(bodyTemperature)) ,
+          aes(x = id, y = bodyTemperature, color =crabType))+
+  geom_point(alpha = .5)+
+  geom_hline(aes(yintercept = mean_temp))+
+  geom_segment(aes( xend = id,y = .fitted,  yend = mean_temp ), 
+               color = "black", alpha = .5)+
+    geom_line(aes(y = .fitted), alpha  = 2)+ 
+    theme( axis.text.x = element_blank(), axis.ticks.x = element_blank())+
+  labs(x = "")
+
+c<-ggplot(mutate(augment(crab_lm), id = 1:n(), mean_temp = mean(bodyTemperature)) ,
+          aes(x = id, y = bodyTemperature, color = crabType))+
+  geom_point(alpha = .5)+
+  geom_hline(aes(yintercept = mean_temp))+
+  geom_segment(aes( xend = id,  yend = .fitted), 
+               color = "black", alpha = .5)+
+    geom_line(aes(y = .fitted), alpha  = 2)+ 
+    theme( axis.text.x = element_blank(), axis.ticks.x = element_blank())+
+  labs(x = "")
+
+plot_grid(plot_grid(c + theme(legend.position = "none"),
+          a + theme(legend.position = "none"),
+          b + theme(legend.position = "none"), ncol = 3, labels = c("a","b","c")),
+           get_legend(a+theme(legend.position = "bottom")), 
+                      ncol = 1, rel_heights = c(1,.1))
+```                      
+
+```{r assum, echo = FALSE}
+quiz(caption = "Which shows which", 
+question("From the plot above, which shows total deviations",
+ answer("a"),
+ answer("b", correct = TRUE),
+ answer("c"),
+ allow_retry = TRUE,   
+  correct = random_praise(),
+  incorrect = random_encouragement()), 
+question("From the plot above, which shows model (i.e. how predictions differ from total) deviations",
+ answer("a"),
+ answer("b"),
+ answer("c", correct = TRUE),
+ allow_retry = TRUE,   
+  correct = random_praise(),
+  incorrect = random_encouragement()),
+question("From the plot above, which shows error (i.e. residual) deviations",
+ answer("a", correct = TRUE),
+ answer("b"),
+ answer("c"),
+ allow_retry = TRUE,   
+  correct = random_praise(),
+  incorrect = random_encouragement())
+)
+```
+
+Assume we had a linear model `crab_lm`, and ran this code
+
+```{r, eval=FALSE, echo=TRUE}
+crab_lm %>%
+  augment() %>%
+  summarise(mean_temp = mean(bodyTemperature),
+            this_var_partition = sum((.fitted - mean_temp)^2) )
+```
+
+
+```{r varpart, echo = FALSE}
+question("What would be the best name for `this_var_partition`?",
+ answer("MS_total"),
+ answer("MS_groups"),
+ answer("MS_error"),
+ answer("SS_total"),
+ answer("SS_groups", correct = TRUE),
+ answer("SS_error"),
+ allow_retry = TRUE,   
+  correct = random_praise(),
+  incorrect = random_encouragement()
+)
+```
+
+
+## Model 
+
+```{r lm,  exercise=TRUE, eval = FALSE}
+crab_lm  <- lm(__ ~  __, data = crabs)
+summary.lm(crab_lm)
+```
+
+
+
+```{r modeloutput, echo = FALSE}
+quiz(caption = "Look at the model output", 
+     question("The `Estimate` value of the `(Intercept)` is",
+              answer("The overall mean crab temperature"),
+              answer("Mean temperature of males with minor claws removed", correct = TRUE),
+              answer("Mean difference between females and males with minor claws removed"),
+  allow_retry = TRUE,   
+  correct = random_praise(),
+  incorrect = random_encouragement()),
+       question("The `Estimate` value of the `crabTypefemale` is",
+              answer("The overall mean crab temperature"),
+              answer("Mean temperature of males with minor claws removed"),
+              answer("Mean difference between females and males with minor claws removed", correct = TRUE),
+  allow_retry = TRUE,   
+  correct = random_praise(),
+  incorrect = random_encouragement()),
+       question("The `p` value of the `(Intercept)` is",
+              answer("The probability that this estimate (or something more extreme) is equal to the  grand mean"),
+              answer("The probability that this estimate (or something more extreme) would be observed if its mean was the grand mean"),
+              answer("The probability that this estimate (or something more extreme) is equal to zero"),
+              answer("The probability that this estimate (or something more extreme) would be observed if its mean was the zero", correct = TRUE),
+              answer("The probability that this estimate (or something more extreme) is equal to females"),
+              answer("The probability that this estimate (or something more extreme) would be observed if its mean was the females"),
+  allow_retry = TRUE,   
+  correct = random_praise(),
+  incorrect = random_encouragement()),
+          question("The `p` value of the `crabTypefemale` is",
+              answer("The probability that this estimate (or something more extreme) is equal to the  grand mean"),
+              answer("The probability that this estimate (or something more extreme) would be observed if its mean was the grand mean"),
+              answer("The probability that this estimate (or something more extreme) is equal to zero"),
+              answer("The probability that this estimate (or something more extreme) would be observed if its mean was the zero"),
+              answer("The probability that this estimate (or something more extreme) is equal to minor removed"),
+              answer("The probability that this estimate (or something more extreme) would be observed if its mean was the same as male minor removed",correct = TRUE),
+  allow_retry = TRUE,   
+  correct = random_praise(),
+  incorrect = random_encouragement()),
+            question("The `R-Squared` value of the 0.432 means",
+              answer("In the real world, crab claw condition explains 43.2% of variance in body temperature"),
+              answer("In this experiment, crab claw condition explains 43.2% of variance in body temperature",correct = TRUE),
+  allow_retry = TRUE,   
+  correct = random_praise(),
+  incorrect = random_encouragement())
+)
+```
+
+## Test 
+
+First, do data match normality assumptions?
+
+```{r nrmassum,  exercise=TRUE, eval = FALSE}
+ggplot(augment(crab_lm), aes(sample = ___))+
+  geom_qq() +
+  geom_qq_line()
+```
+
+
+```{r nrmassum-solution}
+ggplot(augment(crab_lm), aes(sample = .resid))+
+  geom_qq() +
+  geom_qq_line()
+```
+
+
+
+
+```{r normassump, echo = FALSE}
+question("From the plot above",
+ answer("The data are close enough to not  normal. No need to worry about normality assumptions.", correct = TRUE),
+  answer("Make you run far away from normality assumptions"),
+ allow_retry = TRUE,   
+  correct = random_praise(),
+  incorrect = random_encouragement()
+)
+```
+
+```{r, echo = TRUE}
+anova(crab_lm)
+```
+
+
+```{r conclude, echo = FALSE}
+quiz(caption = "ANOVA test",
+question("From the anova results above we",
+ answer("Reject the null hypothesis", correct = TRUE),
+  answer("Fail to reject the null hypothesis"),
+ allow_retry = TRUE,   
+  correct = random_praise(),
+  incorrect = random_encouragement()),
+question("And conclude that",
+ answer("All treatments have the same mean"),
+ answer("All treatments have different means"),
+ answer("Not all treatments have the same mean", correct = TRUE),
+ allow_retry = TRUE,   
+  correct = random_praise(),
+  incorrect = random_encouragement()))
+```
+
+**Post hoc test**
+
+```{r, echo = TRUE}
+aov(bodyTemperature ~  crabType, crabs) %>%
+  TukeyHSD() %>%
+  tidy()%>% select(contrast, estimate, adj.p.value)
+```
+
+```{r posthoc, echo = FALSE}
+quiz(caption = "From the post hoc test above",
+question("I can put female in signifiance group A, male major removed in significance group B, male minor removed in significance group C",
+ answer("TRUE", correct = TRUE),
+  answer("FALSE"),
+ allow_retry = TRUE,   
+  correct = random_praise(),
+  incorrect = random_encouragement()),
+question("If the q above where TRUE, intact male would be in singificnace groups (select all that apply)",
+ answer("A"),
+ answer("B", correct = TRUE),
+ answer("C", correct = TRUE),
+ allow_retry = TRUE,   
+  correct = random_praise(),
+  incorrect = random_encouragement()))
+```

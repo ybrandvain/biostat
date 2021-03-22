@@ -232,7 +232,7 @@ question("In this example, the proportion of people that are diagnosed to be sic
 #### Change the proportion of people who are sick, `p_sick` to `0.10` and run th simulation again.
 
 ```{r bayes2, echo=FALSE}
-question("Compared to the answers above, the proportion of people that are diagnosed to be sick who are actually healthy is now ",
+question("Compared to the answers above, the proportion of people that are diagnosed to be sick who are actually sick is now ",
   answer("much less"),
   answer("about the same"),
   answer("much greater", correct = TRUE),

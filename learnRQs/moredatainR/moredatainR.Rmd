@@ -1,0 +1,134 @@
+---
+title: "Tutorial"
+output: learnr::tutorial
+runtime: shiny_prerendered
+---
+
+```{r setup, include=FALSE}
+library(learnr)
+library(tidyverse)
+library(ggmosaic)
+iris <- tibble(iris)
+```
+
+# More dealing with data Questions
+
+###  Complete this quiz to evaluate your comprehension of the material
+A similar, if not identical quiz should be completed for credit on canvas.
+
+Always [`glimpse()`](https://tibble.tidyverse.org/reference/glimpse.html) first  
+
+```{r glimpse, exercise=TRUE, eval = FALSE}
+glimpse(iris)
+```
+
+
+
+
+
+#### Q1 and Q2: `mutate()`, `arrange()`, `select()`   
+
+Use the [`mutate`](https://dplyr.tidyverse.org/reference/mutate.html) and then the [`arrange()`](https://dplyr.tidyverse.org/reference/arrange.html) (in `desc`ending order) functions to find the individual with the greatest `Sepal.Length` relative to (aka divided by) `Petal.Length`, [`select()`](https://dplyr.tidyverse.org/reference/arrange.html) the new column `sepal_to_petal_length` and then answer the question.
+
+
+
+```{r mutatearrangeselect, exercise=TRUE, eval = FALSE}
+iris %>%
+  mutate(sepal_to_petal_length = ___/___) %>%
+  ____(desc(____))                        %>%
+  select(____)                            %>%
+  head(n = 3)                             # let's just see the top 3
+```
+
+```{r mutatearrangeselect-solution}
+iris %>%
+  mutate(sepal_to_petal_length = Sepal.Length/Petal.Length) %>%
+  arrange(desc(sepal_to_petal_length)) %>%
+  select(sepal_to_petal_length) %>%
+  head(n = 3) # let's just see the top 3
+```
+
+**Q1**
+
+```{r mutatearrangeselectQ, echo=FALSE}
+question_text("What is the largest `sepal_to_petal_length` in the data set (include three digits past the decimal)?",
+    allow_retry = T,
+    answer("4.833", correct = T),
+    correct = random_praise(),
+    incorrect = "good try, the answer is 4.833"
+)
+```
+
+
+**Q2** 
+
+```{r mutatearrangeselectQ2, echo=FALSE}
+question("Above the order was `iris %>% mutate %>% arrange %>% select`. Which other order would still work? (*Hint:* try them and see if it makes sense)",
+    answer("`mutate %>% iris    %>% select %>% arrange`"),
+    answer("`iris   %>% select  %>% mutate %>% arrange`"),   
+    answer("`iris   %>% arrange %>% mutate %>% select`"),  
+    answer("`iris   %>% mutate  %>% select %>% arrange`", correct = TRUE),
+    answer("order of code doesnt matter"),
+    allow_retry = TRUE,
+    correct = random_praise(),
+    incorrect = random_encouragement()
+  )
+```
+
+
+#### Q3: `group_by()` and `summarise()`   
+
+Combine the [`group_by()`](https://dplyr.tidyverse.org/reference/group_by.html) and [`summarise()`](https://dplyr.tidyverse.org/reference/summarise.html) functions to find the mean petal width of each iris species 
+
+
+
+
+```{r groupbysummarise, exercise=TRUE, eval = FALSE}
+
+```
+
+```{r groupbysummarise-solution}
+iris %>%
+  group_by(Species) %>%
+  summarise(Mean.Petal.Width = mean(Petal.Width))
+```
+
+
+
+```{r summarise, echo=FALSE}
+question_text("What is the mean Petal Width of the species with the smallest mean Petal Width?",
+    allow_retry = T,
+    answer("0.246", correct = T),
+    correct = random_praise(),
+    incorrect = "good try, the answer is 0.246"
+)
+```
+
+
+#### Q4 and 5: `ggplot()` 
+
+**Q4:** Plot petal length (on the y) as a function of petal width (on the x), showing species with color
+
+```{r ggplot, exercise=TRUE, eval = FALSE}
+ggplot(iris, aes(x = ___, y = ___, ___ = ____))+
+  geom_____()
+```
+
+```{r ggplot-solution}
+ggplot(iris, aes(x = Petal.Width, y = Petal.Length, color = Species))+
+  geom_point()
+```
+
+
+
+**Q5:** Plot sepal width (on the y) as a function of sepal length (on the x), facetting by species
+
+```{r ggplot2, exercise=TRUE, eval = FALSE}
+
+```
+
+```{r ggplot2-solution}
+ggplot(iris, aes(x = Sepal.Width, y = Sepal.Length))+
+  geom_point()+
+  facet_wrap(~Species)
+```

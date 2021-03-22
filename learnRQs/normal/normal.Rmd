@@ -1,0 +1,299 @@
+---
+title: "Tutorial"
+output: learnr::tutorial
+runtime: shiny_prerendered
+---
+
+```{r setup, include=FALSE}
+library(learnr)
+library(tidyverse)
+library(knitr)
+library(kableExtra)
+library(ggmosaic)
+library(cowplot)
+library(infer)
+library(broom)
+knitr::opts_chunk$set(echo = FALSE)
+
+```
+
+# Normal quiz  
+
+
+## Worked example  
+
+
+
+The weights of singleton (that is, not twins) babies born in the U.S. are  (roughly) normally distributed with a mean of 3.339 kg with a standard deviation of 0.573 kg.  
+
+
+#### How many standard deviations away from the mean is a 5 kg (11 lb) baby?  
+
+```{r math, exercise=TRUE, eval = FALSE}
+# mean = 3.339, sd  = 0.573
+```
+
+<div id="math-hint">
+**Hint:** Divide the difference between the observation and the parameter by the standard deviation.
+</div>
+
+
+
+```{r z1, echo = FALSE}
+question_text("How many  standard deviations away from the mean is a 5 kg (11 lb) baby?  (include three numbers past the decimal).",
+ answer("2.898", correct = TRUE),
+ answer("2.899", correct = TRUE),
+ allow_retry = TRUE,   
+  correct = random_praise(),
+  incorrect = random_encouragement()
+)
+```
+
+```{r z2, echo = FALSE}
+question("What is the name of the procedure you did to find the answer above.",
+ answer("The Central Limit Theorem"),
+ answer("The q transform"),
+ answer("The Z transform", correct = TRUE),
+ answer("The log transform"),
+ allow_retry = TRUE,   
+  correct = random_praise(),
+  incorrect = random_encouragement()
+)
+```
+
+#### What is the probability density that a baby is 5kg? 
+
+
+Use the appropriate [`_norm()`](https://stat.ethz.ch/R-manual/R-devel/library/stats/html/Normal.html) function to find the probability density that a baby is 5 kg (11 pounds)
+
+```{r math11, exercise=TRUE, eval = FALSE}
+# mean = 3.339, sd  = 0.573, weight = 5
+
+```
+
+<div id="math11-hint">
+**Hint:** Its `dnorm()`.
+</div>
+
+
+```{r z21, echo = FALSE}
+question("The answer above describes the proprtion of babies than will 5 kg at birth (be prepared to explain).",
+ answer("TRUE"),
+ answer("FALSE", correct = TRUE),
+ allow_retry = TRUE,   
+  correct = random_praise(),
+  incorrect = random_encouragement()
+)
+```
+
+
+Use the appropriate [`_norm()`](https://stat.ethz.ch/R-manual/R-devel/library/stats/html/Normal.html) function to find the probability  that a baby is greater than 5 kg (11 pounds)   
+
+```{r math21, exercise=TRUE, eval = FALSE}
+# mean = 3.339, sd  = 0.573, weight = 5
+
+```
+
+<div id="math21-hint">
+**Hint:** Its `pnorm()`, and consider if `lower.tail` should be `TRUE` or `FALSE`. 
+</div>
+
+
+#### Exceptional babies   
+
+What value separates the heaviest 99% of babies from the rest (hint, this is a one-tailed question, unlike examples in the book)
+
+
+```{r math12, exercise=TRUE, eval = FALSE}
+# mean = 3.339, sd  = 0.573, quantile = .99
+ 
+```
+
+<div id="math12-hint">
+**Hint:** Its `qnorm()`, and consider if `lower.tail` should be `TRUE` or `FALSE`. 
+</div>
+
+
+```{r z12, echo = FALSE}
+question_text("What value (in kg) separates the heaviest 99% of babies from the rest ?  (include three numbers past the decimal).",
+ answer("4.672", correct = TRUE),
+ allow_retry = TRUE,   
+  correct = random_praise(),
+  incorrect = random_encouragement()
+)
+```
+
+#### Probability of a range   
+
+What is the probability a baby is between three and four kg?   
+
+
+```{r math121, exercise=TRUE, eval = FALSE}
+# mean = 3.339, sd  = 0.573, range 3 to 4
+
+```
+
+
+<div id="math121-hint">
+**Hint:** Subtract the probability it is less than three from the probability it is less than four (use `pnorm()` for each). 
+</div>
+
+
+```{r z121, echo = FALSE}
+question_text("What is the probability a baby is between three and four kg?  (include three numbers past the decimal).",
+ answer("0.598", correct = TRUE),
+ answer("0.599", correct = TRUE),
+ answer(".598", correct = TRUE),
+ answer(".599", correct = TRUE),
+ allow_retry = TRUE,   
+  correct = random_praise(),
+  incorrect = random_encouragement()
+)
+```
+
+#### Baby sampling distributions   
+
+Imagine we took five babies born in a given hospital and calculated their mean weight. If you repeated this again for all the hospitals in the country, you would have a sampling distribution, and if each sample was independent (hint it's not),  the standard deviation of this distribution would equal   
+
+```{r math2, exercise=TRUE, eval = FALSE}
+# mean = 3.339, sd  = 0.573, n = 5
+
+```
+
+
+```{r z3, echo = FALSE}
+question_text("The standard deviation of the sampling distribution of the weights of five babies equals (include three numbers past the decimal).",
+ answer("0.256", correct = TRUE),
+ answer(".256", correct = TRUE),
+ allow_retry = TRUE,   
+  correct = random_praise(),
+  incorrect = random_encouragement()
+)
+```
+
+
+
+<div id="mathz3-hint">
+**Hint:** Maybe the next question is all the hint you need?    
+</div>
+
+```{r z4, echo = FALSE}
+question("We call this value the",
+ answer("Standard deviation"),
+ answer("Standard error", correct = TRUE),
+ answer("Best linear unbiased predictor"),
+ answer("Confidence interval"),
+ answer("Z distribution"),
+ answer("t distribution"),
+ allow_retry = TRUE,   
+  correct = random_praise(),
+  incorrect = random_encouragement()
+)
+```
+
+#### Simulate babies
+
+Focus on one of the questions above, Use the appropriate `_norm()` function to simulate babies and convince yourself that the math is right.  
+
+
+```{r math3, exercise=TRUE, eval = FALSE}
+n_reps       <- 100000
+sample_size  <- 5
+baby_sd      <- 0.573
+baby_mean    <- 3.339
+
+tibble(hospital  = rep(1:n_reps, each = sample_size),
+       weights   = _norm(n = n_reps * sample_size, mean = __, sd = ___)) %>%
+  __(__) %>%
+  summarise(mean_vals = mean(weights))%>%
+  summarise(se = __(___))
+```
+
+
+```{r math3-solution, exercise=TRUE, eval = FALSE}
+n_reps       <- 100000
+sample_size  <- 5
+baby_sd      <- 0.573
+baby_mean    <- 3.339
+
+tibble(hospital  = rep(1:n_reps, each = sample_size),
+       weights   = rnorm(n = n_reps * sample_size, mean = baby_mean, sd = baby_sd)) %>%
+  group_by(hospital) %>%
+  summarise(mean_vals = mean(weights))%>%
+  summarise(se = sd(mean_vals))
+```
+
+
+
+#### Think  
+
+Do you think baby weights  are actually perfectly normal? If not, how will they deviate from the normal distribution?  
+
+##  Normality   
+
+```{r z5, echo = FALSE}
+question("The normal distribution (or something pretty close to it) is quite ____ in the real world",
+ answer("Rare"),
+ answer("Common", correct = TRUE),
+ allow_retry = TRUE,   
+  correct = random_praise(),
+  incorrect = random_encouragement()
+)
+```
+
+
+```{r z6, echo = FALSE}
+question("The central limit theorem states that all sampling distributions will be normal, regardless of sample size or the underlying distribution.",
+ answer("TRUE"),
+ answer("FALSE", correct = TRUE),
+ allow_retry = TRUE,   
+  correct = random_praise(),
+  incorrect = "Incorrect. What sample size do we need for the central limit theorem?"
+)
+```
+
+
+Recall or app to visually determine the sample size required to see  if sampling distributions are roughly normally distributed  (ie how big of a sample we need to have normally distributed sampling distributions)
+
+```{r}
+include_app("https://brandvain.shinyapps.io/centrallimit/",height = "750")
+```
+
+
+**Rank the distributions above, from which needs the smallest to largest sample size to have a normal sampling distribution**
+
+#### Evaluating normality and data transformation
+
+```{r}
+my_dat <- tibble( x = (rpois(75, lambda  = 2.2) )) 
+        a <- ggplot(my_dat , aes(x = x)) + geom_histogram(binwidth =  1,color = "white")+labs(title = "Histogram")
+        b <- ggplot(my_dat , aes(x = x)) + geom_density(fill = "grey")+labs(title = "Density plot")
+        c <- ggplot(my_dat , aes(sample = x)) + geom_qq() + geom_qq_line()+labs(title = "quantile-quantile plot")
+        d <- ggplot(my_dat , aes(x = x)) + stat_ecdf()+labs(title = "Cumulative distribution")
+        plot_grid(plot_grid(a,b,c, d, ncol = 2))
+```
+
+
+```{r z7, echo = FALSE}
+quiz(caption = "Consider the plot above.", 
+  question("What is a giveaway its not normal (pick the best answer).",
+ answer("The mean isn't zero"),
+ answer("Data are not symmetric about the mean", correct = TRUE),
+ answer("More than 95% of the data is two standard deviations away from the mean"),
+ allow_retry = TRUE,   
+  correct = random_praise(),
+  incorrect = random_encouragement()), 
+  question("What transformation is most appropriate to make it normal? ",
+ answer("A Z-transform"),
+ answer("An arcsin square  root transform"), 
+ answer("An reciprocal transform"),
+ answer("A log(x) transform"),
+ answer("A log(x+2) transform", correct = TRUE),
+ answer("No transform is needed"),
+ allow_retry = TRUE,   
+  correct = random_praise(),
+  incorrect = random_encouragement()
+))
+```
+
+

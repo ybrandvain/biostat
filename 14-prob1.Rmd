@@ -20,7 +20,7 @@ library(datasauRus)
 library(ggridges)
 library(randomNames)
 library(infer)
-
+options(crayon.enabled = FALSE)   
 html_tag_audio <- function(file, type = c("mp3")) {
   type <- match.arg(type)
   htmltools::tags$audio(
@@ -154,7 +154,7 @@ Let's look at a snapshot of a single point in time from Figure \@ref(fig:exclusi
 include_graphics("images/exclusive_full_still.jpeg")
 ```
 
-We count 15 balls - 10 orange (<span style="color:#EDA158;">A</span>), 2 green (<span style="color:#62CAA7;">B</span>), and 3 blue (<span style="color:#98C5EB;">C</span> ). So **the proportion** of each outcome is sthe number of  times we see that outcome divided by the number of times we seen any outcome. That is, 
+We count 15 balls - 10 orange (<span style="color:#EDA158;">A</span>), 2 green (<span style="color:#62CAA7;">B</span>), and 3 blue (<span style="color:#98C5EB;">C</span> ). So **the proportion** of each outcome is the number of  times we see that outcome divided by the number of times we seen any outcome. That is, 
 So the **proportion describes an estimate from a sample**.  Here, the proportion of:   
 
 
@@ -694,4 +694,10 @@ include_app("https://brandvain.shinyapps.io/prob1/",height = '800')
 [`sample(x = , size = , replace = , prob =  )`](https://stat.ethz.ch/R-manual/R-devel/library/base/html/sample.html):     Generate a sample of size `size`, from a vector `x`, with (`replace = TRUE`) or without (`replacement = FALSE`) replacement. By default the size is the length of `x`, sampling occurs without replacement and probabilities are equal. Change these defaults by specifying a value for the argument. For example, to have unequal sampling probabilities, include a vector of length `x`, in which the $i^{th}$ entry describes the relative probability of sampling the $i^{th}$ value in `x`.    
 
 [`case_when()`](https://dplyr.tidyverse.org/reference/case_when.html): Tells R to do one thing under one condition, and another under another condition for as many conditions as we want. We combine this with `sample()` to simulate conditional probabilities.   
+```
+
+
+
+```{r, echo=FALSE}
+rm(list = ls())
 ```

@@ -1,0 +1,185 @@
+---
+title: "Tutorial"
+output: learnr::tutorial
+runtime: shiny_prerendered
+---
+
+```{r setup, include=FALSE}
+library(learnr)
+library(broom)
+library(ggfortify)
+library(tidyverse)
+library(ggmosaic)
+library(knitr)
+knitr::opts_chunk$set(echo = FALSE)
+
+library(palmerpenguins)
+my_gentoo_male_penguins <- penguins %>% 
+  filter(species == "Gentoo",
+         sex     == "male", 
+         island  == "Biscoe") %>% 
+  mutate(id = case_when(flipper_length_mm == 219     & body_mass_g ==  5200  ~ "a",
+                        flipper_length_mm == 221     & body_mass_g  ==   6300  ~ "b", 
+                        flipper_length_mm ==215     &  body_mass_g  ==  5400  ~ "c",
+                        TRUE ~ ""))
+
+my_gentoo_male_penguins_lm <- lm(flipper_length_mm ~ body_mass_g, data = my_gentoo_male_penguins)
+```
+
+# Linear model quiz
+
+
+## Background
+
+
+Penguins fly through the water by pushing off with their flippers. It seems reasonable that heavier birds would therefore have larger flippers. To look into this, let's look into the relationship between `body_mass_g` and `flipper_length_mm` in male Gentoo penguin, and call this subset  `my_gentoo_male_penguins`.
+
+
+```{r, eval = FALSE, echo=TRUE}
+library(palmerpenguins)
+my_gentoo_male_penguins <- penguins %>% 
+  filter(species == "Gentoo",
+         sex     == "male") 
+``` 
+
+First let's visualize the relationship between `body_mass_g` and `flipper_length_mm`   
+
+```{r plot, exercise=TRUE, eval = FALSE, message=FALSE, warning=FALSE}
+ggplot(data = my_gentoo_male_penguins, aes(x = __, y = ___))+
+  ____() +
+  geom_smooth(method = 'lm', se = FALSE)
+```
+
+```{r plot-solution}
+ggplot(data = my_gentoo_male_penguins, aes(x = body_mass_g, y = flipper_length_mm))+
+  geom_point() +
+  geom_smooth(method = 'lm', se = FALSE)
+```
+
+
+Now lets  make a linear model to predict `flipper_length_mm` as a function of  `body_mass_g`.   
+
+
+```{r lm1, echo = FALSE}
+question("Which R code models `flipper_length_mm` as a function of  `body_mass_g`?",
+ answer("cor(flipper_length_mm ~ body_mass_g, data = my_gentoo_male_penguins)"),
+ answer("lm(flipper_length_mm ~ body_mass_g, data = my_gentoo_male_penguins)", correct = TRUE),
+ answer("cor(body_mass_g ~ flipper_length_mm, data = my_gentoo_male_penguins)"),
+ answer("lm(body_mass_g ~flipper_length_mm, data = my_gentoo_male_penguins)"),
+ allow_retry = TRUE,   
+  correct = random_praise(),
+  incorrect = random_encouragement()
+)
+```
+
+I did this for us and created the linear model `my_gentoo_male_penguins_lm`    
+
+
+```{r, eval = TRUE, echo=TRUE}
+tidy(my_gentoo_male_penguins_lm)
+```
+
+
+```{r broom, echo=FALSE}
+question("Which package did I need to load to use the tidy function",
+         answer("tidyr"),
+         answer("broom",  correct = TRUE),
+         answer("tidy_lm"),
+         answer("ggffortify"),
+    allow_retry = TRUE,
+    correct = random_praise(),
+    incorrect = random_encouragement()
+  )
+```
+
+
+```{r predict, echo=FALSE}
+question("Which of the following could you predict from this output? (check all that apply)",
+         answer("The flipper length of a 6000g penguin"),
+         answer("The flipper length of a 6000g male adellee penguin"),
+         answer("The flipper length of a 600g male gentoo penguin penguin"),
+         answer("The flipper length of a 6000g male gentoo penguin", correct = TRUE),
+    allow_retry = TRUE,
+    correct = random_praise(),
+    incorrect = random_encouragement()
+  )
+```
+
+
+```{r all, exercise=TRUE, eval = FALSE}
+
+```
+
+
+```{r predict2, echo=FALSE}
+question_text("Predcit the flipper length of a 5000 g male gentoo penguin in mm (round to the nearest integer)",
+         answer("218.95", correct = TRUE),
+         answer("219", correct = TRUE),
+         answer("218", correct = TRUE),
+    allow_retry = TRUE,
+    correct = random_praise(),
+    incorrect = random_encouragement()
+  )
+```
+
+
+
+```{r ignore, echo=FALSE}
+question("Which p an t-values from this model evaluate silly hypotheses we need not consider?",
+         answer("(Intercept)", correct = TRUE),
+         answer("body_mass_g "),
+         answer("All p and t values are very important"),
+         answer("All p and t values are very silly and should never be taken seriously"),
+    allow_retry = TRUE,
+    correct = random_praise(),
+    incorrect = random_encouragement()
+  )
+```
+
+
+Which of the following are not assumptions of a linear model?
+
+
+```{r assume, echo=FALSE}
+question("Which of the following are not assumptions of a linear model? (select all that apply)",
+         answer("Explanatory values are random", correct = TRUE),
+         answer("data are unbiased"),
+         answer("Residuals are normally distributed"),
+         answer("Means and Variance in residuals are independent of predictors"),
+         answer("Data are appropriately described by adding up components of the model"),
+         answer("Response values are  independent of explanatory variables", correct = TRUE),
+    allow_retry = TRUE,
+    correct = random_praise(),
+    incorrect = random_encouragement()
+  )
+```
+
+Use the autoplot function in the `ggforce` package to evaluate assumptions of the linear model
+
+```{r all2, exercise=TRUE, eval = FALSE, message=FALSE, warning=FALSE }
+
+```
+
+
+**Evaluate the plot below**
+
+```{r  eval=TRUE, message=FALSE, warning=FALSE}
+ggplot(data = my_gentoo_male_penguins, aes(x = body_mass_g, y = flipper_length_mm))+
+  geom_point(aes(color = id %in%c("a","b","c")), show.legend = FALSE) +
+  geom_smooth(method = 'lm', se = FALSE)+
+  scale_color_manual(values = c("black","red"))+
+  geom_text(aes(label = id), color = "red", position = position_nudge(y = -1))
+```
+
+
+
+```{r resid, echo=FALSE}
+question("Which has the smallest (i.e. closest to zero) residual",
+         answer("a", correct = TRUE),
+         answer("b"),
+         answer("c"),
+    allow_retry = TRUE,
+    correct = random_praise(),
+    incorrect = random_encouragement()
+  )
+```

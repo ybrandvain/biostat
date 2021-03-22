@@ -17,6 +17,7 @@ library(DT)
 library(datasauRus)
 library(ggridges)
 library(palmerpenguins)
+options(crayon.enabled = FALSE)   
 iris <- tibble(iris)
 ```
 
@@ -786,4 +787,9 @@ ggplot(penguins, aes(x = bill_length_mm, y = flipper_length_mm, color = species)
 
 ```{r echo = FALSE}
 include_app("https://brandvain.shinyapps.io/rreview/")
+```
+
+
+```{r, echo=FALSE}
+rm(list = ls())
 ```

@@ -1,0 +1,358 @@
+---
+title: "Tutorial"
+output: learnr::tutorial
+runtime: shiny_prerendered
+---
+
+```{r setup, include=FALSE}
+library(learnr)
+library(tidyverse)
+library(knitr)
+library(kableExtra)
+library(ggmosaic)
+library(infer)
+library(broom)
+knitr::opts_chunk$set(echo = FALSE)
+
+spider <- read_csv("https://whitlockschluter3e.zoology.ubc.ca/Data/chapter09/chap09q07RedbackSpiderCannibalism.csv")
+spider_long  <-  spider %>% 
+  group_by(secondMaleAcceptance , eatenOrEscape) %>%
+  summarise(count = n()) %>%
+  ungroup()
+
+spider_wide <- spider_long %>%
+  pivot_wider(names_from = "eatenOrEscape", values_from = "count")
+```
+
+# Two categorical Quiz
+
+## Background
+
+Sometimes female *Latrodectus hasselti* (redback spiders) eat their mates. Is there anything in it for the males? Maydianne Andrade tested the idea that eating a male might prevent her from re-mating with a second male -- that is if she's too preoccupied eating/digesting her mate that she's not looking to mate again. She observed whether a female accepted a second male after the first male either escaped or was eaten.  
+
+
+```{r design, echo = FALSE}
+question("This study is",
+ answer("Observational", correct = TRUE),
+ answer("Expiremental"),
+ allow_retry = TRUE,   
+  correct = random_praise(),
+  incorrect = random_encouragement()
+)
+```
+
+I have these data as   
+
+- All two columns (`secondMaleAcceptance`, `eatenOrEscape`) and 32 rows (one for each 1st male)  in a tibble called `spider`.    
+- In long format with three columns (`secondMaleAcceptance`, `eatenOrEscape`, `count`), and four columns in  a tibble called `spider_long`.  
+- In wide format as a contingency table with three columns (`secondMaleAcceptance`, `eaten`, `escape`),  with eaten and escaped as count data, in a tibble called `spider_wide`.  (below)   
+
+#### Plot   
+
+**Plot the data** using which data format is easiest for you
+
+```{r plot, exercise=TRUE, eval = FALSE}
+
+```
+
+
+```{r plot-solution}
+ggplot(spider, aes(x = eatenOrEscape, fill = secondMaleAcceptance))+
+  geom_bar(position = "dodge")+
+  theme(legend.position = "bottom")
+```
+
+
+```{r eyes, echo = FALSE}
+question("What trend is apparent from this plot?",
+ answer("There is no obvious trend"),
+ answer("Following cannibalistic mating females are more likely to accept a second suitor"),
+answer("Following cannibalistic mating females are less likely to accept a second suitor", correct = TRUE),
+ allow_retry = TRUE,   
+  correct = random_praise(),
+  incorrect = random_encouragement()
+)
+```
+
+#### Relative Risk 
+
+
+```{r, eval=TRUE}
+kable(spider_wide) %>% kable_styling()
+```
+
+
+
+
+Use the data above to calculate the relative risk of having the second male accepted if you were eaten compared to if you escaped.  
+
+```{r relativerisk, exercise=TRUE, eval = FALSE}
+risk_given_eaten    <- __ / (__ + __)
+risk_given_escaped  <- __ / (__ + __)
+relative_risk       <- __ / __
+relative_risk 
+```
+
+
+
+```{r relativerisk-solution}
+risk_given_eaten    <- 3 / (3 + 6)
+risk_given_escaped  <- 22 / (22 + 1)
+relative_risk       <- risk_given_eaten / risk_given_escaped 
+```
+
+
+
+```{r rr, echo = FALSE}
+question_text("The relative risk of having the second male accepted if you were eaten compared to if you escaped  is(to two places after the decimal)",
+ answer("0.35", correct = TRUE),
+ answer(".35", correct = TRUE),
+ allow_retry = TRUE,   
+  correct = random_praise(),
+  incorrect = random_encouragement()
+)
+```
+
+
+#### Odds ratio   
+
+
+
+```{r, eval=TRUE}
+kable(spider_wide) %>% kable_styling()
+```
+
+
+
+
+Use the data above to calculate the odds ratio  of having the second male accepted if you were eaten compared to if you escaped.  
+
+```{r oddsratio, exercise=TRUE, eval = FALSE}
+odds_given_eaten    <- __ / __
+odds_given_escaped  <- __ / __ 
+odds_ratio         <- __ / __
+odds_ratio   
+```
+
+
+
+```{r oddsratio-solution}
+odds_given_eaten    <- 3 /  6
+odds_given_escaped  <- 22 / 1 
+odds_ratio         <- .5 / 22
+odds_ratio  
+```
+
+
+
+```{r or, echo = FALSE}
+question_text("The odds ratio of having the second male accepted if you were eaten compared to if you escaped (to two places after the decimal)",
+ answer("0.02", correct = TRUE),
+ answer(".02", correct = TRUE),
+ allow_retry = TRUE,   
+  correct = random_praise(),
+  incorrect = random_encouragement()
+)
+```
+
+## Is this pattern an unexpected outcome of the null   
+
+Hypotheses
+
+
+```{r hyp, echo = FALSE}
+quiz(caption = " Null and alternative hypotheses",
+     question("What  is the (two-tailed) null hypothesis",
+               answer("There is no association being eaten & your mate rejecting a second male", correct = TRUE),
+               answer("Being eaten is not associated with a lower chance of your mate rejecting a second male"),
+               answer("There is an association being eaten & your mate rejecting a second male"),
+              allow_retry = TRUE,   
+              correct = random_praise(),
+              incorrect = random_encouragement()),
+     question("What  is the (two-tailed) alternative hypothesis",
+               answer("There is no association being eaten & your mate rejecting a second male"),
+               answer("Being eaten is not associated with a lower chance of your mate rejecting a second male"),
+               answer("There is an association being eaten & your mate rejecting a second male", correct = TRUE),
+              allow_retry = TRUE,   
+              correct = random_praise(),
+              incorrect = random_encouragement())
+)
+```
+
+
+[Fisher's exact test](https://bookdown.org/ybrandvain/Applied-Biostats/contingency.html#fishers-exact-test-as-an-alternative-to-the-chi2-test.) uses math tricks to lay out all  potential permutations and then calculates a p-value for us, and uses this distribution to come up with a measure. Lets use it to test the null hypothesis, using the `fisher.test()` function.   
+
+
+```{r fisher, exercise=TRUE, eval = FALSE}
+spider_wide %>%
+    ___(-__)%>%
+    fisher.test()
+```
+
+```{r fisher-solution}
+spider_wide %>%
+   select(-secondMaleAcceptance)%>%
+   fisher.test()
+```
+
+Look at the results... Now pipe them into the `tidy()` function in broom
+
+
+```{r fisher2, exercise=TRUE, eval = FALSE}
+library(broom) 
+spider_wide %>%
+    ___(-__)%>%
+    fisher.test() %>%
+    ___()
+```
+
+```{r fisher2-solution}
+spider_wide %>%
+   select(-secondMaleAcceptance)%>%
+   fisher.test() %>%
+   tidy()
+```
+
+
+
+```{r conclude, echo = FALSE}
+     question("Assuming a traditional alpha threshold of 0.05, what  do you do to the null hypothesis",
+               answer("Reject it", correct = TRUE),
+               answer("Fail to reject it"),
+              allow_retry = TRUE,   
+              correct = random_praise(),
+              incorrect = random_encouragement())
+```
+
+
+## Chi2
+
+An alternative method to null hypothesis significance testing would be to calculate $\chi^2$ and look this up on the $\chi^2$ sampling distribution.   Modify the code below to find expected counts in each category, assuming indepenence, so we can calculate $\chi^2$  
+
+```{r expectations, exercise=TRUE, eval = FALSE}
+spider_long %>%
+  mutate(total_n = sum(count)) %>%
+  group_by(secondMaleAcceptance)     %>% 
+    mutate(p_accept = __ / __) %>% 
+    ungroup() %>%
+  group_by(eatenOrEscape) %>% 
+    mutate(p_eatenOrEscape = __ / __) %>% 
+    ungroup() %>%
+  mutate(expected_count = __ * __ * __)
+```
+
+
+```{r expectations-solution}
+spider_long %>%
+  mutate(total_n = sum(count)) %>%
+  group_by(secondMaleAcceptance)     %>% 
+    mutate(p_accept = sum(count) / total_n) %>% 
+    ungroup() %>%
+  group_by(eatenOrEscape) %>% 
+    mutate(p_eatenOrEscape = sum(count) / total_n) %>% 
+    ungroup() %>%
+  mutate(expected_count = total_n * p_accept * p_eatenOrEscape)
+```
+
+
+
+```{r expected, echo = FALSE}
+     question_text("Under independence how many spiders do you expect would have been eaten and had their mates reject the second suitor? (round to the nearest integer)",
+               answer("2", correct = TRUE),
+              allow_retry = TRUE,   
+              correct = random_praise(),
+              incorrect = random_encouragement())
+```
+
+```{r expected2, echo = FALSE}
+     question("What assumption of the chi2 test is broken, making the Fisher test more appropriate?",
+               answer("Data are not independent"),
+               answer("One of the categories has an expected count less than one"),
+               answer("More than 20% e of the categories has an expected count less than five", correct = TRUE),
+               answer("Data are biased"),
+              allow_retry = TRUE,   
+              correct = random_praise(),
+              incorrect = random_encouragement())
+```
+
+Calculate $\chi^2$ anyway   
+
+```{r chi2calc, message=FALSE, warning=FALSE, echo=TRUE, eval = FALSE}
+spider_long %>%
+  mutate(total_n = sum(count)) %>%
+  group_by(secondMaleAcceptance)     %>% 
+    mutate(p_accept = __ / __) %>% 
+    ungroup() %>%
+  group_by(eatenOrEscape) %>% 
+    mutate(p_eatenOrEscape = __ / __) %>% 
+    ungroup() %>%
+  mutate(expected_count = __ * __ * __,
+         each_chi2       = (___ - __)^2 / ___)%>%
+  summarise(chi2 = __(__))
+```
+
+```{r chi2calc-solution}
+spider_long %>%
+  mutate(total_n = sum(count)) %>%
+  group_by(secondMaleAcceptance)     %>% 
+    mutate(p_accept = sum(count) / total_n) %>% 
+    ungroup() %>%
+  group_by(eatenOrEscape) %>% 
+    mutate(p_eatenOrEscape = sum(count) / total_n) %>% 
+    ungroup() %>%
+  mutate(expected_count = total_n * p_accept * p_eatenOrEscape,
+         each_chi2      = (expected_count - count)^2 / expected_count)%>%
+  summarise(chi2 =sum(each_chi2))
+```
+
+
+```{r chi2val, echo = FALSE}
+     question_text("What did you find chi2 to equal? (include one digit past the decimal)",
+               answer("14.7", correct = TRUE),
+              allow_retry = TRUE,   
+              correct = random_praise(),
+              incorrect = random_encouragement())
+```
+
+We can estimate a p-value by comparing our value of $\chi^2$ to the $\chi^2$ sampling distribution with one degree of freedom (2 columns - 1) x (2 rows - 1) = 1. As follows
+
+
+```{r chi2p}
+# Execute the code to find a p-value
+pchisq(q = 14.7, df = 1, lower.tail = FALSE)
+```
+
+**Consider, why did we only look at the lower tail?** 
+
+
+Run the code below to have R do a $\chi^2$ test for us  
+
+```{r chi2R, message=FALSE, warning=FALSE, echo=TRUE, eval = FALSE}
+spider_wide %>%
+   select(-secondMaleAcceptance)%>%
+   chisq.test(orrect = FALSE) %>% # tells R to calculate a standard chi2
+   tidy()
+```
+
+
+
+```{r q, echo = FALSE}
+     question("Compared to our chi2 math, Rs answer for the p-value and chi2 value was",
+               answer("Basically the same", correct = TRUE),
+               answer("Off by  a bit, but doesn't really change the story"),
+               answer("Off by  a lot, be afraid"),
+              allow_retry = TRUE,   
+              correct = random_praise(),
+              incorrect = random_encouragement())
+```
+
+
+```{r q2, echo = FALSE}
+     question("Compared to the chi2 math, the p-value from Fisher's exact test was",
+               answer("Basically the same"),
+               answer("Off by  a bit, but doesn't really change the story", correct = TRUE),
+               answer("Off by  a lot, be afraid"),
+              allow_retry = TRUE,   
+              correct = random_praise(),
+              incorrect = random_encouragement())
+```

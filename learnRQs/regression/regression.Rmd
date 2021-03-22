@@ -1,0 +1,309 @@
+---
+title: "Tutorial"
+output: learnr::tutorial
+runtime: shiny_prerendered
+---
+
+```{r setup, include=FALSE}
+library(learnr)
+library(sortable)
+library(tidyverse)
+library(knitr)
+library(kableExtra)
+library(ggmosaic)
+library(cowplot)
+library(infer)
+library(broom)
+library(ggfortify)
+knitr::opts_chunk$set(echo = FALSE)
+
+lions <-  read_csv("https://whitlockschluter3e.zoology.ubc.ca/Data/chapter17/chap17e1LionNoses.csv")
+lion_lm <- lm(ageInYears ~ proportionBlack , data = lions)
+```
+
+# regression 
+
+
+
+## Setup
+
+```{r,echo=FALSE, fig.height=2.3, fig.width=3, eval=TRUE, message=FALSE,fig.show='hold', out.width="50%"}
+ggplot(lions, aes(x=proportionBlack, y = ageInYears)) +
+  geom_point()+
+  geom_smooth(method = "lm")
+include_graphics("https://miro.medium.com/max/2000/0*S7JbIjaE2Ic4cNle.JPG")
+```
+
+
+Can we predict a lion's age from the amount of black on its nose? Use the following summaries of
+this data to find out (find both the slope and the intercept). 
+
+- $Cov_{age, prop\_black} = 0.420$      
+- $s^2_{prop\_black} = 0.0394$  
+- $s^2_{age} = 7.16$   
+- $mean_{prop\_black} = 0.322$    
+- $mean_{age} = 4.31$   
+
+
+#### Math  
+
+
+```{r playgroundslope, exercise=TRUE, eval = FALSE}
+
+```
+
+
+
+```{r slope, echo = FALSE}
+question_text("For every increase in proportion black, age increases by __ (include one point past the decimal)",
+ answer("10.6", correct = TRUE),
+ answer("10.7", correct = TRUE),
+ allow_retry = TRUE,   
+  correct = random_praise(),
+  incorrect = random_encouragement()
+)
+```
+
+
+```{r playgroundintercept, exercise=TRUE, eval = FALSE}
+
+```
+
+
+
+```{r intercept, echo = FALSE}
+question_text("The intercept for this model is  __ (include two points past the decimal)",
+ answer("0.87", correct = TRUE),
+ answer(".87", correct = TRUE),
+ answer("0.88", correct = TRUE),
+ answer(".88", correct = TRUE),
+ allow_retry = TRUE,   
+  correct = random_praise(),
+  incorrect = random_encouragement()
+)
+```
+
+
+```{r predict, exercise=TRUE, eval = FALSE}
+
+```
+
+
+
+
+```{r pred1, echo = FALSE}
+question_text("You see a male with about 70% of its nose black. Predict his age (round to nearest year, type 'NO', if there isn't a good answer)",
+ answer("8", correct = TRUE),
+ answer("8.0", correct = TRUE),
+ allow_retry = TRUE,   
+  correct = random_praise(),
+  incorrect = random_encouragement()
+)
+```
+
+
+```{r pred2, echo = FALSE}
+question_text("You see a male with about 99.99% of its nose black. Predict his age (round to nearest year, type 'NO', if there isn't a good answer)",
+ answer("NO", correct = TRUE),
+ answer("'No'", correct = TRUE),
+ allow_retry = TRUE,   
+  correct = random_praise(),
+  incorrect = random_encouragement()
+)
+```
+
+
+
+```{r pred3, echo = FALSE}
+question("The shaded region around the line is known as a prediction interval",
+ answer("TRUE"),
+ answer("FALSE", correct = TRUE),
+ allow_retry = TRUE,   
+  correct = random_praise(),
+  incorrect = random_encouragement()
+)
+```
+
+
+## An anova approach  
+
+
+
+
+
+```{r echo = FALSE, eval = TRUE, fig.height = 1.7, fig.width=5.5}
+b <- ggplot(mutate(lions, mean_age = mean(ageInYears)) , 
+            aes(x = proportionBlack, y = ageInYears))+
+  geom_point(alpha = .5)+
+  geom_hline(aes(yintercept = mean_age))+
+  geom_segment(aes( xend = proportionBlack, yend = mean_age ), 
+               color = "black", alpha = .5)
+
+a<-ggplot(mutate(augment(lion_lm), mean_age = mean(ageInYears)) ,
+          aes(x = proportionBlack, y = ageInYears))+
+  geom_point(alpha = .2)+
+  geom_hline(aes(yintercept = mean_age))+
+  geom_segment(aes( xend = proportionBlack,y = .fitted,  yend = mean_age ), 
+               color = "black", alpha = .5)+
+  geom_line(aes(y = .fitted), alpha  = 2, color = "blue")
+
+c<-ggplot(augment(lion_lm) ,
+          aes(x = proportionBlack, y = ageInYears))+
+  geom_point(alpha = .5)+
+  geom_segment(aes( xend = proportionBlack,  yend = .fitted), 
+               color = "black", alpha = .5)+
+    geom_line(aes(y = .fitted), alpha  = 2, color = "blue")
+
+plot_grid(a, b, c, ncol = 3, labels = c("a","b","c"))
+```
+
+
+
+```{r dev, echo = FALSE}
+quiz(caption = "Deviation", 
+     question("Which corresponds to total deviations?",
+         answer("a"),
+         answer("b", correct = TRUE),
+         answer("c"),
+  allow_retry = TRUE,   
+  correct = random_praise(),
+  incorrect = random_encouragement()),
+     question("Which corresponds to model deviations?",
+         answer("a", correct = TRUE),
+         answer("b"),
+         answer("c"),
+  allow_retry = TRUE,   
+  correct = random_praise(),
+  incorrect = random_encouragement()),
+     question("Which corresponds to residual deviations?",
+         answer("a"),
+         answer("b"),
+         answer("c", correct = TRUE),
+  allow_retry = TRUE,   
+  correct = random_praise(),
+  incorrect = random_encouragement())
+)
+```
+
+
+Examine the code below 
+
+
+```{r, echo=TRUE, eval=TRUE}
+lm(ageInYears ~ proportionBlack, lions) %>%
+  augment()%>%
+  summarise( ssa = sum((.fitted - ageInYears)^2) ,
+             ssb = sum((.fitted - mean(ageInYears))^2),
+             ssc = sum((ageInYears - mean(ageInYears))^2))
+```
+
+
+
+
+```{r varcomp, echo = FALSE}
+quiz(caption = "Variance components", 
+     question("Which corresponds to $SS_{total}$",
+         answer("`ssa = sum((.fitted - ageInYears)^2)`"),
+         answer("`ssb = sum((.fitted - mean(ageInYears))^2)`"),
+         answer("`ssc = sum((ageInYears - mean(ageInYears))^2)`", correct = TRUE),
+  allow_retry = TRUE,   
+  correct = random_praise(),
+  incorrect = random_encouragement()),
+     question("Which corresponds to $SS_{model}$",
+         answer("`ssa = sum((.fitted - ageInYears)^2)`"),
+         answer("`ssb = sum((.fitted - mean(ageInYears))^2)`", correct = TRUE),
+         answer("`ssc = sum((ageInYears - mean(ageInYears))^2)`"),
+  allow_retry = TRUE,   
+  correct = random_praise(),
+  incorrect = random_encouragement()),
+     question("Which corresponds to $SS_{error}$",
+         answer("`ssa = sum((.fitted - ageInYears)^2)`", correct = TRUE),
+         answer("`ssb = sum((.fitted - mean(ageInYears))^2)`"),
+         answer("`ssc = sum((ageInYears - mean(ageInYears))^2)`"),
+  allow_retry = TRUE,   
+  correct = random_praise(),
+  incorrect = random_encouragement())
+)
+```
+
+The data came from 32 lions.
+
+
+```{r findF, exercise=TRUE, eval = FALSE}
+
+```
+
+
+
+```{r Fval, echo = FALSE}
+question_text("Find F (round to the nearest integer)",
+ answer("50", correct = TRUE),
+ answer("50.0", correct = TRUE),
+ allow_retry = TRUE,   
+  correct = random_praise(),
+  incorrect = random_encouragement()
+)
+```
+
+
+```{r findp, exercise=TRUE, eval = FALSE}
+
+```
+
+
+
+
+
+
+```{r test, echo = FALSE}
+quiz(caption = "Hypothesis test", 
+     question("The degrees of freedom for F are",
+         answer("df1 = 30, df2 = 1"),
+         answer("df1 = 29, df2 = 2"),
+         answer("df1 = 1,  df2 = 30", correct = TRUE),
+         answer("df1 = 2,  df2 = 29"),
+  allow_retry = TRUE,   
+  correct = random_praise(),
+  incorrect = random_encouragement()),
+     question("The p-value is",
+         answer("Super duper ooper small p < .000000000000000000001"),
+         answer("Super small .000000000000000000001 < p < .000001", correct = TRUE),
+         answer("Very small .000001 < p < .001"),
+         answer("Below the traditional $\alpha$ threshold of 0.05?  That is 0.05 p < .001"),
+         answer("Above the traditional $\alpha$ threshold of 0.05?  That is  p > 0.05"),
+  allow_retry = TRUE,   
+  correct = random_praise(),
+  incorrect = random_encouragement()),
+     question("What do we do to the null hypothesis?",
+         answer("Reject it", correct = TRUE),
+         answer("Fail to reject it"),
+         answer("Fail to accept it"),
+  allow_retry = TRUE,   
+  correct = random_praise(),
+  incorrect = random_encouragement())
+)
+```
+
+
+```{r findr2, exercise=TRUE, eval = FALSE}
+
+```
+
+
+```{r r2, echo = FALSE}
+question_text("What proportion of the variance in age is 'explained' by proportion black on the nose? (include two digits after the decimal)",
+ answer(".62", correct = TRUE),
+ answer("0.62", correct = TRUE),
+ answer(".63", correct = TRUE),
+ answer("0.63", correct = TRUE),
+ allow_retry = TRUE,   
+  correct = random_praise(),
+  incorrect = random_encouragement()
+)
+```
+
+Evaluate these plot to see if data appear to meet assumptions of a linear regression
+
+```{r, echo=FALSE, eval=TRUE, warning=FALSE, message=FALSE}
+autoplot(lion_lm)
+```

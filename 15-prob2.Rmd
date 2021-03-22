@@ -1,4 +1,4 @@
-# Probabilistic thinking {#prob2}
+# Math for Probabilistic thinking {#prob2}
 
 ```{r, echo = FALSE, warning=FALSE, message=FALSE}
 library(tidyverse)
@@ -19,6 +19,7 @@ library(ggridges)
 library(randomNames)
 library(infer)
 library(tiktokrmd)
+options(crayon.enabled = FALSE)   
 ```
 
 
@@ -396,15 +397,21 @@ flu_sum %>%
 
 This is basically what we got by math in section \@ref(bayes).   
 
-```{r}
-tt_url <- "https://www.tiktok.com/@aquickspoonful/video/6890681375431691526"
-tt <- tiktok_embed(tt_url)
-tiktok_html(tt)
+
+
+
+
+
+## Probabilitic maths: Quiz   
+
+Go through all "Topics" in the `learnR` tutorial, below. Nearly identical will be homework on canvas.
+
+```{r, echo=FALSE}
+include_app("https://brandvain.shinyapps.io/prob2/",height = '800')
 ```
 
 
 
-reflection qs. math vs sim, which makes more sens eto you, why? 
-
-
-add learnr quiz, definitions and videos
+```{r, echo=FALSE}
+rm(list = ls())
+```

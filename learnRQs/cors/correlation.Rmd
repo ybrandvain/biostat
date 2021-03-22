@@ -1,0 +1,495 @@
+---
+title: "Tutorial"
+output: learnr::tutorial
+runtime: shiny_prerendered
+---
+
+```{r setup, include=FALSE}
+library(learnr)
+library(sortable)
+library(tidyverse)
+library(ggmosaic)
+library(knitr)
+knitr::opts_chunk$set(echo = FALSE)
+
+library(palmerpenguins)
+my_penguins <- penguins %>% 
+  filter(species == "Gentoo",
+         sex     == "male", 
+         island  == "Biscoe") 
+
+crickets  <- read_csv("https://whitlockschluter3e.zoology.ubc.ca/Data/chapter16/chap16q12CricketImmunitySpermViability.csv") %>%
+  filter(spermViability>75)
+
+library(infer)
+```
+
+# Permutation quiz
+
+## Guess the correlation  
+
+
+
+Now that you have some practice with [guess the correlation](http://guessthecorrelation.com/), look at these three plots
+
+```{r, echo=FALSE, out.width="100%"}
+include_graphics("https://github.com/ybrandvain/3272_book/blob/master/images/guess.jpeg?raw=true")
+```
+
+
+```{r guess1, echo=FALSE}
+# Define the answer options
+plots <- c("A", "B", "C")
+
+# Initialize the question
+question_rank(
+  "Rank the correlations, from smallest to greatest",
+  answer(c("B","C","A"), correct = TRUE),
+  answer(c("A","C","B"), correct = FALSE, message = "Other direction!"),
+  allow_retry = TRUE,
+  options = sortable_options(
+    animation = 150
+  )
+)
+```
+
+
+
+```{r guess2, echo=FALSE}
+question("Guess the correlation in C",
+  answer("0.07"),
+  answer("0.23"),
+  answer("0.48", correct = TRUE),
+  answer("0.62"),
+   allow_retry = TRUE,   
+    correct = random_praise(),
+    incorrect = random_encouragement()
+  )
+```
+
+
+
+
+## Background
+
+
+Penguins fly through the water by pushing of with their flippers. It seems retainable that heavier bird  would therefore have larger flipper. To look into this, lets look into the relationship between `body_mass_g` and `flipper_length_mm` in Gentoo penguins from Biscoe island, and call this subset  `my_penguins`.
+
+
+```{r, eval = FALSE, echo=TRUE}
+library(palmerpenguins)
+my_penguins <- penguins %>% 
+  filter(species == "Gentoo",
+         sex     == "male", 
+         island  == "Biscoe") 
+``` 
+
+First let's visualize the relationship between `body_mass_g` and `flipper_length_mm`   
+
+```{r plot, exercise=TRUE, eval = FALSE}
+ggplot(data = my_penguins, aes(x = __, y = ___))+
+  ____() +
+  geom_smooth(method = 'lm', se = FALSE)
+```
+
+```{r plot-solution}
+ggplot(data = my_penguins, aes(x = body_mass_g, y = flipper_length_mm))+
+  geom_point() +
+  geom_smooth(method = 'lm', se = FALSE)
+```
+
+
+Now lets estimate the correlation between `body_mass_g`  and `flipper_length_mm`.    **Let's do so using math first**
+
+
+```{r est, exercise=TRUE, eval = FALSE}
+# calculate correlation with math
+my_penguins %>%
+  summarize(n              = n(), 
+            mean_body      = ___(___),
+            mean_flip      = ___(___),
+            sd_body        = ___(___),
+            sd_flip        = ___(___),
+            sum_cross_prod = sum((___ -  __) * (___ - ___)),
+            cov_body_flip  = ___ / (___ - ___)  ,  
+            cor_body_flip  = cov_body_flip / (___ * ___)))
+
+# calculate correlation with one R function
+my_penguins %>%
+  summarize(cor_body_flip  = ___(___, ___))
+```
+
+```{r est-solution}
+my_penguins %>%
+  summarize(n              = n() ,
+            mean_body      = mean(body_mass_g),
+            mean_flip      = mean(flipper_length_mm),
+            sd_body        = sd(body_mass_g),
+            sd_flip        = sd(flipper_length_mm),
+            sum_cross_prod = sum((body_mass_g - mean_body) * (flipper_length_mm - mean_flip)),
+            cov_flip_body  = sum_cross_prod / (n - 1),
+            cor_flip_body  = cov_flip_body / (sd_body * sd_flip))
+
+my_penguins %>%
+  summarize(cor_flip_body  = cor(flipper_length_mm, body_mass_g))
+
+```
+
+
+
+
+```{r math, echo = FALSE}
+question_text("The sum of cross products  between `body_mass_g`  and `flipper_length_mm`  is (rounded to nearest integer)",
+ answer("35225", correct = TRUE),
+ allow_retry = TRUE,   
+  correct = random_praise(),
+  incorrect = random_encouragement()
+)
+```
+
+
+```{r obs, echo = FALSE}
+question_text("The estimated correlation bewteen `body_mass_g`  and `flipper_length_mm`  is (to three points past the decimal)",
+ answer("0.330", correct = TRUE),
+ answer(".330", correct = TRUE),
+ answer(".33", correct = TRUE),
+ answer(".33", correct = TRUE),
+ allow_retry = TRUE,   
+  correct = random_praise(),
+  incorrect = random_encouragement()
+)
+```
+
+
+
+##  Correlation vs covariance   
+
+Adapt the code below to familiarize yourself with differences between the covariance and the correlation by comparing the covariance and correlation in body mass and flipper_length when body mass is reported in grams vs kg. 
+
+```{r est2, exercise=TRUE, eval = FALSE}
+my_penguins %>%
+  mutate(body_mass_kg        = body_mass_g / 1000),
+  summarize(cov_flip_body_g   = __(__, __),
+            cov_flip_body_kg  = __(__, __),
+            cor_flip_body_g   = __(__, __),
+            cor_flip_body_kg  = __(__, __))
+```
+
+```{r est2q, echo=FALSE}
+quiz(caption = "Correlation vs covariance  ",
+question("The **covariance** between body_mass_kg and flipper_length_mm is ____ than the covariance between body_mass_g and flipper_length_mm",
+  answer("greater than"),
+  answer("equal to "),
+  answer("less than", correct = TRUE),
+   allow_retry = TRUE,   
+    correct = random_praise(),
+    incorrect = random_encouragement()
+  ),
+question("The **correlation** between body_mass_kg and flipper_length_mm is ____ than the correlation between boddy_mass_g and flipper_length_mm",
+  answer("greater than"),
+  answer("equal to ", correct = TRUE),
+  answer("less than"),
+   allow_retry = TRUE,   
+    correct = random_praise(),
+    incorrect = random_encouragement()
+  )
+)
+```
+
+
+**Be prepared to discuss the answer above, think about the visual of the area of rectangles**    
+
+
+
+## Bootrapping and permuting   
+
+```{r  bootrappingvPermuting, echo=FALSE}
+question("We bootstrap to XXX and permute to YYY",  
+         answer("XXX = estimate uncertainty" , correct = TRUE),
+         answer("XXX = hypothesis test"      ),
+         answer("YYY = estimate uncertainty" ),
+         answer("YYY = hypothesis test"      , correct = TRUE),
+           allow_retry = TRUE,
+    correct = random_praise(),
+  incorrect = random_encouragement()
+)
+```
+
+
+
+```{r  bootrappingAndPermuting, echo=FALSE}
+quiz(caption = "Consider the properties of permutation and bootstrap",
+    question("Every bootstrap replicate will have  (select all that apply)",
+    answer("Identical values for mean body_mass"),
+    answer("Identical values for mean flipper_length"),
+    answer("A variable correlation between body mass and flipper length deviating from the sample correlation by sampling error", correct = TRUE),     
+    answer("A variable correlation between body mass and flipper length deviating from the proposed correlation under the null by sampling error"),  
+    allow_retry = TRUE,
+    incorrect = "Try again!"
+  ),
+        question("Every permuted replicate will have (select all that apply)",
+    answer("Identical values for mean body_mass", correct = TRUE),
+    answer("Identical values for mean flipper_length", correct = TRUE),
+    answer("A variable correlation between body mass and flipper length deviating from the sample correlation by sampling error"),     
+    answer("A variable correlation between body mass and flipper length deviating from the proposed correlation under the null by sampling error", correct = TRUE),  
+    allow_retry = TRUE,
+    incorrect = "Try again!"
+  )
+)
+```
+
+
+## Bootstraping    
+
+Say we want to estimate uncertainty in the correlation between `body_mass_g` and  `flipper_length_mm`  from the data. Adapt the cricket code,  below, to estimate uncertainty in this correlation in `my_penguins` as the standard error and 95% confidence interval.      
+
+
+
+
+```{r cricket, message=FALSE, warning=FALSE, echo=TRUE, eval = FALSE}
+n_reps <- 10000
+
+# bootstrap
+crickets_boot_dist <- crickets %>%
+  rep_sample_n(size  = nrow(crickets), replace = ___, reps = n_reps ) %>%
+  summarise(cor_vals = cor(spermViability ,lysozyme))
+  
+# quantify uncertainty from the bootstrap
+crickets_boot_dist %>%
+  summarise(se       = __(__),
+            lower_CI = ___(__, prob = __),
+            upper_CI = ___(__, prob = __))
+```
+
+```{r boot, exercise=TRUE, eval = FALSE}
+n_reps <- 10000
+
+penguin_boot_dist <- my_penguins %>%
+  rep_sample_n(???????) %>%
+  summarise(?????)
+  
+# quantify uncertainty from the bootstrap
+penguin_boot_dist  %>%
+  ??????
+```
+
+```{r bootans, echo=FALSE, eval=FALSE}
+
+#bootstrap 
+penguin_boot_dist <- my_penguins %>%
+    rep_sample_n(size  = nrow(my_penguins), replace = TRUE, reps = n_reps ) %>%
+  summarise(cor_vals = cor(body_mass_g, flipper_length_mm))
+  
+  
+# quantify uncertainty from the bootstrap
+penguin_boot_dist  %>%
+  summarise(se       = sd(cor_vals ),
+            lower_CI = quantile(cor_vals , prob = 0.025),
+            upper_CI = quantile(cor_vals , prob = 0.975))
+```
+
+
+```{r bootq, echo=FALSE}
+question("The bootstrap standard error of the correlation between `body_mass_g` and  `flipper_length_mm` is approximately",
+  answer("0.095", correct = TRUE),
+  answer("0.142"),
+  answer("0.380"),
+  answer("0.579"),
+  allow_retry = TRUE,
+    correct = random_praise(),
+  incorrect = random_encouragement()
+)
+```
+
+
+#### Hypotheses    
+
+
+```{r hypoth, echo=FALSE}
+quiz(caption = "Hypotheses",
+    question("What is the null hypothesis?",
+    answer("The correlation between body mass and flipper length in  penguins is zero"),
+    answer("The correlation between body mass and flipper length in  penguins is nonzero"),
+      answer("The correlation between body mass and flipper length in male Gentoo penguins from Biscoe is less than or equal to zero"),     
+    answer("The correlation between body mass and flipper length in male Gentoo penguins from Biscoe is greater than or equal to zero"),
+    answer("The correlation between body mass and flipper length in male Gentoo penguins from Biscoe is nonzero"),
+     answer("The correlation between body mass and flipper length in male Gentoo penguins from Biscoe is zero", correct = TRUE),
+    allow_retry = TRUE,
+    incorrect = "Try again!"
+  ),
+    question("What is the alternative hypothesis?",
+    answer("The correlation between body mass and flipper length in penguins is zero"),
+    answer("The correlation between body mass and flipper length in  penguins is nonzero"),
+      answer("The correlation between body mass and flipper length in male Gentoo penguins from Biscoe is less than or equal to zero"),     
+    answer("The correlation between body mass and flipper length in male Gentoo penguins from Biscoe is greater than or equal to zero"),
+    answer("The correlation between body mass and flipper length in male Gentoo penguins from Biscoe is nonzero", correct = TRUE),
+     answer("The correlation between body mass and flipper length in male Gentoo penguins from Biscoe is zero"),
+    allow_retry = TRUE,
+    incorrect = "Try again!"
+  )
+)
+```
+
+
+## Permutation
+
+Say we wanted to  to estimate uncertainty in the correlation between `body_mass` and `flipper_length` from the data. Permute to test this null and estimate a p-value.     
+
+```{r perm, exercise=TRUE, eval = FALSE}
+n_reps          <- 10000
+observed_cor    <- my_penguins %>%
+  summarise(___) %>%
+  pull()
+
+# permute
+perm_dist <- my_penguins %>%
+  rep_sample_n(size = nrow(___), replace = ___, reps = n_reps) %>%
+  mutate( ___ = sample(___, replace = ___)) %>%
+  summarise(cor_val = __)
+
+# find p-value
+p.val <- perm_dist %>%
+  mutate(as_or_more_extreme =  __(___) __ abs(__)) %>%
+  summarise(p_val = mean(as_or_more_extreme))
+
+p.val
+```
+
+
+```{r perm-solution}
+n_reps          <- 10000
+observed_cor    <- my_penguins %>%
+  summarise(mass_flip  = cor(body_mass_g, flipper_length_mm)) %>%
+  pull()
+
+# permute
+perm_dist <- my_penguins %>%
+  rep_sample_n(size = nrow(my_penguins), replace =FALSE, reps = n_reps) %>%
+  mutate(body_mass_g = sample(body_mass_g, replace = FALSE)) %>%
+  summarise(cor_val= cor(body_mass_g, flipper_length_mm))%>% 
+  ungroup()
+
+# find p-value
+p.val <- perm_dist %>%
+  mutate(as_or_more_extreme =  abs(cor_val) >= abs(observed_cor)) %>%
+  summarise(p_val = mean(as_or_more_extreme))
+
+p.val
+```
+
+
+```{r pvalquiz, echo=FALSE}
+quiz(caption = "Interpetting p-values",
+    question("What is our P value (approximately)?",
+    answer("nearly zero"),
+    answer("Approx 0.001"),
+    answer("Approx 0.01", correct = TRUE),
+    answer("Approx 0.1"),
+    answer("Approx 0.5"),
+    answer("nearly 1"),
+    answer("not enough info"),
+    allow_retry = TRUE,
+    incorrect = "Try again!"
+  ),
+  question("What do we do to the null hypothesis?",
+    answer("Reject it", correct = TRUE),
+    answer("Fail to reject it"),
+    allow_retry = TRUE,
+    incorrect = "Try again!"
+  ),
+    question("What is the probability that the true correlation is zero (if the answer is 'not enough info, check that AND your best guess')?",
+    answer("nearly zero", correct = TRUE),
+    answer("Approx 0.001"),
+    answer("Approx 0.01"),
+    answer("Approx 0.1"),
+    answer("Approx 0.5"),
+    answer("nearly 1"),
+    answer("not enough info", correct = TRUE),
+    allow_retry = TRUE,
+    incorrect = "Try again!"
+  )
+)
+```
+
+
+**Be prepared to discuss the answer above**  
+
+## Advanced  fun   
+
+Let's consider this correlation across all combinations of sex, species, and island, as shown in the  plot below  
+
+```{r, eval = TRUE, echo=TRUE, message=FALSE, warning=FALSE}
+ggplot(penguins %>% na.omit() %>% mutate(body_mass_kg = body_mass_g/1000),
+       aes(x = body_mass_kg, y = flipper_length_mm, color = species))+
+  geom_point(alpha = .3)+
+  geom_smooth(method = 'lm', se = FALSE) +
+  facet_grid(sex~species + island , labeller = "label_both")+
+  theme_light()+
+  theme(legend.position = "none")
+```
+
+
+Find the correlation across all combinations of sex, species, and island, and [`arrange()`](https://dplyr.tidyverse.org/reference/arrange.html) these values in descending order.  
+
+
+```{r all, exercise=TRUE, eval = FALSE}
+penguins      %>%
+  na.omit()   %>%
+  group_by(__, __, __)%>%
+  summarise(cor_flip_body  = cor(__, __)) %>%
+  __(__(__)) # sort from greatest to smallest correlation
+```
+
+```{r all-solution, exercise=TRUE, eval = FALSE}
+penguins      %>%
+  na.omit()   %>%
+  group_by(sex, species, island)%>%
+  summarise(cor_flip_body  = cor(body_mass_g, flipper_length_mm)) %>%
+  arrange(desc(cor_flip_body)) # sort from greatest to smallest correlation
+```
+
+
+
+```{r, echo=TRUE, eval=TRUE, message=FALSE, warning=FALSE}
+penguins      %>%
+  na.omit()   %>%
+  group_by(sex, species, island)%>%
+  summarise(cor_flip_body  = cor(flipper_length_mm, body_mass_g)) %>%
+  arrange(desc(cor_flip_body))
+```
+
+
+```{r allcors, echo=FALSE}
+question("Which combination of sex species and island had the largest correlation",
+         answer("male Adelie from Dream"),
+         answer("female Adelie from Biscoe"),
+         answer("male Chinstrap from Dream ",  correct = TRUE),
+    allow_retry = TRUE,
+    correct = random_praise(),
+  incorrect = random_encouragement()
+  )
+```
+
+The code below runs a correlation separately for each combination of sex, island and species, and finds a p-value and confidence interval etc...
+
+```{r, echo=TRUE}
+library(broom)
+penguins                           %>%
+  na.omit()                        %>%
+  group_by(species, sex, island)   %>%
+  nest()                           %>%
+  mutate(cor_tests = map(data, ~ cor.test(.x$body_mass_g, .x$flipper_length_mm)),
+         answers   = map(cor_tests, tidy))  %>%
+  unnest(answers)                           %>%
+  select(-data, - cor_tests)
+```
+
+```{r multipletes, echo=FALSE}
+question("Assuming you want to do the frequentist *Null hypothesis significance testing* thing, what is the biggest problem in interpreting these p-values (we haven't covered this, so think and guess)",
+         answer("This does not allow information to be shared across combinations of sex, island, and species"),
+         answer("This does not answer the Bayesian question we care about"),
+         answer("The p-values do not reflect the true nulls because we have conducted multiple tests and therefore have a greater chance of rejecting the null in at least one comparison",  correct = TRUE),
+    allow_retry = TRUE,
+    incorrect = "This is a problem, but is a part of the whole Null hypothesis significance testing thing. Try again!"
+  )
+```

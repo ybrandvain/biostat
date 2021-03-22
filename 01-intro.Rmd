@@ -9,6 +9,7 @@ library(tweetrmd)
 library(tufte)
 library(emo)
 library(here)
+options(crayon.enabled = FALSE)   
 ```
 
 
@@ -266,4 +267,8 @@ The homework (due by 7 am on monday) is on [canvas](https://canvas.umn.edu/cours
 
 **Categorical variables** are qualitative -- they cannot be assigned a meaningful value on the number line.    
 **Numeric variables** are quantitative -- they can be assigned a meaningful value on the number line.
+```
+
+```{r, echo=FALSE}
+rm(list = ls())
 ```

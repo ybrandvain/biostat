@@ -11,6 +11,7 @@ library(tufte)
 library(cowplot)
 library(emo)
 library(DT)
+options(crayon.enabled = FALSE)   
 ```
 
 
@@ -600,3 +601,8 @@ To override this and get summaries excluding `NA` values add the `na.rm = TRUE`,
 ### Optional quiz     {-}   
 
 Feel free to try [this learnR tutorial](https://rstudio.cloud/learn/primers/2.3) for more practice.
+
+
+```{r, echo=FALSE}
+rm(list = ls())
+```

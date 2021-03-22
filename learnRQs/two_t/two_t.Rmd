@@ -1,0 +1,190 @@
+---
+title: "Tutorial"
+output: learnr::tutorial
+runtime: shiny_prerendered
+---
+
+```{r setup, include=FALSE}
+library(learnr)
+library(sortable)
+library(tidyverse)
+library(knitr)
+library(kableExtra)
+library(ggmosaic)
+library(cowplot)
+library(infer)
+library(broom)
+knitr::opts_chunk$set(echo = FALSE)
+
+frogs <-  read_csv("Swierk_Langkilde_BEHECO_1.csv") %>%
+  select(year, pond, treatment,hatched.eggs)
+```
+
+# two-t quiz  
+
+
+
+## Setup
+
+There are plenty of reasons to choose your partner carefully. In much of the biological world  a key reason is "evolutionary fitness" -- presumably organisms evolve to choose mates that will help them make more (or healthier) children. This could, for example explain Kermit's resistance in one of the [more complex love stories of our time](https://www.insider.com/miss-piggy-and-kermit-relationship-timeline-2018-12), as frogs and pigs are unlikely to make healthy children.   
+
+To evaluate this this idea @swierk2019, identified a males top choice out of two female wood frogs and then had them mate with the preferred or unpreferred female and counted the number of hatched eggs. 
+
+[we've seen this data before]. It is loaded here as `frogs` but can be downloaded from https://raw.githubusercontent.com/ybrandvain/biostat/master/data/Swierk_Langkilde_BEHECO_1.csv  
+
+
+#### Plot the data  
+
+```{r plot, exercise=TRUE, eval = FALSE}
+ggplot(frogs, aes( x = treatment, y = hatched.eggs,  ... )) +
+  geom___()   + 
+  ...  
+```
+
+```{r plot-solution}
+ggplot(frogs, aes( x = treatment, y = hatched.eggs,  color = treatment )) +
+  geom_jitter(width = .2,height = 0, show.legend = FALSE)   + 
+  stat_summary(fun.data = "mean_cl_normal", color = "black")  
+```
+
+
+#### Summarise the data 
+
+Find the  difference in means by treatment, the pooled variance and cohens d.  
+
+```{r sum1, exercise=TRUE, eval = FALSE}
+first_summary <- frogs     %>% 
+  group_by(treatment)      %>%
+  summarise(n = n(), 
+            df = n - 1,
+            mean_hatch = mean(hatched.eggs),
+            var_hatch  = var(hatched.eggs))
+
+print(first_summary)
+
+first_summary %>%
+  summarise(est_dif    = diff(mean_hatch),
+            pooled_var = ,
+            pooled_sd  = sqrt(pooled_var)
+            cohensd    = )
+```
+
+
+```{r sum1-solution}
+first_summary <- frogs     %>% 
+  group_by(treatment)      %>%
+  summarise(n = n(), 
+            df = n - 1,
+            mean_hatch = mean(hatched.eggs),
+            var_hatch  = var(hatched.eggs))
+
+print(first_summary)
+
+first_summary %>%
+  summarise(est_dif    = diff(mean_hatch),
+            pooled_var = sum(var_hatch * df) / sum(df),
+            pooled_sd  = sqrt(pooled_var),
+            cohensd    = est_dif / pooled_sd)
+```
+
+
+Cohen suggested that d = 0.2 be considered a 'small' effect size, 0.5 represents a 'medium' effect size and 0.8 a 'large' effect size.
+
+```{r cohensd, echo = FALSE}
+quiz(caption = "Cohens s", 
+     question("Cohen's d is",
+         answer("Small", correct = TRUE),
+         answer("Medium"),
+         answer("Large"),
+  allow_retry = TRUE,   
+  correct = random_praise(),
+  incorrect = random_encouragement()),
+     question("This means we",
+         answer("Reject the null hypothesis"),
+         answer("Fail to reject the null hypothesis"),
+         answer("The null is false"),
+         answer("The null is true"),
+         answer("Are looking into a pretty subtle difference (if it exists)", correct = TRUE),
+  allow_retry = TRUE,   
+  correct = random_praise(),
+  incorrect = random_encouragement())
+)
+```
+
+
+#### Evaluate assumptions
+
+```{r assum, echo = FALSE}
+quiz(caption = "Assumptions", 
+question("The assumptions of a two-sample t-test are (select all that apply)",
+ answer("Response variables are normally distributed"),
+ answer("Residuals are normally distributed", correct = TRUE),
+ answer("Variance does not differ between groups", correct = TRUE),
+ answer("Response variables are independent of predictors"),
+ answer("Data within each group is independent", correct = TRUE),
+ answer("Response variables are collected without bias",correct = TRUE),
+ allow_retry = TRUE,   
+  correct = random_praise(),
+  incorrect = random_encouragement()), 
+question("Above we saw a difference in variance of 1000 between group (56118 vs 67412), how worried should you be about violating the assumption of homoscedasticity?",
+ answer("Not very worried", correct = TRUE),
+ answer("Freaking out"),
+ answer("Not enough information"),
+ allow_retry = TRUE,   
+  correct = random_praise(),
+  incorrect = random_encouragement())
+)
+```
+
+Here is a look at the output of a linear model. Let's use the `augment` function in the broom package to find residuals and then let's make a qqplot
+
+```{r qq,  exercise=TRUE, eval = FALSE}
+frog_lm  <- lm(hatched.eggs ~ treatment, data = frogs)
+frog_lm
+
+ggplot(data = augment(frog_lm), aes(sample = .resid)) +
+  geom_qq()+
+  geom_qq_line()
+```
+
+```{r normassump, echo = FALSE}
+question("From the plot above",
+ answer("It's clear the data are normal, nothing too worry about at all"),
+ answer("The data seem to not be normal, but it's not terrible and the sample size is probably big enough for the central limit theorem to take the wheel (but maybe consider alternatives).", correct = TRUE),
+  answer("Make you run far away from normality assumptions"),
+ allow_retry = TRUE,   
+  correct = random_praise(),
+  incorrect = random_encouragement()
+)
+```
+
+
+
+```{r moremassump, echo = FALSE}
+quiz(caption = "Considering assumptions", 
+     question("If data do not meet assumptions",
+                            answer("We ignore this and charge ahead"),
+              answer("Run to find another test -- we can't use a test for data that doesn't meet test assumptions"),
+              answer("Consider how extreme the violation is and if the test is robust to these violations before moving forward", correct = TRUE),
+  allow_retry = TRUE,   
+  correct = random_praise(),
+  incorrect = random_encouragement()),
+ question("Say you were concerned about the frog data meeting assumptions of the two-sample t-test. What test would you use?",
+          answer("Welch's t-test", message = "Nope, variances here are pretty similar"),
+          answer("A rank-based nonparametric test", message = "Maybe 30 years ago"), 
+          answer("A permutation test", correct = TRUE), 
+  allow_retry = TRUE,   
+  correct = random_praise())
+)
+```
+
+#### Test 
+
+Find the standard error, t, the p-value, and the 95% confidence interval  the `t.test()`  function (set `var.equal = TRUE`).   
+
+
+```{r ttest,  exercise=TRUE, eval = FALSE}
+
+```
+
+

@@ -18,6 +18,7 @@ library(datasauRus)
 library(ggridges)
 library(randomNames)
 library(infer)
+options(crayon.enabled = FALSE)   
 
 df_students <- readr::read_csv("https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2019/2019-05-07/student_teacher_ratio.csv")
 
@@ -71,8 +72,13 @@ This chapter pulls from Chapter 2 of Whitlock and Schluter (2020), all of Wilke 
 - Critique figures and understand when / how they are being manipulated.   
 
 ```{block2, type='rmdwarning'}
-tbd
-``` 
+In addition to this reading, watching the embedded videos on [telling a good story](https://youtu.be/geG8E_ocYDY), [misleading by truncating your axes](https://youtu.be/9pNWVMxaFuM), [misleading by messing with bin size](https://www.youtube.com/watch?v=zAg1wsYfwsM&feature=youtu.be), and trying [these data](https://github.com/ybrandvain/biostat/blob/master/images/homglobin4comp.png?raw=true) on the [color vision deficiency simulator](http://hclwizard.org/cvdemulator/)  **you should think hard about your figures, the story you want them to tell, and how you would emphasize that story in your plots**. 
+```
+
+
+
+
+
 
 In Chapter \@ref(viz1), we went over our goals in making a plot, and dove into making our first ggplots. I did this so that we could get started on something, before perfecting.   
 
@@ -543,9 +549,9 @@ include_graphics("images/covid4text-1.png")
 
 In writing up results, we describe our statistical analyses, summaries and figures in prose. This is an opportunity to reiterate the take-home messages from the analysis and point towards our figures and statistics as evidence for these messages. Let’s think about how to do this, leaving he discussion of statistics to a later time.
 
-- **A bad write up:** Figure \@ref(moderna2) compares covid cases and severity of these cases for treatments and controls.   
+- **A bad write up:** Figure \@ref(fig:moderna2) compares covid cases and severity of these cases for treatments and controls.   
 
-- **Better write up:** Figure \@ref(moderna2) shows an excess of covid cases in people treated with a placebo compared to people getting the moderna mRNA-1273 vaccine (185 of 15,000 individuals in the placebo group caught coronovirus, while only 11 of the 15,000 vaccinated caught coronovirus). Additionally, none of the vaccinated participants who became infected developed a serve case of covid, while 30 of the 185 infected after receiving the placebo developed a serious case (compare the dark blue bar above control and its absence above mRNA-1273).   
+- **Better write up:** Figure \@ref(fig:moderna2) shows an excess of covid cases in people treated with a placebo compared to people getting the moderna mRNA-1273 vaccine (185 of 15,000 individuals in the placebo group caught coronavirus, while only 11 of the 15,000 vaccinated caught coronavirus). Additionally, none of the vaccinated participants who became infected developed a serve case of covid, while 30 of the 185 infected after receiving the placebo developed a serious case (compare the dark blue bar above control and its absence above mRNA-1273).   
 
 ```{block2, type='rmdnote'}
 When reading text about a figure, **first look at the figure and think** about its message. Then look at what was written and consider:  
@@ -575,3 +581,8 @@ include_graphics("https://pbs.twimg.com/media/EtmtwHHUUAAGV2C?format=jpg&name=sm
 
 ## Data tables
 In Chapter \@ref(data1) we discussed storing data for analysis in tables. Although [it is usually better to present data in figures than tables](http://www.stat.columbia.edu/~gelman/research/published/dodhia.pdf), we may sometimes want to present results to readers in tables. These tables should not look like those introduced in chapter \@ref(data1). In general, these tables should follow best practices in making figures (e.g. facilitating comparisons, honesty, readability etc...). These tables need not be tidy, and should not include all raw data, but rather should summarize data and analyses.
+
+
+```{r, echo=FALSE}
+rm(list = ls())
+```

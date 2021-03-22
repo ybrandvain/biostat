@@ -8,6 +8,7 @@ library(blogdown)
 library(tweetrmd)
 library(tufte)
 library(emo)
+options(crayon.enabled = FALSE)   
 ```
 
 
@@ -414,3 +415,6 @@ knitr::include_graphics('https://d33wubrfki0l68.cloudfront.net/db69c3d03699d3954
 
 
 
+```{r, echo=FALSE}
+rm(list = ls())
+```

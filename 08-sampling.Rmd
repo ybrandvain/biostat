@@ -18,12 +18,12 @@ library(datasauRus)
 library(ggridges)
 library(randomNames)
 library(infer)
+options(crayon.enabled = FALSE)   
 ```
 
 
 ```{block2, type='rmdnote'}
 These notes accompany portions of Chapter 4  --- *Estimaing with Uncertainty* --- of our textbook, which we revisit in Section \@ref(uncertainty).   **The reading below is required,**  @whitlock2020 is  not.  
-
 If you want a different (or another) presentiation of this material, I highly recommend [Chapter 7](https://moderndive.com/7-sampling.html) of [@ismay2019] as an optional reading.
 ```
 
@@ -198,11 +198,8 @@ The **sampling distribution** is  our tool for accessing the alternate realities
 
 ```{block2, type='rmdnote'}
 I keep saying how important sampling and the sampling distribution is. So, when, why, and how do we use it in statistics??? There are two main ways. 
-
 - First, when we make an estimate from a sample, we build a sampling distribution around this estimate to describe uncertainty in this estimate (Section \@ref(uncertainty)).  
-
 - Second, in null hypotheses significance testing (Section \@ref(hypoth)) we compare our statistics to its sampling distribution under the null, to see how readily it could have been caused by sampling error.   
-
 Thus the sampling distribution plays a key role in two of the major goals of statics - estimation and hypothesis testing.  
 ```
 
@@ -227,12 +224,10 @@ coa_dist<- lapply(500:1,function(i){
   tibble(trial = 500:i, prop)
   }) %>% bind_rows %>%
   filter(trial %in% c(1:10, 15,seq(25,500,25)))
-
 coa_baseplot <- ggplot(coa_dist, aes(x = prop)) + 
   geom_histogram(binwidth = 1/30, color = "white")+
   theme(axis.text.x = element_text(size=15)) + 
   geom_vline(xintercept = 41/390, color = "red", lty = 2)
-
 coa_sampling <- coa_baseplot + 
   transition_states(trial,transition_length = .2, state_length = .2)+
   labs(title = 'Sampling distribution of COA faculty prop', 
@@ -264,11 +259,9 @@ n.reps      <- 1000
 library(infer)
 sample.size <- 30
 n.reps      <- 1000
-
 coa.sampling.dist <- coa %>%
   rep_sample_n(size = sample.size, reps = n.reps) %>%
   summarise(prop = sum(role == "faculty") / sample.size)  # count faculty and divide by sample size
-
 ggplot(coa.sampling.dist, aes(x = prop))                  +
   geom_histogram(binwidth = 1/30, color = "white")        +
   ggtitle("Sampling distribution of COA faculty ratio")   + 
@@ -337,7 +330,6 @@ coa.sampling.dist <- simulated_data %>%
 coa.sampling.dist <- simulated_data %>%
   group_by(replicate)       %>%
   summarise(prop = sum(role == "faculty") / sample.size)  # count faculty and divide by sample size
-
 ggplot(coa.sampling.dist, aes(x = prop))                  +
   geom_histogram(binwidth = 1/30, color = "white")        +
   ggtitle("Sampling distribution of COA faculty ratio")   + 
@@ -401,13 +393,11 @@ Because  sampling error is most pronounced in a small sample, estimates from sma
 > "Experimental college where students learn without faculty..."
 > `r tufte::quote_footer('--- Some unscrupulous newspaper, probably.')`
 
-
 The very same sampling procedure from that same population will also result in an extreme proportion of faculty (60% or greater) for one in one-hundred samples of size five. A sample like this would yield a quite different headline. 
 
 
 > "Experimental college where faculty outnumber students..."
 > `r tufte::quote_footer('--- Some unscrupulous newspaper, probably.')`
-
 A sample of size 30 is much less likely to mislead -- it will only yield a sample with zero faculty 3.6 percent of the time, and will essentially never yield a sample with more than 50% faculty.   
 
 The numbers I gave above are correct and scary. But it gets worse -- since unexceptional numbers are hardly worth reporting (illustrated by the light grey coloring of unexceptional values in Figure \@ref(fig:smallN)), so we'll rarely see accurate  headlines like this. 
@@ -418,7 +408,7 @@ The numbers I gave above are correct and scary. But it gets worse -- since unexc
 
 
 
-```{r smallN, fig.cap = 'Comparing the sampling distribution of faculty proportion in samples of size five and thirty. The true population proportion is 0.105. Bars are colored by if they are likely to be reported, with unremarkable observations blending into the background.', echo=FALSE, cache=TRUE, message=FALSE, warning=FALSE, fig.height=1.7, fig.width=4.75}
+```{r,  smallN, fig.cap = 'Comparing the sampling distribution of faculty proportion in samples of size five and thirty. The true population proportion is 0.105. Bars are colored by if they are likely to be reported, with unremarkable observations blending into the background.', echo=FALSE,  message=FALSE, warning=FALSE, fig.height=1.7, fig.width=4.75}
 sample.size <- c(5, 30)
 n.reps      <- 100000
 coa.samples.by.n <- lapply(sample.size, function(N){coa %>%
@@ -484,17 +474,11 @@ Many of the concepts discussed in this chapter were first introduced in Section 
 
 ```{block2, type='rmddef'}
 **Population:**  A  collection of all individuals of a circumscribed type, or a generative process from which we can generate  samples.   
-
 **Sample:** A subset of a population -- individuals we measure.    
-
 **Parameter:** A true measure of a population.   
-
 **Estimate:** A guess at a parameter that  made from a finite sample. 
-
 **Sampling error:** A deviation between parameter and estimate attributable to the finite process of sampling.   
-
 **Sampling bias:** A deviation between parameter and estimate attributable to non representative sampling.     
-
 **Independence:** Samples are independent if  the probability that one individual is studied is unrelated to the probability that any other individual is studied.
 ```
 
@@ -503,11 +487,10 @@ Many of the concepts discussed in this chapter were first introduced in Section 
 
 ```{block2, type='rmdcode'}
 [`sample(x = , size = , replace = , prob =  )`](https://stat.ethz.ch/R-manual/R-devel/library/base/html/sample.html):     Generate a sample of size `size`, from a vector `x`, with (`replace = TRUE`) or without (`replacement = FALSE`) replacement. By default the size is the length of `x`, sampling occurs without replacement and probabilities are equal. Change these defaults by specifying a value for the argument. For example, to have unequal sampling probabilities, include a vector of length `x`, in which the $i^{th}$ entry describes the relative probability of sampling the $i^{th}$ value in `x`.
-
 [`sample_n(tbl = , size = , replace = , weight = )`](https://dplyr.tidyverse.org/reference/sample.html):  Generate a sample of size `size`, from a tibble `tbl`, with (`replace = TRUE`) or without (`replacement = FALSE`) replacement. All arguments are the same as in `sample()` except `weight` replaces `prob`, and `tbl` replaces `x`. `sample_n()` is a function in the `dplyr` package, which is loaded with tidyverse.   
-
 [`rep_sample_n()`](https://infer.netlify.app/reference/rep_sample_n.html): Generate `reps` samples of size `size`, from a tibble `tbl`, with (`replace = TRUE`) or without (`replacement = FALSE`) replacement. All arguments are the same as in `sample()`,  except `tbl` replaces `x`, and `reps` allows us to specify how many samples of size `size` we would like. `rep_sample_n()` returns a tibble grouped by replicate.  `rep_sample_n()` is a function in the `infer` package, which must be installed and loaded in addition to tidyverse.     
 ```
 
-
-
+```{r, echo=FALSE}
+rm(list = ls())
+```

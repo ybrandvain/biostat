@@ -1,0 +1,53 @@
+# Break  {#break2}   
+
+```{r, echo = FALSE, warning=FALSE, message=FALSE}
+library(tidyverse)
+library(DT)
+library(knitr)
+library(blogdown)
+library(beyonce, warn.conflicts=F, quietly=T)
+library(stringr)
+library(tweetrmd)
+library(emo)
+library(tufte)
+library(cowplot)
+library(lubridate)
+library(ggthemes)
+library(kableExtra)
+library(ggforce)
+library(datasauRus)
+library(ggridges)
+library(randomNames)
+library(infer)
+library(tiktokrmd)
+library(ggridges)
+library(colorspace)
+options(crayon.enabled = FALSE)   
+```
+
+Take this time to check in on your understanding of stats concepts, and R code. 
+
+Be sure you understand  
+
+- Population vs Samples   
+- Parameters  vs Estimate   
+- The sampling distribution
+- Estimation with uncertainty   
+- Probability -- probability laws and Bayes' theorem    
+- Null hypothesis significance testing -- the null hypothesis -- a p-value etc   
+- The binomial distribution  
+
+Please revisit old homework questions the where hard for you, and fill out this [survey](https://forms.gle/qPFGEqZoaiN7rA7t7)
+
+## Reproducible examples
+
+In R it's good to seek help, but great to help people help you.  Watch this video on making reproducible examples. Then make a reproducible example that to the [#reproduciblerhelp](https://biostatsspring2021.slack.com/archives/C01QET9V6UV) slack channel, and try to help one other person!  
+
+```{r, echo=FALSE}
+include_url("https://www.youtube.com/embed/G5Nm-GpmrLw")
+```
+
+
+```{r, echo=FALSE}
+rm(list = ls())
+```

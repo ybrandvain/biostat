@@ -11,6 +11,7 @@ library(blogdown)
 library(tweetrmd)
 library(tufte)
 library(emo)
+options(crayon.enabled = FALSE)   
 ```
 
 ```{block2, type='rmdnote'}
@@ -403,3 +404,6 @@ Complete the quiz below, a nearly  identical quiz will be on [canvas](https://ca
 include_app("https://brandvain.shinyapps.io/intro2r/",height = '800')
 ```
 
+```{r, echo=FALSE}
+rm(list = ls())
+```

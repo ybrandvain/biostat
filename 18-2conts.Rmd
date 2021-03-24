@@ -505,6 +505,10 @@ cor.test(x = crickets %>% pull(spermViability),
   tidy()
 ```
 
+```{r, echo=FALSE, out.width="50%"}
+include_graphics("https://raw.githubusercontent.com/allisonhorst/stats-illustrations/master/rstats-artwork/broom_package.png")
+```
+
 ### Care in interpreting (and running) correlation coefficients.   
 
 **The correlation looks at how $X$ and $Y$ jointly deviate from their means. As such, interpreting a correlation is only meaningful when both $X$ and $Y$ are random.**

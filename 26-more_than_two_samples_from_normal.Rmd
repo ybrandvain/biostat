@@ -143,11 +143,11 @@ We could solve the first issue by conducting three two-sample t-tests. But this 
 ```{r}
 bind_rows(
   t.test(body_temp ~ ambient_temp , filter(sqrl, ambient_temp != "hot"), var.equal  = TRUE) %>% 
-       tidy() %>% mutate(comp = "cold v warm") %>% select(comp, p.value, t = statistic),
+       tidy() %>% mutate(comp = "cold v warm") %>% dplyr::select(comp, p.value, t = statistic),
     t.test(body_temp ~ ambient_temp , filter(sqrl, ambient_temp != "warm"), var.equal  = TRUE) %>% 
-       tidy() %>% mutate(comp = "cold v hot") %>% select(comp, p.value, t = statistic),
+       tidy() %>% mutate(comp = "cold v hot") %>% dplyr::select(comp, p.value, t = statistic),
     t.test(body_temp ~ ambient_temp , filter(sqrl, ambient_temp != "cold"), var.equal  = TRUE) %>% 
-       tidy() %>% mutate(comp = "warm v hot") %>% select(comp, p.value, t = statistic))                                                                                  %>% mutate(p.value = paste(round(p.value * 10^c(31,41,24),digits = 2),c("x10^-31","x10^-41","x10^-24"), sep=""))%>% kable(digits = 4)
+       tidy() %>% mutate(comp = "warm v hot") %>% dplyr::select(comp, p.value, t = statistic))                                                                                  %>% mutate(p.value = paste(round(p.value * 10^c(31,41,24),digits = 2),c("x10^-31","x10^-41","x10^-24"), sep=""))%>% kable(digits = 4)
 ```
 
 
@@ -387,7 +387,7 @@ F_summary <- sums_of_squares  %>%
          ms_model = ss_model / df_model,
          ms_error = ss_error / df_error,
          F_val    = ms_model / ms_error) %>%
-  select(-n, -n_groups)
+  dplyr::select(-n, -n_groups)
 
 F_summary                                                                                                                          %>% kable(digits = 4)
 ```
@@ -555,7 +555,7 @@ perm_anova <- sqrl %>%
          results = map(fit, glance))                                  %>% # turn results into a tibble with glance()
   unnest(results)                                                     %>% #  make results easier to read
   ungroup()                                                           %>%
-  select(statistic)                                                   %>% # grab the F value from permuted data           
+  dplyr::select(statistic)                                            %>% # grab the F value from permuted data           
   mutate(as_or_more = statistic >= obs_f)                             %>%
   summarise(p_val = mean(as_or_more))
 

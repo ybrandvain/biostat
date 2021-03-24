@@ -31,7 +31,7 @@ options(crayon.enabled = FALSE)
 
 
 ```{block2, type='rmdnote'}
-This text (roughly) follows Chapter 15 of our textbook.   **The reading below is required,**  @whitlock2020 is  not.    
+This text (roughly) follows Chapter 17 of our textbook.   **The reading below is required,**  @whitlock2020 is  not.    
 ```
 
 
@@ -154,6 +154,9 @@ Y_i &=  a + b  x_{i}
 - $b$ is the slope, and     
 - $X_i$ is the $i^{th}$ individual's observed value for the explanatory variable, $X$   
 
+```{r, echo=FALSE, out.width="50%"}
+include_graphics("https://raw.githubusercontent.com/allisonhorst/stats-illustrations/master/other-stats-artwork/dragons_continuous.png")
+```
 
 
 ### Finding the "line of best fit"   
@@ -439,7 +442,7 @@ augment(snake_lm) %>%
             ms_model = ss_model / df_model,
             ms_error = ss_error / df_error,
             F_val    = ms_model/   ms_error,
-            p_value  = pf(F_val, df1 = df_model, df2 = df_error, lower.tail = FALSE))            %>% select(-  df_model, -df_error)                                                        %>% mutate(p_value  = paste(round(p_value* 10^7,digits = 1),"x10^-7",sep= "")) %>% kable( digits=4)
+            p_value  = pf(F_val, df1 = df_model, df2 = df_error, lower.tail = FALSE))            %>% dplyr::select(-  df_model, -df_error)                                                        %>% mutate(p_value  = paste(round(p_value* 10^7,digits = 1),"x10^-7",sep= "")) %>% kable( digits=4)
 ```
 
 Or with the [`anova`](https://stat.ethz.ch/R-manual/R-devel/library/stats/html/anova.lm.html) function

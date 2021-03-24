@@ -391,8 +391,8 @@ So, is our $\chi^2$  value of `r moderna_chi2_calcs %>% pull(chi2) %>% sum() %>%
 
 ```{r modernachi2perm, fig.cap= 'Distribution of chi2 values from our null permutation.', warning=FALSE, message=FALSE, fig.height= 2.4, fig.width =5}
 # Boring formating stuff...
-moderna_perm_for_chi2 <- bind_rows(select( moderna_perm_summaries, treatment, covid, replicate, count) , 
-          select( moderna_perm_summaries, treatment, covid, replicate, count) %>%
+moderna_perm_for_chi2 <- bind_rows(dplyr::select( moderna_perm_summaries, treatment, covid, replicate, count) , 
+          dplyr::select( moderna_perm_summaries, treatment, covid, replicate, count) %>%
             mutate(treatment = "-", count = 196 - count)) 
 
 moderna_perm_for_chi2 <- bind_rows(moderna_perm_for_chi2, 
@@ -477,7 +477,7 @@ We can type
 
 ```{r}
 covid_chisq_test <- covid_counts      %>%
-  select(- outcome)                 %>%  # to ignore labels
+  dplyr::select(- outcome)                 %>%  # to ignore labels
   chisq.test(x = ., correct = FALSE)
 
 covid_chisq_test 
@@ -589,7 +589,7 @@ Because we expect fewer than a count of five in more than 20% of our cells, we v
 
 ```{r}
 cows_exact_test <- cows   %>%
-  select(- bitten)         %>%  # to ignore labels
+  dplyr::select(- bitten)         %>%  # to ignore labels
   fisher.test()
 
 cows_exact_test

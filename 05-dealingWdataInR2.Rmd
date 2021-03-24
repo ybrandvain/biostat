@@ -83,7 +83,7 @@ sorted_bufo_bufo <- toad_data     %>% # initial data
   filter(species == "Bufo bufo")  %>% # only Bufo bufo
   mutate(BMI = height / weight)   %>% # calculate BMI
   arrange(BMI)                    %>% # sort by BMI
-  select(-species)                    # remove species
+  dplyr::select(-species)             # remove species
 
 sorted_bufo_bufo
 ```

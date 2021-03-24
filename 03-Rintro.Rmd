@@ -126,7 +126,7 @@ Using RStudio Cloud allows you to use R and RStudio without installing anything 
 
 ### Installing RStudio  {#oncomp}    
 
-1. First **download/update R** from [here](https://www.r-project.org/), be sure to download the version compatible with your computer, and pick any CRAN mirror you like (I usually do Iowa). If you installed R a while ago, be sure you’re using R version 4.0.0 or above.  
+1. First **download/update R** from [here](https://www.r-project.org/), be sure to download the version compatible with your computer, and pick any CRAN mirror you like (I usually do Iowa). If you installed R a while ago, be sure you're using R version 4.0.0 or above.  
 
 2. Then **download/update RStudio** [from here](https://rstudio.com/products/rstudio/download/#download). Be sure to select he free version (RStudio Desktop, Open Source License), and as above, be sure to download the version compatible with your computer. If you installed RStudio a while ago, be sure you’re using RStudio version 1.3.0 or above.  
 

@@ -255,14 +255,14 @@ Let's say we didn't care about the height or weight, and we just wanted individu
 
 
 ```{r}
-select(toad_data, individual, species, sound, BMI)
+dplyr::select(toad_data, individual, species, sound, BMI)
 ```
 
 A negative sign in `select` means remove, so `select(toad_data, -height, - weight)` will give the same result as the code above. 
 
 
 ```{r}
-select(toad_data, -height, -weight)
+dplyr::select(toad_data, -height, -weight)
 ```
 
 

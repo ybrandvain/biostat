@@ -83,6 +83,11 @@ So, the equation $\hat{Y_i} = a + Y_{1,i} \times b_1$ is
     \end{cases}
   \end{equation}
 
+
+```{r, echo=FALSE, out.width="50%"}
+include_graphics("https://raw.githubusercontent.com/allisonhorst/stats-illustrations/master/other-stats-artwork/dragon_regression.png")
+```
+
 #### Previous Example: Lizard survival
 
 ```{r, echo=FALSE, out.width="35%"}
@@ -100,7 +105,7 @@ lizards <- read_csv("https://whitlockschluter3e.zoology.ubc.ca/Data/chapter12/ch
 
 ```{r, message=FALSE, echo=FALSE, warning=FALSE, fig.height=2.5, fig.width=3}
 lizards <- read_csv("https://whitlockschluter3e.zoology.ubc.ca/Data/chapter12/chap12e3HornedLizards.csv")  %>% na.omit()
-lizards <- rep_sample_n(lizards , size= nrow(lizards)) %>% ungroup() %>% select(-replicate)
+lizards <- rep_sample_n(lizards , size= nrow(lizards)) %>% ungroup() %>% dplyr::select(-replicate)
 ggplot(lizards, aes(x = Survival, y = squamosalHornLength, color = Survival))  +
   geom_jitter(height = 0, width = .2, size = 1.5, alpha = .5, show.legend = FALSE)  +
   stat_summary(fun.data = "mean_cl_normal", color = "black")
@@ -523,7 +528,7 @@ sim_tests <- bind_rows(sim_n10, sim_n50) %>%
   mutate(fit = map(.x = data, ~ t.test(.x$sim_val ~ .x$this_group, var.equal = TRUE)),
          results = map(fit, tidy)) %>%
 unnest(results) %>%
-  select(this_experiment, var_g2,     n,  p.value)
+  dplyr::select(this_experiment, var_g2,     n,  p.value)
 
 ```
 

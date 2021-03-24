@@ -1,0 +1,625 @@
+# Predicting one continuous variable from two (or more) things {#morenova}   
+
+```{r, echo = FALSE, warning=FALSE, message=FALSE}
+library(tidyverse)
+library(gridExtra)
+library(DT)
+library(knitr)
+library(blogdown)
+library(beyonce, warn.conflicts=F, quietly=T)
+library(stringr)
+library(tweetrmd)
+library(emo)
+library(tufte)
+library(cowplot)
+library(lubridate)
+library(ggthemes)
+library(kableExtra)
+library(ggforce)
+library(datasauRus)
+library(ggridges)
+library(randomNames)
+library(infer)
+library(tiktokrmd)
+library(ggridges)
+library(colorspace)
+library(ggfortify)
+library(broom)
+library(emojifont)
+library(magrittr)
+options(crayon.enabled = FALSE)   
+```
+
+
+
+
+```{block2, type='rmdnote'}
+This text (roughly) follows Chapter 18 of our textbook.   **The reading below is required,**  @whitlock2020 is  not.
+```
+
+
+<span style="color: Blue;font-size:22px;">   Motivating scenarios:  </span>  <span style="color: Black;font-size:18px;">   We have numerous explanatory variables and want to develop an synthetic model. </span>
+
+**Learning goals: By the end of this chapter you should be able to**    
+
+- Write down and interpret longer and more complex linear models.   
+- Interpret  a polynomial regression and run one in R.      
+- Interpret and run  two factor ANOVAs in R.         
+- Calculate TYPE I sums of squares.   
+
+
+
+## Review  of Linear  Models  
+
+A linear model predicts the response variable, as $\widehat{Y_i}$ by adding up all components of the model.  
+
+
+```{r, out.width="50%", echo=FALSE, out.extra='style="float:right;padding-left: 5px"'}
+include_graphics("https://raw.githubusercontent.com/allisonhorst/stats-illustrations/master/other-stats-artwork/dragon_predict_mlr.png")
+```
+ 
+ 
+\begin{equation} 
+\hat{Y_i} = a + b_1  y_{1,i} + b_2 y_{2,i} + \dots{}
+(\#eq:predlong)
+\end{equation}
+ 
+ 
+
+Linear models we have seen   
+
+- One sample t-tests: $\widehat{Y} = \mu$     
+- Two sample t-tests: $\widehat{Y_i} = \mu + A_i$   <span style="color: LightGrey;">($A_i$ can take 1 of 2 values)</span>     
+- ANOVA: $\widehat{Y_i} = \mu + A_i$  <span style="color: LightGrey;">($A_i$ can take one of more than two values)</span>       
+- Regression   $\widehat{Y_i} = \mu + X_i$    <span style="color: LightGrey;">($X_i$ is continuous)</span>      
+ 
+So far we've mainly modeled a continuous response variable as a function of one explanatory variable. But linear models can include multiple predictors -- for example, we can predict Dragon Weight as a function of both a categorical  (spotted: yes/no) and continuous variable in the same model.   
+
+
+### Test statistics for  a linear model    
+
+- **The $t$ value** describes how many standard errors an estimate is from its null value.     
+- **The $F$ value**  quantifies the ratio of variation in a response variable associated with a focal explanatory variable ($MS_{model}$), relative to the variation that is not attributable to this variable  ($MS_{error}$).    
+
+### Assumptions of a linear model   
+
+
+Remember that linear models assume 
+
+- **Linearity:** That observations are appropriately modeled by adding up all predictions in our equation.      
+- **Homoscedasticity:** The variance of residuals is independent of the predicted value, $\hat{Y_i}$  is the same for any value of X.    
+- **Independence:** Observations are independent of each other (aside from the predictors in the model).  
+- **Normality:**  That residual values are normally distributed.     
+- **Data are collected without bias**   as usual.   
+
+
+
+
+
+## Polynomial regression example   
+
+
+We note that linear models can include e.g. squared, and geometric functions too, so long as we get out predictions by adding up all the components of the model. 
+
+A classic example of a linear model is a **polynomial regression**, in which we predict some response variable as a function of a predictor and higher order terms  of the predictor. The most common polynomial regression includes the explanatory variable and its square value \@ref(eq:polynomial).
+
+
+
+\begin{equation} 
+\begin{split}
+\widehat{Y_i} = a + b_1 \times y_{1,i} + b_2 \times X_{2,i}\\ \\
+\text{ where } X_{2,i} = X_{1,i}^2
+\end{split}
+(\#eq:polynomial)
+\end{equation} 
+
+
+
+```{block2, type='rmdwarning'}
+Often including a cubic, or even a quadratic term is useful -- but be thoughtful before adding too many in -- each additional term takes away from our degrees of freedom, complicates interpretation, and may overfit the data.   Let your biological intuition and statistical reasoning guide you.
+```
+
+### Polynomial regression example   
+
+Let's revisit our example polynomial regression example predicting the number of species from the productivity of the plot to work through these ideas. Recall that   
+
+- A simple linear regression did not fit the data well AND violated assumptions of a regression, as residuals were large and positive for intermediate predictions and large and negative for large or small predictions.       
+- Including a squared term improved the model fit and had the data meet assumptions.  
+
+Let's write a descriptive equation for each model
+
+$$\text{N.SPECIES = CONSTANT + PRODUCTIVITY}$$
+$$\text{N.SPECIES = CONSTANT + PRODUCTIVITY + PRODUCTIVITY}^2$$
+
+We present these models in Figure \@ref(fig:bmasslinsq). See that we can add a polynomial fit to our ggplot by typing `formula =  y ~ poly(x, 2, raw = TRUE)` into the `geom_smooth` function.
+
+```{r bmasslinsq, fig.cap ="(A) Fitting a linear regression to predict the number of plant species from prodcutivity of a plot. (B) A Adding a squared term to our linear regression.", warning=FALSE, message=FALSE, fig.height=2, fig.width=5}
+bmass <- tibble( Biomass = c(192.982,308.772,359.064,377.778,163.743,168.421,128.655,98.246,107.602,93.567,83.041,33.918,63.158,139.181,148.538,133.333,127.485,88.889,138.012),   n.species = c(25.895,12.729,8.342,2.885,21.504,20.434,18.293,16.046,16.046,11.655,12.725,9.515,7.16,16.042,16.042,11.655,12.725,2.88,8.338))
+base_plot <- ggplot(bmass, aes(x = Biomass, y =  n.species))+  geom_point()+  xlab("Productivity (g/15 Days)" )
+
+linear_plot <- base_plot +   labs(title = "Linear term") +  
+  geom_smooth(method = 'lm') 
+
+polynomial_plot <- base_plot +  labs(title = "Linear and squared term") +
+  geom_smooth(method = 'lm',formula =  y ~ poly(x, 2, raw = TRUE)) 
+plot_grid(linear_plot, polynomial_plot, labels = c("a","b"))
+```
+
+
+#### Fitting polynomial regressions in R  
+
+Fitting a model with a linear term in R should look familiar to you. `linear_term <- lm(n.species  ~ Biomass, bmass)`   
+
+There are a bunch of ways to ass a polynomial term.   
+
+- `lm(n.species  ~ poly(Biomass, degree = 2, raw = TRUE), bmass)` Is what we typed into our `geom_smooth` function above. If we typed `degree = 3`, the model would include a cubed term as well.    
+- `lm(n.species  ~ Biomass + I(Biomass^2), bmass)` Is a more explicit way to do this. When doing math to variables in our linear model we need to wrap them in `I()` or R gets confused and does weird things.   
+- `lm(n.species  ~ Biomass + Biomass2, bmass %>% mutate(Biomass2 = Biomass^2))` Or we can `mutate` to add a squared transform the data before making our model.  <span style="color: LightGrey;">NOTE: I did not pipe the mutate into `lm()`. That's because `lm()` does take things from the standard `%>%` pipe. If you want to pipe into `lm()`, you will need the `magrittr` package and then you can use a special pipe, %\$%, so... `bmass %>% mutate(Biomass2 = Biomass^2) %$% lm(n.species  ~ Biomass + Biomass2)` will work.</span>   
+
+
+```{r}
+linear_term <- lm(n.species  ~ Biomass, bmass)
+poly_term   <- lm(n.species  ~ Biomass + Biomass2, bmass %>% mutate(Biomass2 = Biomass^2)) 
+```
+
+#### Interpretting the output of a polynomial regression -- model coefficents    
+
+So, let's look at this polynomial regression 
+
+```{r}
+summary.lm(poly_term)
+```
+
+The output of this model should look familiar. Our rows are
+
+
+- `(Intercept)`  -- the number of species we would have if we followed our curve to 0 productivity. That this value is -2.2.9  highlights the idea that we should not make predictions outside of the range of our data. Of course, we wouldn't predict a negative number of species ever...    
+- `Biomass`  --  This describes how the number of species changes with a linear increase in productivity. It's critical to see that this DOES not mean that the number of species always increase with productivity.    That's because of the next term,      
+- `Biomass2` --  This describes how the number of species changes with  productivity squared. The negative sign  means that the number of species decreases with the square of productivity. Polynomial regressions are often used in these cases where intermediate values are largest or smallest, so it's normal to see contrasting signs for the linear and squared terms.  
+
+
+Writing down this equation, we predict species number as
+
+$$\widehat{n.species}_i = -2.29 + 0.202 \times Biomass_i -0.000488 \times Biomass_i^2$$
+So, for example if we had a plot with a productivity of 250 g/15 Days, we would predict it had 
+\begin{equation} 
+\begin{split}
+\widehat{n.specie}{s_{|Biomass=250}} &= -2.29  +0.202 \times 250  -0.000488 \times 250^2\\ 
+&= 17.71
+\end{split}
+(\#eq:polynomial)
+\end{equation} 
+
+
+A value which makes sense, as it seems to be where out curve intersects with 250 in  Figure \@ref(figbmasslinsq)B.    
+
+
+Our columns, `Estimate`, `Std. Error`, `t value`, and `Pr(>|t|)`  should also feel familiar, all interpretations are the same as usual. The standard error describes the uncertainty in the estimate, the t describes ow many standard errors away from zero the estimate is, and the p-value describes the probability that a value this many standard errors away from zero would arise if the null where true.  One thing though
+
+**The p-values in this output do not describe the statistical significance of the predictors!! DO NOT INTERPRET THESE P-VALUES AS SUCH**   
+
+One way to think about this is to just look at our simple linear model which shows basically no association between biomass and species number (and the association it shows it slightly negative).
+
+
+```{r}
+broom::tidy(linear_term)
+```
+
+
+**Note** The `summary.lm()` output still usefully provides our estimates and uncertinaty in them -- so don't ignore it! 
+
+
+#### An ANOVA approach  
+
+So how do we get significance of each term? We look at the ANOVA output!
+
+```{r}
+anova(poly_term)
+```
+
+We now conclude that the association between n.species and  the linear term of Biomass would be quite expected from the null. How do we square these ideas? I think of the significance of the linear term as how weird it would be to see a non-zero linear estimate in the absence of a squared term. However, this is not fully correct, as this P-value differs from the one above with just the linear term. To make sense of this, let's dig into how we calculate the sums of squares for these larger models.  
+
+**"Sequential" Type I Sums of squares**  
+
+We'll see in this and the next section that there's a real issue in which variable we attribute our sums of squares to in larger linear models.   
+
+In many cases (see below) Sequential "Type I" sums of squares make the most sense. Here we 
+
+- Calculate $SS_{error}$ and $SS_{total}$ as we always do!   (Figure \@ref(fig:sspoly)A,D)
+- Calculate the $SS_{thing1}$ (in this case Biomass), as if it where the only thing in the model, $\widehat{Y_{i|bmass}}$. (Figure \@ref(fig:sspoly)B).     
+- Calculate the $SS_{thing2}$ (in this case $Biomass^2$), as the deviation of predicted values from a model with both things in it, $\widehat{Y_{i|bmass,bmass^2}}$, minus predictions from a model with just thing1 in it,  $\widehat{Y_{i|bmass}}$ (Figure \@ref(fig:sspoly)C).   
+
+```{r sspoly, fig.cap= "Calculating *sequential* sums of squares for our model. **a** Total deviations, as usual. **b** Deviations from predicted values of Biomass alone without considering the squared term (red line) -- this makes up $SS_{Biomass}$. **c** Deviations of  predictions from $Biomass + Biomass^2$ (blue line) away from predictions of Biomass alone (red line) -- this makes up $SS_{Biomass^2}$. **d** Deviation of data points from full model (blue line) -- this makes up $SS_{error}$", fig.height=2,fig.width=7.2, message=FALSE, warning=FALSE, echo=FALSE}
+
+combine_models <- full_join(augment(linear_term) %>%   
+            dplyr::select(n.species, Biomass, .fitted_lin = .fitted,  .resid_lin = .resid),
+          augment(poly_term) %>% 
+            dplyr::select(n.species, Biomass, .fitted_full = .fitted, .resid_full= .resid),
+          by = c("n.species", "Biomass"))
+
+a <- ggplot(bmass%>% mutate(mean_n.species = mean(n.species)), aes(x = Biomass, y =  n.species))+ 
+  geom_point()+  
+  geom_hline(aes(yintercept = mean_n.species))+
+  geom_segment(aes( xend = Biomass, yend = mean_n.species ), 
+               color = "black", alpha = .5)+
+  labs(title = "Total deviation               = ")+
+  xlab("Productivity" )+
+  theme(plot.title = element_text(size = 8))
+
+b <- ggplot(linear_term %>%augment()%>% mutate(mean_n.species = mean(n.species)), aes(x = Biomass, y =  n.species))+ 
+  geom_point(alpha = .2)+  
+  geom_hline(aes(yintercept = mean_n.species))+
+  geom_segment(aes( xend = Biomass,y = .fitted,  yend = mean_n.species ), 
+               color = "black")+
+  geom_line(aes(y = .fitted), alpha  = 2, color = "firebrick")+ 
+  labs(title = "Bmass deviation             +")+
+  xlab("Productivity" )+
+  theme(plot.title = element_text(size = 8))
+
+c <-  ggplot(combine_models%>% mutate(mean_n.species = mean(n.species)), aes(x = Biomass, y =  n.species))+ 
+  geom_point(alpha = .2)+  
+  geom_line(aes(y = .fitted_lin), color = "firebrick")+
+  geom_segment(aes( xend = Biomass,y = .fitted_lin,  yend = .fitted_full), 
+               color = "black")+
+  geom_smooth(method = "lm", formula = y ~ poly(x,2, raw = TRUE), se = FALSE,size = .5)+ 
+  labs(title = expression(paste("Bmass&",Bmass^2," deviation+")))+
+  xlab("Productivity" )+
+  theme(plot.title = element_text(size = 8))
+
+d <-  ggplot(poly_term%>%augment()%>% mutate(mean_n.species = mean(n.species)), aes(x = Biomass, y =  n.species))+ 
+  geom_point(alpha = 2)+
+  geom_segment(aes( xend = Biomass,  yend = .fitted), 
+               color = "black")+
+  geom_smooth(method = "lm", formula = y ~ poly(x,2, raw = TRUE), se = FALSE,size=.5)+ 
+  labs(title = "Residual deviation")+
+  xlab("Productivity" )+
+  theme(plot.title = element_text(size = 8))
+
+plot_grid(a,b,c,d, labels = c("a","b","c","d"), label_y = .9,ncol = 4)
+```
+
+We can calculate these sums of squares in R as follows, and then compute mean squares and p-values. Before I do this, I make a tibble with prediction from both the simple linear model with just a linear term, and the fuller linear model with the linear and squared term.  
+
+```{r}
+combine_models <- full_join(augment(linear_term) %>%   
+            dplyr::select(n.species, Biomass, .fitted_lin = .fitted,  .resid_lin = .resid),
+          augment(poly_term) %>% 
+            dplyr::select(n.species, Biomass, .fitted_full = .fitted, .resid_full= .resid),
+          by = c("n.species", "Biomass"))
+
+combine_models %>% 
+  summarise(ss_tot    = sum( (n.species    - mean(n.species))^2 ),
+            ss_bmass  = sum( (.fitted_lin  - mean(n.species))^2 ),
+            ss_bmass2 = sum( (.fitted_full - .fitted_lin )^2 ),
+            ss_error  = sum( (n.species    - .fitted_full)^2 ),
+            #df
+            df_bmass  = 1,     df_bmass2 = 1,     df_error  = n() - 3,
+            #
+            ms_bmass  = ss_bmass  / df_bmass ,
+            ms_bmass2 = ss_bmass2 / df_bmass2 ,
+            ms_error  = ss_error  / df_error,
+            #
+            F_bmass   = ms_bmass / ms_error,     F_bmass2  = ms_bmass2/ ms_error,
+            p_bmass    = pf(q = F_bmass,  df1 = df_bmass,  df2 = df_error, lower.tail = FALSE),
+            p_bmass2   = pf(q = F_bmass2, df1 = df_bmass2, df2 = df_error, lower.tail = FALSE))                                                                   %>% mutate_all(round,digits = 4) %>%DT::datatable( options = list( scrollX='400px'))
+```
+
+
+You can scroll through the output above to see that our calculations match what `anova()` tells us!!!
+
+## Type I  Sums of Squares (and others)   
+
+
+Calculating Sums of Squares sequentially, as we did in Figure \@ref(fig:sspoly), is the default way R does things. 
+
+Sequential *Type I* sums of squares calculate the sums of squares for the first thing in your model first, then the second thing, then the third thing etc...  This means that while our   
+
+- Sums of square, Mean squares, F values, and p-values might change, depending on the order in which variables are entered into our model.      
+- Parameter estimates and uncertainty in them will not change with order.   
+
+In general sequential sums of squares make the most sense when   
+
+- We are not interested in the significance of the earlier terms in our model, which we want to take account of, but don't really care about their statistical significance.    
+- Designs are "balanced" (Figure \@ref(fig:balance)), as in these cases, we get the  same SS, F and P values regardless of the order that we put terms into the model.
+
+```{r balance, fig.cap = 'Examples of balanced and unbalanced statistical designs, from [statistics how to](https://www.statisticshowto.com/balanced-and-unbalanced-designs/).', echo=FALSE, out.width="50%"}
+include_graphics("https://www.statisticshowto.com/wp-content/uploads/2016/11/balanced-and-unbalanced-design.png")
+```
+
+
+In the next class, we will look into other ways to calculate the sums of squares.   
+
+## Two categorical variables without an interaction   
+
+We saw that paired t-tests increase our power because they control for extraneous variation impacting each pair. We often want to use a similar study design for a stud with more than two explanatory variables.  
+
+For example, in a randomized "*Controlled Blocked Design*" each "block" gets all treatments, and by including treatment in our model we can explain variability associated with block unrelated to our main question. In such models we don't care about the statistical significance of the block, we just want to use block to explain as much variation as possible before considering treatment.
+
+In the study below, researchers wanted to know if the presence of a fish predator impacted diversity pf the marine zooplankton in the area. To find out they introduced the zooplankton with no, some, or a lot of fish, in mesh bags in a stream. Each stream got three such bags -- one with no, one with some, and the other with many fish. This was replicated at five streams, so each stream is a "Block".
+
+
+
+
+
+```{r randblock, fig.cap="The prey and none, some or lots of its predator are put in mesh bags in five streams", echo=FALSE, message=FALSE, fig.height=3,  out.width="45%", fig.show='hold', message=FALSE, warning=FALSE}
+include_graphics("images/predpray.jpeg")
+zoo<- read_csv("https://whitlockschluter3e.zoology.ubc.ca/Data/chapter18/chap18e2ZooplanktonDepredation.csv") %>%
+  mutate(treatment = fct_relevel(treatment, c("control", "low", "high"))) %>%
+  mutate(block = factor(block)) 
+
+mesh <- tibble(x0 = c(seq(0,1,.05),rep(0,21)),
+       x1 = c(seq(0,1,.05),rep(1,21)),
+       y0 = c(rep(0,21),seq(0,1,.05)),
+       y1 = c(rep(1,21),seq(0,1,.05)),
+       group = 1:42)%>%
+  gather(key = xid, value = x,-group,-y0,-y1)          %>% 
+  gather(key = yid, value = y,-group,-x,-xid)          %>%
+  dplyr::select(-xid,-yid)                             %>%
+  rep_sample_n(size = 168, reps = 5,replace = FALSE)   %>%
+  ungroup()                                            %>%
+  rename(Block = replicate)                            %>%
+  rep_sample_n(size = 168*5, reps = 3,replace = FALSE) %>%
+  ungroup()                                            %>%
+  rename(treatment = replicate)                        %>%
+  mutate(treatment = case_when(treatment == 1~"control",
+                               treatment == 2~ "low",
+                               treatment == 3~ "high"))%>%
+  mutate(treatment = factor(treatment,levels = c("control","low","high")))%>%
+  mutate(t2 = case_when(Block == 1 & treatment =="control" ~ 3,
+                        Block == 1 & treatment =="low"     ~ 1,
+                        Block == 1 & treatment =="high"    ~ 2,
+                        Block == 2 & treatment =="control" ~ 2,
+                        Block == 2 & treatment =="low"     ~ 3,
+                        Block == 2 & treatment =="high"    ~ 1,
+                        Block == 3 & treatment =="control" ~ 2,
+                        Block == 3 & treatment =="low"     ~ 3,
+                        Block == 3 & treatment =="high"    ~ 1,
+                        Block == 4 & treatment =="control" ~ 1,
+                        Block == 4 & treatment =="low"     ~ 2,
+                        Block == 4 & treatment =="high"    ~ 3,
+                        Block == 5 & treatment =="control" ~ 3,
+                        Block == 5 & treatment =="low"     ~ 2,
+                        Block == 5 & treatment =="high"    ~ 1,
+                         ))
+
+
+ 
+fish.in.pool <- tibble(x = runif(min = .05,max=.95, n = 5 *(30+90)),
+                       y = runif(min = .05,max=.95, n = 5 *(30+90)),
+                       Block = rep(1:5,each = 120),
+                       treatment = rep(rep(2:3, times = c(30,90)),5))%>%
+  mutate(treatment = case_when(treatment == 1~"control",
+                               treatment == 2~ "low",
+                               treatment == 3~ "high"))%>%
+  mutate(treatment = factor(treatment,levels = c("control","low","high")))%>%
+  mutate(t2 = case_when(Block == 1 & treatment =="control" ~ 3,
+                        Block == 1 & treatment =="low"     ~ 1,
+                        Block == 1 & treatment =="high"    ~ 2,
+                        Block == 2 & treatment =="control" ~ 2,
+                        Block == 2 & treatment =="low"     ~ 3,
+                        Block == 2 & treatment =="high"    ~ 1,
+                        Block == 3 & treatment =="control" ~ 2,
+                        Block == 3 & treatment =="low"     ~ 3,
+                        Block == 3 & treatment =="high"    ~ 1,
+                        Block == 4 & treatment =="control" ~ 1,
+                        Block == 4 & treatment =="low"     ~ 2,
+                        Block == 4 & treatment =="high"    ~ 3,
+                        Block == 5 & treatment =="control" ~ 3,
+                        Block == 5 & treatment =="low"     ~ 2,
+                        Block == 5 & treatment =="high"    ~ 1,
+                         ))
+
+ggplot(mesh ,aes(x=x,y=y, group = group))+
+  annotate(geom = "rect",     xmin = -Inf, xmax = Inf, ymin =-Inf, ymax = Inf, fill = "aquamarine", alpha = .5)+
+  facet_grid(t2~Block, labeller = "label_both")+
+  geom_point(data = fish.in.pool,inherit.aes = FALSE,
+             aes(x=x,y=y))+
+  geom_line(alpha = .2)+
+  theme_tufte()  +
+  ggtitle("No, low, or many fish replicated in five blocks")+
+  theme(axis.text = element_blank(),axis.ticks = element_blank(),axis.title = element_blank(),strip.text =  element_text(size=12), strip.text.y = element_blank())
+
+```
+
+### Estimation and Uncertainty
+
+The raw data are presented below, with means for treatments in the final column. 
+
+```{r, echo=FALSE}
+pivot_wider(mutate(zoo, block = paste("Block: ",block)), names_from = block, id = treatment, values_from = diversity)%>% mutate(mean_diversity = (`Block:  1`+ `Block:  2`+ `Block:  3`+ `Block:  4` +`Block:  5`)/5) %>% kable()
+```
+
+We can conceive of this as a linear model, in which we predict diversity as a function of block and treatment
+
+$$DIVERSITY = BLOCK + TREATMENT$$
+We enter the model into R as follows 
+
+```{r, message=FALSE}
+fish_dat <- read_csv("https://whitlockschluter3e.zoology.ubc.ca/Data/chapter18/chap18e2ZooplanktonDepredation.csv") %>%
+  mutate(treatment = fct_relevel(treatment, c("control", "low", "high")))
+wrong_fish_lm <- lm(diversity ~ block + treatment, data = fish_dat)
+broom::tidy(wrong_fish_lm)
+```
+
+**NOTE** Uhhohh. Something went wrong here. Why is there only one value for `block`, when there are five? It's because R thought bock was a number and ran a regression. Let's clarify this for R by mutating black to be a factor.  
+
+```{r}
+fish_dat <- mutate(fish_dat, block = factor(block)) 
+fish_lm   <- lm(diversity ~ block + treatment, data = fish_dat)
+broom::tidy(fish_lm)
+```
+
+We take these estimates and uncertainty about them seriously, but fully ignore the t and p-values, as above. From here we predict diversity in   
+
+- *Control predation in block one* is just the intercept: $3.42  -   0  - 0 = 3.42$.      
+- *Control predation in block three* is the intercept minus the mean difference between block three and block one:  $3.42  -   0.70  - 0 = 2.72$.   
+- *High predation in block one* is the intercept minus the mean difference between high predation and the control,  $3.42  -   0  - 1.64 = 1.79$.   
+- *Low predation in block four* is the intercept, minus the mean difference between block four and block one, minus the mean difference between low predation and the control treatment:  3.42 - 1.00 - 1.02 = 1.40.        
+
+### Hypothesis testing with two categorical predictors   
+
+In this model, the null and alternative  hypotheses are   
+
+- $H_0:$ There is no association between predator treatment and zooplankton diversity -- i.e. Under the null, we predict zooplankton diversity in this experiment as the intercept plus the deviation associated with stream (Figure \@ref(fig:h0hazoo)a).      
+- $H_A:$ There is an association between predator treatment and zooplankton diversity -- i.e. Under the alternative, we predict zooplankton diversity in this experiment as the intercept plus and the deviation associated with stream plus the effect of one or more treatments (Figure \@ref(fig:h0hazoo)b).      
+
+
+
+```{r h0hazoo, fig.cap="Null (**a**) and alternative (**b**) hypotheses for our blocked predation experiment.", fig.height=2.5, fig.width=6.5, warning=FALSE, echo=FALSE, message=FALSE}
+pa <-ggplot(data = zoo %>%  mutate(x = as.numeric(treatment)-1+ (as.numeric(block) - 3)/40 ), aes(x = x, y = diversity, color = block,lty = block, label= block)) +
+  geom_hline(data = zoo %>% 
+               group_by(block)  %>% 
+               summarise(diversity= mean(diversity)),
+             aes(yintercept = diversity, color = block, lty=block),
+             show.legend = FALSE,lty =2)  +
+  geom_text(size = 3,show.legend = FALSE)+
+  ylab("Diversity") +
+  xlab("treatment")+ 
+  theme_light() +
+  theme(axis.line = element_line())+ 
+  scale_x_continuous(breaks = 0:2, labels = c("control","low","high"))
+
+pb <-ggplot(data = zoo %>%  mutate(x = as.numeric(treatment)-1+ (as.numeric(block) - 3)/40 ), aes(x = x, y = diversity, color = block, label= block,group = block)) +
+  geom_text(alpha = .6,size = 3,show.legend = FALSE)+
+  #stat_summary(fun.y = mean, geom = "line", lty = 2,             show.legend = FALSE,alpha = .3)+
+  geom_line(data = fish_lm%>% augment()%>%dplyr::select(-diversity)%>% rename(diversity = .fitted), aes(x = as.numeric(treatment)-1 ),lty = 2,show.legend = FALSE)+
+  geom_text(alpha = .6,size = 3,show.legend = FALSE)+
+  ylab("Diversity") +
+  xlab("treatment")+ 
+  theme_light()+
+  theme(axis.line = element_line())+ 
+  scale_x_continuous(breaks = 0:2, labels = c("control","low","high")) +
+  annotate(geom = "text", x=.3, y = 3.75, label = "Note, means and predictions for blocks\none and two are nearly identical", hjust = 0, size = 3)
+
+
+plot_grid( pa +   labs(title = "Null Model",subtitle = "Diversity is independent of treatment\nDIVERSITY = A + BLOCK"), pb +   labs(title = "Alternative Model",subtitle ="Diversity differs by treatment\nDIVERSITY = A + BLOCK + TREATMENT"),  nrow = 1, labels = c("a","b"))
+```
+
+
+Again we test these hypotheses in an ANOVA framework   
+
+```{r}
+anova(fish_lm)
+```
+
+We conclude that predation treatment impacts zooplankton diversity, with diversity decrease as there are more predators. Because this is an experimental manipulation, we can conclude that predation decreased diversity.  
+
+#### Calcualating sums of squares   
+
+```{r sstwoanov, fig.cap= "Calculating *sequential* sums of squares for our zooplankton model. **a** Total deviations, as usual. **b** Deviations from predicted values of Block alone without considering the treatment -- this makes up $SS_{block}$. **c** Deviations of predictions from $block + treatment$  away from predictions of block alone -- this makes up $SS_{treatment}$. **d** Deviation of data points from full model (blue line) -- this makes up $SS_{error}$", fig.height=2.2,fig.width=8, message=FALSE, warning=FALSE, echo=FALSE}
+block_model <- lm(diversity ~ block, fish_dat) 
+full_model  <- lm(diversity ~ block + treatment, fish_dat)
+combine_models <- full_join(augment(block_model ) %>%   
+            dplyr::select(diversity, block, .fitted_block = .fitted,  .resid_block = .resid),
+          augment(full_model) %>% 
+            dplyr::select(diversity, block, treatment, .fitted_full = .fitted, .resid_full= .resid),
+          by = c("diversity", "block")) %>%
+  mutate(treatment = fct_relevel(treatment, c("control", "low", "high"))) %>%  
+  mutate(x = as.numeric(treatment)-1+ (as.numeric(block) - 3)/40 )%>% 
+  mutate(mean_diversity = mean(diversity))
+
+a <- ggplot(combine_models, aes(x = x, y =  diversity, color = block))+ 
+  geom_point()+  
+  geom_hline(aes(yintercept = mean_diversity))+
+  geom_segment(aes( xend = x, yend = mean_diversity, color = block), alpha = .5)+
+  labs(title = "Total deviation               = ")+
+  theme(plot.title = element_text(size = 8))+ 
+  ylab("Diversity") +
+  xlab("treatment")+ 
+  scale_x_continuous(breaks = 0:2, labels = c("control","low","high"))+
+  theme(legend.position = "none")
+
+b <- ggplot(combine_models, aes(x = x, y =  diversity, color = block))+ 
+  geom_point(alpha = .2)+  
+  geom_hline(aes(yintercept = mean_diversity))+
+  geom_point(aes(  y = .fitted_block ), pch = "_",alpha =2, size =5)+
+  geom_segment(aes(xend = x, y = mean_diversity, yend = .fitted_block), alpha  = 2)+ 
+  labs(title = "Block deviation             +")+
+  theme(plot.title = element_text(size = 8))+ 
+  ylab("Diversity") +
+  xlab("treatment")+ 
+  scale_x_continuous(breaks = 0:2, labels = c("control","low","high"))+
+  theme(legend.position = "none")
+
+c <-  ggplot(combine_models, aes(x = x, y =  diversity, color = block))+ 
+  geom_point(alpha = .2)+  
+  geom_point(aes(  y = .fitted_block ), pch = "_",alpha =2, size =5)+
+  geom_point(aes(  y = .fitted_full ), pch = "^",alpha =2, size =5)+
+  geom_segment(aes(xend = x, y = .fitted_full, yend = .fitted_block), alpha  = 2)+ 
+  labs(title = "Block&Treat deviation   +")+
+  theme(plot.title = element_text(size = 8))+ 
+  ylab("Diversity") +
+  xlab("treatment")+ 
+  scale_x_continuous(breaks = 0:2, labels = c("control","low","high"))+
+  theme(legend.position = "none")
+
+
+
+d <-   ggplot(combine_models, aes(x = x, y =  diversity, color = block))+ 
+  geom_point()+  
+  geom_point(aes(  y = .fitted_full ), pch = "^",alpha =2, size =5)+
+  geom_segment(aes(xend = x, yend = .fitted_full), alpha  = 2)+ 
+  labs(title = "Residual deviation")+
+  theme(plot.title = element_text(size = 8))+ 
+  ylab("Diversity") +
+  xlab("treatment")+ 
+  scale_x_continuous(breaks = 0:2, labels = c("control","low","high"))+
+  theme(legend.position = "none")
+  
+
+
+plot_grid(a,b,c,d, labels = c("a","b","c","d"), label_y = .9,ncol = 4)
+```
+
+We again use the sequential method to calculate sums of squares because we first want to account for block. The code below shows you how `anova()`   got its answer. But in our case we ignore the F-value and significance of `block`, as it's in the model to soak up shared variation, not to be tested.  
+
+
+
+
+
+```{r}
+block_model <- lm(diversity ~ block, fish_dat) 
+full_model  <- lm(diversity ~ block + treatment, fish_dat)
+combine_models <- full_join(augment(block_model ) %>%   
+            dplyr::select(diversity, block, .fitted_block = .fitted,  .resid_block = .resid),
+          augment(full_model) %>% 
+            dplyr::select(diversity, block, treatment, .fitted_full = .fitted, .resid_full= .resid),
+          by = c("diversity", "block")) 
+
+combine_models %>% 
+  summarise(ss_tot    = sum( (diversity      - mean(diversity))^2 ),
+            ss_block  = sum( (.fitted_block  - mean(diversity))^2 ),
+            ss_treat = sum( (.fitted_full    - .fitted_block)^2 ),
+            ss_error  = sum( (diversity      - .fitted_full)^2 ),
+            #df
+            df_block  = n_distinct(block) - 1,  df_treat = n_distinct(treatment) -1,  
+            df_error  = n() - 1,
+            #
+            ms_block  = ss_block  / df_block,
+            ms_treat  = ss_treat / df_treat ,
+            ms_error  = ss_error  / df_error,
+            #
+            F_treat   = ms_treat / ms_error,
+            p_bmass2   = pf(q = F_treat, df1 = df_treat, df2 = df_error, lower.tail = FALSE))                                                                  # %>% mutate_all(round,digits = 4) %>%DT::datatable( options = list( scrollX='400px'))
+```
+
+
+### Post-hoc tests for bigger linear models
+
+So we rejected the null hypothesis and conclude that predator abundance impacts zooplankton diversity. Which treatments differ?  Again we, conduct a post-hoc test.  
+
+Instead of using the `aov()` function and piping the output to `TukeyHSD()`, here I'll show you how to conduct a posthoc test with the [`glht()`](http://finzi.psych.upenn.edu/R/library/multcomp/html/glht.html) function in the [multcomp package](https://cran.r-project.org/web/packages/multcomp/vignettes/multcomp-examples.pdf).  
+
+In the code below, I say I want to look at all pairwise comparisons between treatments, using the Tukey-Kramer method from Chapter \@ref(anova).  
+
+```{r}
+library(multcomp)
+glht(full_model, linfct = mcp(treatment = "Tukey")) %>%
+  summary()
+```
+
+We conclude that diversity in both low and high predation differ significantly from both the control, no predation treatment, treatment. But we fail to reject the hypothesis that low and high predation treatments differ.  
+
+
+## Quiz
+

@@ -150,6 +150,10 @@ So here $\hat{Y_i} = a = 39.329$ -- that is, we predict that a given species ran
 
 ## Residuals describe the difference  between predictions and observed values.  
 
+```{r, echo=FALSE,out.width="50%"}
+include_graphics("https://raw.githubusercontent.com/allisonhorst/stats-illustrations/master/other-stats-artwork/dragon_residual.png")
+```
+
 Of course, most observations will not exactly equal their predicted value. Rather, an observation $Y_i$  will differ from its predicted value, $\hat{Y_i}$ by some amount, $e_i$, called the residual.  
 
 \begin{equation} 
@@ -200,7 +204,7 @@ The [`augment()`](https://generics.r-lib.org/reference/augment.html) function in
 library(broom)
 range_shift_lm %>%
   augment()    %>%
-  select(elevationalRangeShift, .fitted, .resid)
+  dplyr::select(elevationalRangeShift, .fitted, .resid)
 ```
 
 
@@ -242,7 +246,7 @@ ggplot(lizards, aes(x = Survival, y = squamosalHornLength, color = Survival))  +
 
 ```{r, message=FALSE, echo=FALSE, warning=FALSE, fig.height=2.5, fig.width=3}
 lizards <- read_csv("https://whitlockschluter3e.zoology.ubc.ca/Data/chapter12/chap12e3HornedLizards.csv")  %>% na.omit()
-lizards <- rep_sample_n(lizards , size= nrow(lizards)) %>% ungroup() %>% select(-replicate)
+lizards <- rep_sample_n(lizards , size= nrow(lizards)) %>% ungroup() %>% dplyr::select(-replicate)
 ggplot(lizards, aes(x = Survival, y = squamosalHornLength, color = Survival))  +
   geom_jitter(height = 0, width = .2, size = 1.5, alpha = .5, show.legend = FALSE)  +
   stat_summary(fun.data = "mean_cl_normal", color = "black")
@@ -297,7 +301,7 @@ Again, we can look at this in more detail with the augment function in the broom
 ```{r}
 lizard_lm %>% 
   augment() %>%
-  select(squamosalHornLength, Survival, .fitted, .resid)
+  dplyr::select(squamosalHornLength, Survival, .fitted, .resid)
 ```
 
 This shows the residuals (`.resid`), as the difference between the predicted values, $\hat{Y_i}$ (`.fitted`) and the observed values, $Y_i$ (`squamosalHornLength`). Note that the $\hat{Y_i}$ differs for living and killed lizards.  
@@ -335,7 +339,7 @@ Again, we can use the augment function in the broom package to  look at actual v
 
 ```{r}
 augment(cricket_lm) %>%
-  select(lysozyme, spermViability, .fitted, .resid)
+  dplyr::select(lysozyme, spermViability, .fitted, .resid)
 ```
 
 We can look at this significance of our predictions with `summary.lm()`
@@ -351,6 +355,8 @@ As above, the p-value for  the intercept is silly -- of course crickets have non
 
 ## Assumptions of a linear model  {#linmodasum}
 
+
+
 A linear model assumes    
 
 - **Linearity:** That is to say that our observations are appropriately modeled by adding up all predictions in our equation. We can evaluate this by seeing that residuals are independent of predictors.       
@@ -364,6 +370,10 @@ These vary in how hard they are to diagnose. But the [`autoplot()`](https://cran
 - Making sure the residuals are independent of predictors (a diagnosis for linearity).  A Residuals vs Fitted plot with a slope near zero is consistent with this assumption.    
 - Making sure that the mean and variance in residuals are independent of predictors.  A Scale-location plot with a slope near zero is consistent with this assumption.    
 - Normality of residuals. A qq plot with a slope near one is consistent with this assumption.  
+
+```{r, out.width="30%", echo=FALSE}
+include_graphics("https://raw.githubusercontent.com/allisonhorst/stats-illustrations/master/other-stats-artwork/dragon_residual_distribution.png")
+```
 
 Have a look at the diagnostic plots from our models to see if they look ok!   
 

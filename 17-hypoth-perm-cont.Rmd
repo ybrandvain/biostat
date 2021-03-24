@@ -105,7 +105,7 @@ Here are the raw data   (download [here](https://raw.githubusercontent.com/ybran
 
 ```{r, echo=FALSE}
 frogs <- tibble(read.csv("data/Swierk_Langkilde_BEHECO_1.csv")) %>%
-  select(year, pond, treatment,hatched.eggs, total.eggs, num.metamorphosed,field.survival.num)
+  dplyr::select(year, pond, treatment,hatched.eggs, total.eggs, num.metamorphosed,field.survival.num)
 
 DT::datatable(frogs,
               options = list(autoWidth = TRUE,pageLength = 5, lengthMenu = c(5, 25, 50)
@@ -199,7 +199,7 @@ Here are the bootstrap results:
 
 ```{r, echo=FALSE}
 frogs.boot %>% 
-  select(-replicate)%>%
+  dplyr::select(-replicate)%>%
   mutate_all(round,digits = 2) %>%
 DT::datatable(.,
               options = list(autoWidth = TRUE,pageLength = 5, lengthMenu = c(5, 25, 50)
@@ -295,7 +295,7 @@ Yielding a difference of `r pull(mean_diff) %>% round(digits = 2)` between the m
 So now we permute the data by randomly shuffling "treatment" onto our observed response variable, `hatched.eggs`, by using the [`sample()`](https://stat.ethz.ch/R-manual/R-patched/library/base/html/sample.html) function. Let's make one permutation below.
 
 ```{r}
-one.perm <- select(frogs,treatment, hatched.eggs)     %>%
+one.perm <- dplyr::select(frogs,treatment, hatched.eggs)     %>%
   mutate(perm_treatment = sample(treatment, size = n(), replace = FALSE))         
 ```
 
@@ -342,7 +342,7 @@ But, this is just one sample from the null distribution.  Now we do this many ti
 sample_size <- nrow(frogs)
 perm_reps   <- 100000
 
-many.perm <- select(frogs,treatment, hatched.eggs)     %>%
+many.perm <- dplyr::select(frogs,treatment, hatched.eggs)     %>%
   rep_sample_n(size = sample_size, replace = FALSE, reps = perm_reps ) %>%
   mutate(perm_treatment = sample(treatment, size = n(), replace = FALSE))  %>%
   group_by(replicate, perm_treatment)

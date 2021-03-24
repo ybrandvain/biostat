@@ -86,30 +86,30 @@ I share my most common mistakes, below. I note that these are my common mistakes
 
 
 ```{r, eval=FALSE}
-select(iris, sepal.length)
-select(iris, Sepal_Length)
-select(iris, Sepal.Lngth)
+dplyr::select(iris, sepal.length)
+dplyr::select(iris, Sepal_Length)
+dplyr::select(iris, Sepal.Lngth)
 ```
 
 ```{r, error=TRUE, echo=FALSE}
-select(iris, Sepal.Lngth)
+dplyr::select(iris, Sepal.Lngth)
 ```
 
 Similarly, you might misspell the function:  
 
 ```{r, error=TRUE}
-selct(iris, Sepal.Length)
+dplyr::selct(iris, Sepal.Length)
 ```
 
 So, check for these mistakes and fix the code above to look like this:  
 
 
 ```{r, eval=FALSE}
-select(iris, Sepal.Length)
+dplyr::select(iris, Sepal.Length)
 ```
 
 ```{r, echo=FALSE}
-select(iris, Sepal.Length) %>% head()
+dplyr::select(iris, Sepal.Length) %>% head()
 ```
 
 ```{block2, type='rmdtip'}

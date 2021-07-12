@@ -542,6 +542,9 @@ This quote is a great encapsulation of the major challenges in regression. <span
 
  <span style="color: LightGrey;">In addition to the standard caveats about uncertainty, bias, nonindependence and model assumptions etc...</span> Predictions from a linear model are only good for similar conditions across the range of values of the explanatory variable used to generate the model.  
 
+```{r, echo=FALSE}
+include_graphics("https://imgs.xkcd.com/comics/extrapolating.png")
+```
 
 #### Be warry of extrapolation: Example 
 

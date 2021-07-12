@@ -309,7 +309,7 @@ For example, let's say I want to calculate [`mean()`](https://stat.ethz.ch/R-man
 ```{r,fig.height=0.1, fig.width=3, error = TRUE, warning=FALSE}
 iris <- iris        %>% 
   group_by(Species) %>%
-  summarize(mean_petal_to_sepal_width = mean(petal_to_sepal_width), .groups= "drop_last") 
+  dplyr::summarize(mean_petal_to_sepal_width = mean(petal_to_sepal_width)) 
 
 ggplot(iris, aes(x = petal_to_sepal_width, fill = Species )) + 
   geom_density(alpha = .5)
@@ -334,7 +334,7 @@ iris <- iris %>%
 ```{r,fig.height=1.4, fig.width=3, warning=FALSE, message=FALSE}
 iris_petal2sepalw_bysp <- iris        %>% 
   group_by(Species) %>%
-  summarize(mean_petal_to_sepal_width = mean(petal_to_sepal_width), .groups= "drop_last") 
+  dplyr::summarize(mean_petal_to_sepal_width = mean(petal_to_sepal_width), .groups= "drop_last") 
 
 ggplot(iris, aes(x = petal_to_sepal_width, fill = Species )) + 
   geom_density(alpha = .5)
@@ -352,7 +352,7 @@ But what if **you wanted the mean in the same tibble as the initial data** so yo
 ```{r,fig.height=1.4, fig.width=3, warning=FALSE, message=FALSE}
 iris <- iris        %>% 
   group_by(Species) %>%
-  mutate(mean_petal_to_sepal_width = mean(petal_to_sepal_width), .groups= "drop_last") 
+  dplyr::mutate(mean_petal_to_sepal_width = mean(petal_to_sepal_width), .groups= "drop_last") 
 
 ggplot(iris, aes(x = petal_to_sepal_width, fill = Species)) + 
   geom_density(alpha = .5)+ 

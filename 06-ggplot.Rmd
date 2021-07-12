@@ -109,8 +109,13 @@ As we saw in the section, [Centering plots on biology], we want our biological q
 
 Using the [`msleep`](https://ggplot2.tidyverse.org/reference/msleep.html) data set below, we briefly work through a rough guide on how the structure of our data can translate into a plot style, and how we translate that into a geom in ggplot. So the first step you should look at the data – either with the [`view()`](https://tibble.tidyverse.org/reference/view.html) function, or a quick [`glimpse()`](https://tibble.tidyverse.org/reference/glimpse.html) and reflect on your questions before plotting. This also helps us remember the name and data type of each variable.
 
-```{r}
+```{r, eval=FALSE}
 glimpse(msleep)
+```
+
+
+```{r, echo=FALSE}
+include_graphics("images/glimpse_msleep.jpeg")
 ```
 
 
@@ -156,8 +161,13 @@ msleep                 %>%
 
 If the same data where presented as one categorical variable for vore (with each vore once) and another, `n`, for counts.
 
-```{r}
+```{r, eval=FALSE}
 count(msleep, vore)
+```
+
+
+```{r, echo=FALSE}
+include_graphics("images/count_msleep.jpeg")
 ```
 
 

@@ -1,0 +1,546 @@
+# More considerations when predicting one continuous variable from two (or more) things {#morenovaII}   
+
+```{r, echo = FALSE, warning=FALSE, message=FALSE}
+library(tidyverse)
+library(gridExtra)
+library(DT)
+library(knitr)
+library(blogdown)
+library(beyonce, warn.conflicts=F, quietly=T)
+library(stringr)
+library(tweetrmd)
+library(emo)
+library(tufte)
+library(cowplot)
+library(lubridate)
+library(ggthemes)
+library(kableExtra)
+library(ggforce)
+library(datasauRus)
+library(ggridges)
+library(randomNames)
+library(infer)
+library(tiktokrmd)
+library(ggridges)
+library(colorspace)
+library(ggfortify)
+library(broom)
+library(emojifont)
+library(car)
+library(magrittr)
+options(crayon.enabled = FALSE)   
+gg_color_hue <- function(n) {
+  hues = seq(15, 375, length = n + 1)
+  hcl(h = hues, l = 65, c = 100)[1:n]
+}
+dung <- tibble(female = c("uk",rep(c("swiss","swiss","uk","uk"), each= 15)[-1]),
+               male = rep(c("uk","swiss","uk","swiss"), each= 15),
+               sire.2nd.male =  c(74, 77, 72, 81, 75, 76, 78, 68, 81, 74, 71, 58,  
+                  67, 63, 83, 74, 63, 51, 63, 69, 61, 34, 51, 62, 61, 69, 59, 72,  
+                  51, 56, 58, 73, 88, 80, 67, 65, 95, 72, 75, 69, 70, 56, 66, 60, 
+                  81, 92, 96, 98, 99, 85, 84, 93, 75, 93, 99, 92, 93, 93, 100, 97))
+
+```
+
+
+
+
+```{block2, type='rmdnote'}
+This text (roughly) follows Chapter 18 of our textbook.   **The reading below is required,**  @whitlock2020 is  not.
+```
+
+
+<span style="color: Blue;font-size:22px;">   Motivating scenarios:  </span>  <span style="color: Black;font-size:18px;">   We have numerous explanatory variables and want to develop an synthetic model. We are particularly interested in hypotheses in which the reponse variable may depend on an interaction between explanatory variables.  </span>
+
+**Learning goals: By the end of this chapter you should be able to**    
+
+- Write down and interpret longer and more complex linear models.   
+- Interpret  models with interactions and run them in R R.      
+- Calculate Type I, II, and II sums of squares and recognize when one is most appropriate.   
+
+
+
+## Review  of Linear  Models  
+
+A linear model predicts the response variable, as $\widehat{Y_i}$ by adding up all components of the model.  
+
+
+```{r, out.width="50%", echo=FALSE, out.extra='style="float:right;padding-left: 5px"'}
+include_graphics("https://raw.githubusercontent.com/allisonhorst/stats-illustrations/master/other-stats-artwork/dragon_predict_mlr.png")
+```
+ 
+ 
+\begin{equation} 
+\hat{Y_i} = a + b_1  y_{1,i} + b_2 y_{2,i} + \dots{}
+(\#eq:predlong)
+\end{equation}
+ 
+ 
+
+Linear models we have seen   
+
+In chapter \@ref(morenova) we saw we could extend our single factor linear models (e.g. one and two sample t-tests, ANOVAs, regression, etc.) two include more factors:   
+
+- We could include a linear term and its squared value to predict a quantitative outcome in  a polynomial regression.  $\widehat{Y_{i}} = a + b_{1,i} \times y_1 +  b_{2,i} \times y_1^2$...  
+- A linear model in which we predict a quantitative response as a function of two categorical variables (two factor ANOVA without an interaction)      
+- A linear model in which we predict a quantitative response as a function of one continuous variable that we want o account for (aka a covariate) before  considering the effect of a categorical predictor (ANCOVA).      
+
+Here we look at  these in more detail. Specifically, we consider   
+
+- Cases in which the response is predicted by an interaction between explanatory variables    
+- Different ways to attribute sums of squares, depending on your goals / motivation.  
+
+
+
+## Statistical interactions    
+
+
+```{r, echo=FALSE, fig.height=2, fig.width=4, out.extra='style="float:right;padding-left: 5px"'}
+tibble( yumm = c(0,5,3,-5), drink = c("Water","OJ","Water","OJ"), dental_hygine = c("floss", "floss","toothpaste","toothpaste")) %>% mutate(drink = fct_rev(drink)) %>%
+  ggplot(aes(x = drink, y = yumm, color =  dental_hygine , group  =  dental_hygine ))+
+  geom_line( show.legend = FALSE)+
+  geom_point( size = 2 , show.legend = FALSE )+ 
+  geom_text(aes(label = dental_hygine), position = position_nudge(y = c(-.4,-.4,.4,.4), x= c(-.3,.3,-.3,.3)), show.legend = FALSE)
+  
+```
+
+I like orange juice in the morning. I also like the taste of minty fresh toothpaste. But drinking orange juice after brushing my teeth tastes terrible.    
+
+**This is an example of an interaction.**    
+
+- On its own, toothpaste tastes good. 
+- On its own OJ is even better. 
+- Put them together, and you have something gross.   
+
+```{r, echo=FALSE, fig.height=2, fig.width=4, out.extra='style="float:right;padding-left: 5px"'}
+tibble( danger = c(.2,.01,15,1), intoxicated = c("Yes","No","Yes","No"), activity = c("sleeping", "sleeping","driving","driving")) %>%
+  ggplot(aes(x = intoxicated, y = danger, color =  activity, group  =  activity ))+
+  geom_line( show.legend = FALSE)+
+  geom_point( size = 2 , show.legend = FALSE )+ 
+  geom_text(data = .%>% filter(intoxicated == "Yes"),aes(label =activity), position = position_nudge( x= c(.3,.3)), show.legend = FALSE)
+```
+
+
+This is an extreme case. More broadly, an interaction is any case in which the slope of two lines differ -- that is to say when the effect of one variable  on an outcome depends on the value of another variable. 
+
+
+
+
+**Another example of an interaction** Getting intoxicated is a bit dangerous. Driving is a bit dangerous. Driving while intoxicated is more dangesrus than adding these up individually.
+
+
+###  Visualizing main & interactive effects
+
+```{r,echo=FALSE, fig.height=4, fig.width=4.7, out.extra='style="float:right;padding-left: 5px"'}
+#library(car)
+
+par(mfrow = c(2,2),mar = c(3,3,3,1))
+plot(0, xlim = c(0,1), ylim = c(-.05,1.05), type="n", axes = FALSE, xlab = "",ylab="", main = "Main effect of A")
+axis(1,c(.15,.85), c(expression(A[1]), expression(A[2])), tick = FALSE); axis(2,c(-10,10), c("",""))
+axis(1,c(-10,10))
+segments( x0 = c(.15,.14) ,  y0 = c(.85,.84),  x1 = c(.84,.85), y1 = c(.14,.15) , col = c("#1f78b4","#b2df8a"), lwd = 3)
+mtext("Y",side=2, line = 1)
+text(x = c(.15,.15), y = c(.98,.72),
+     labels = c(expression(B[1]), expression(B[2])),col = c("#1f78b4","#b2df8a")) 
+
+
+plot(0, xlim = c(0,1), ylim = c(-.1,1.05), type="n", axes = FALSE, xlab = "",ylab="", main = "Main effect of B")
+axis(1,c(.15,.85), c(expression(A[1]), expression(A[2])), tick = FALSE); axis(2,c(-10,10), c("",""))
+axis(1,c(-10,10))
+segments( x0 = rep(.15,2) ,  y0 = jitter( c(.85,.15), amount = .1),  x1 = rep(.85,2), y1 = jitter( c(.85,.15), amount = .05) , col = c("#1f78b4","#b2df8a"), lwd = 3)
+mtext("Y",side=2, line = 1)
+text(x = c(.15,.15), y = c(.95,.05),
+     labels = c(expression(B[1]), expression(B[2])),col = c("#1f78b4","#b2df8a")) 
+
+
+plot(0, xlim = c(0,1), ylim = c(-.1,1.05), type="n", axes = FALSE, xlab = "",ylab="", main = "Main effect of B \n Interaction between A & B")
+axis(1,c(.15,.85), c(expression(A[1]), expression(A[2])), tick = FALSE); axis(2,c(-10,10), c("",""))
+axis(1,c(-10,10))
+segments( x0 = rep(.15,2) ,  y0 = jitter( c(.6,.4), amount =  0.025),  x1 = rep(.85,2),   y1 = jitter(c(.99, .01), amount = 0.025) , col = c("#1f78b4","#b2df8a"), lwd = 3)
+mtext("Y",side=2, line = 1)
+text(x = c(.15,.15), y = c(.75,.25),
+     labels = c(expression(B[1]), expression(B[2])),col = c("#1f78b4","#b2df8a")) 
+
+plot(0, xlim = c(0,1), ylim = c(-.05,1.05), type="n", axes = FALSE, xlab = "",ylab="", main = "Interaction between A & B")
+axis(1,c(.15,.85), c(expression(A[1]), expression(A[2])), tick = FALSE);
+axis(1,c(-10,10))
+axis(2,c(-10,10), c("",""))
+segments( x0 = rep(.15,2) ,  y0 = jitter( c(.85,.15), amount = .1),  x1 = rep(.85,2), y1 = jitter( c(.25,.85), amount = .25) , col = c("#1f78b4","#b2df8a"), lwd = 3)
+mtext("Y",side=2, line = 1)
+text(x = c(.15,.15), y = c(1,.05),
+     labels = c(expression(B[1]), expression(B[2])),col = c("#1f78b4","#b2df8a")) 
+```
+
+
+
+
+There are many possible outcomes when looking into a model with two predictors and the potential for an interaction. I outline a few extreme possibilities, plotted on the right. 
+
+- We can see an effect of only variable **A** on Y. That is, lines can have nonzero slopes ("*Main effect of A*").   
+- We can see a effect of only variable **B** on Y. That is, lines can have zero slopes but differing intercepts ("*Main effect of B*").   
+- We can see an effect of only variable **B** on Y, but an interaction between that variable and the other. That is, intercepts and slopes can differ (or vice versa) in such a way that the mean of Y only differs by one of the explanatory variables (e.g. "*Main effect of B, Interaction between A & B*").    and/or    
+- We can have only an interaction. That is, on their own values of A or B have no predictive power, but together they do.  (different slopes)      
+ 
+
+
+```{r, out.width="30%", echo=FALSE, out.extra='style="float:right;padding-left: 5px"'}
+include_graphics("https://upload.wikimedia.org/wikipedia/commons/thumb/f/fd/Dungfliegen_bei_der_Paarung_-_Scatophaga_sp.jpg/640px-Dungfliegen_bei_der_Paarung_-_Scatophaga_sp.jpg")
+```
+ 
+ 
+
+
+## Interaction case study   
+
+
+
+Females of the yellow dung fly, *Scathophaga atercoraria*, mate with multiple males and the sperm of different males "compete" to fertilize her eggs.  
+
+What determines whether a sperm is competitive? To find out, @hosken2002 tested if/how the origin <font color = "lightgrey">(from UK or Switzerland)</font> of males and females (and their interaction) influence the percentage of offspring sired by the second male. 
+
+So our model is:   
+
+$$SIRING.2ND.MALE = FEMALE + MALE + FEMALE \times MALE$$   
+
+### Biological hypotheses
+
+There are a few possibilities.    
+
+-   Perhaps females from the UK populations reject (or accept) more sperm from the second male than do females from Sweden (main effect of female population).        
+- Perhaps sperm from UK males have more (or less) siring  success than sperm from UK males  second male (main effect of male population).   
+- Or maybe, sperm from Swedish males has high siring success with Swedish females, and  sperm from UK males has high siring success with UK females (interaction), suggesting harmonious co-adaptation.  
+- Or maybe females have evolved to resist local sperm  so sperm from Swedish males has high siring success with UK females but low siring success with Swedish females, suggesting a conflict between the sexes.   
+
+etc... etc...  
+
+
+
+### The data 
+
+The raw data are avalaible here if you want to follow along.   <span style="color: LightGrey;">Before we analyze it, I am confessing to changing it for teaching purposes. Specifically I am taking the first data point and saying it came from a mating between a UK female and a swiss male.</span>
+
+```{r}
+dung <- tibble(female = c("uk",rep(c("swiss","swiss","uk","uk"), each= 15)[-1]),
+               male = rep(c("uk","swiss","uk","swiss"), each= 15),
+               sire.2nd.male =  c(74, 77, 72, 81, 75, 76, 78, 68, 81, 74, 71, 58,  
+                  67, 63, 83, 74, 63, 51, 63, 69, 61, 34, 51, 62, 61, 69, 59, 72,  
+                  51, 56, 58, 73, 88, 80, 67, 65, 95, 72, 75, 69, 70, 56, 66, 60, 
+                  81, 92, 96, 98, 99, 85, 84, 93, 75, 93, 99, 92, 93, 93, 100, 97))
+```
+
+
+Looking at the means and standard errors below, we see that      
+
+- UK males have similar mating success with both UK and Swedish females. 
+- Swedish males seem to have remarkably low success with Swedish females and remarkably high success with  UK females. This suggests a history of conflict between the sexes over the success of the second male.      
+
+
+
+```{r echo=FALSE, message=FALSE,warning=FALSE}
+dung %>%
+  mutate(male = paste(male,"male"))%>%
+  group_by(female, male) %>%
+  summarise(siring = round(mean(sire.2nd.male), digits = 2),
+            se     = round(sd(sire.2nd.male)/ sqrt(n()),digits = 1),
+            summa  = paste(siring," (",se,")",sep = "")) %>%
+  ungroup() %>%
+  pivot_wider(id_cols = female, names_from = male, values_from = summa)%>%
+  kbl(caption = "Mean (se) male siring success by female population of origin", digits = 2,align = "l") %>%
+  kable_classic(full_width = F, html_font = "Cambria")
+```
+ 
+### Fitting a linear model  with an interaction in R  
+
+In R we can designate an interaction in addition to main effects with a colon, `:`. Or we can have R do a full model with a `*`. So the two models below are identical
+
+```{r}
+lm_dung_fmi <- lm(sire.2nd.male ~ female + male + female:male, dung)
+lm_dung_fmi <- lm(sire.2nd.male ~ female*male , dung) 
+broom::tidy(lm_dung_fmi)
+```
+
+
+
+As usual, we can look at our estimates and uncertainty in them with the `summary.lm()` <span style="color: LightGrey;">or equivalently, the `tidy()` function</span>. As like most linear model we know that these p and t-values <span style="color: LightGrey;">(which shows up at `statistic` in `tidy()`)</span> do not necessarily describe things we care about, and may be misleading.  
+
+Still, we can use this output to make predictions. The first terms should look familiar. For the final term `femaleuk:maleuk` we multiply `femaleuk` (0 or 1), by `maleuk` (0 or 1) as the thing we multiply this effect by.  That is, when the male and female are from the uk this is 1, and second males in this cross have 34.2% less siring success than we would predict if we added up the effect of male uk and female uk.  Because multiplying `femaleuk` (0 or 1), by `maleuk` (0 or 1) is zero in all other cases, it only shows up in this one cross.  
+
+We can see this in the design matrix (below). Remember for the linear algebra fans that we make predictions as the dot product of our model coefficients and the design matrix.
+
+
+
+```{r} 
+model.matrix(lm_dung_fmi)                                                                                                        %>%  DT::datatable(options = list(autoWidth = TRUE,pageLength = 5, lengthMenu = c(5, 25, 50)))
+```
+
+Or, if you don't want to mess with linear algeba, the model predicts siring success of the second male as follows
+  
+
+
+\begin{equation} 
+\begin{split}
+                                               & \text{intercept}   &\text{female UK?}&\text{male UK?}&\text{both UK?}&\widehat{Y_i}\\
+\widehat{Y}_\text{female.swiss x male.swiss} =  &59.733 \times 1+  &32.867 \times  0 + &13.410 \times 0 -&34.197\times 0  =&59.733\\
+\widehat{Y}_\text{female.swiss x male.uk} =     &59.733 \times 1+  &32.867 \times  0 + &13.410 \times 1 -&34.197\times 0  =&73.14\\
+\widehat{Y}_\text{female.uk    x male.swiss} =  &59.733 \times 1+  &32.867 \times  1 + &13.410 \times 0 -&34.197\times 0  = &92.60\\
+\widehat{Y}_\text{female.uk    x male.uk} =     &59.733 \times 1+  &32.867 \times  1 + &13.410 \times 1 -&34.197\times 1  = &71.83\\
+\end{split}
+\end{equation} 
+
+
+We can see that the model predictions simply describe our four sample means.  
+
+## Hypothesis testing  
+
+### Statistical  hypotheses   
+
+We can translate the biological hypotheses into three pairs of statistical null and alternative hypotheses.    
+
+We examine three null and alternative hypotheses
+
+1. Main effect of Male   
+    - <font color = "purple">$H_0:$ Siring success is independent of male origin.</font>  
+    - <font color = "orange">$H_A:$ Siring success differs by male origin.</font>  
+2. Main effect of Female 
+    - <font color = "purple">$H_0:$ Siring success is independent of female origin.</font>  
+    - <font color = "orange">$H_A:$ Siring success differs by female origin.</font>  
+3. Interaction between Male and Female
+    - <font color = "purple">$H_0:$ The influence of male origin on siring success does not differ by female origin.</font>     
+    - <font color = "orange">$H_0:$ The influence of male origin on siring success is depends on female origin.</font>
+    
+
+We visualize these hypotheses below  
+
+```{r, fig.height = 3, fig.width=7.6, echo=FALSE}
+q0 <- ggplot(data = dung , aes(x = male, y = sire.2nd.male, color = female,lty = female, shape = female, group = female)) +
+  geom_jitter(width = .1, height = 0, size = 3,show.legend = FALSE, alpha = .3) +
+  ylab("Kids from 2nd male") +
+  annotate(geom = "text", x = .6, y = c(90,70,80), label = c("female","swiss","UK"), color = c("black",gg_color_hue(2)))+
+  xlab("2nd Male")+ 
+  theme_tufte()
+
+qa <-q0 +
+  geom_hline(yintercept = mean(dung$sire.2nd.male), lty =2) +
+  labs(title = "Null Model",subtitle = "Siring is independent of male, female, and their interaction")
+
+qb <- q0 +
+  labs(title = "Alternative Model 1")+ 
+  geom_segment(data = lm(sire.2nd.male ~ factor(male),    data = dung)%>%
+              augment()%>% 
+              dplyr::select(-sire.2nd.male)%>%
+              rename(sire.2nd.male = .fitted, male = `factor(male)` ) %>%
+              mutate(female = dung$female),
+              aes(x = as.numeric(male) - .2, xend = as.numeric(male)+.2, 
+                  y = sire.2nd.male , yend = sire.2nd.male ),
+              lty = 2,show.legend = FALSE, color = "purple")
+
+qc <- q0 +
+  labs(title = "Alternative Model 3")+ 
+  geom_segment(data = lm(sire.2nd.male ~ factor(female),    data = dung)%>%
+              augment()%>% 
+              dplyr::select(-sire.2nd.male)%>%
+              rename(sire.2nd.male = .fitted, female =`factor(female)` ) %>%
+              mutate(male = factor(dung$male)),
+              aes(x = as.numeric(male) - .2, xend = as.numeric(male)+.2, 
+                  y = sire.2nd.male , yend = sire.2nd.male ),
+              lty = 2,show.legend = FALSE)
+
+qd <- q0 +
+  labs(title = "Alternative Model 4")+ 
+  geom_segment(data = lm(sire.2nd.male ~ female + male,    data = dung %>% mutate(male = factor(male), female = factor(female)))%>%
+              augment()%>% 
+              dplyr::select(-sire.2nd.male)%>%
+              rename(sire.2nd.male = .fitted),
+              aes(x = as.numeric(male) - .2, xend = as.numeric(male)+.2, 
+                  y = sire.2nd.male , yend = sire.2nd.male ),
+              lty = 2,show.legend = FALSE)+
+  geom_line(data = lm(sire.2nd.male ~ female + male,    data = dung %>%
+                        mutate(male = factor(male), 
+                               female = factor(female)))%>%
+              augment()%>% 
+              dplyr::select(-sire.2nd.male)%>%
+              rename(sire.2nd.male = .fitted), lty=2,show.legend = FALSE)
+
+qe<- q0 +
+  labs(title = "Alternative Model 5")+ 
+  geom_segment(data = lm(sire.2nd.male ~ female:male,    data = dung %>% mutate(male = factor(male), female = factor(female)))%>%
+              augment()%>% 
+              dplyr::select(-sire.2nd.male)%>%
+              rename(sire.2nd.male = .fitted),
+              aes(x = as.numeric(male) - .2, xend = as.numeric(male)+.2, 
+                  y = sire.2nd.male , yend = sire.2nd.male ),
+              lty = 2,show.legend = FALSE)+
+  geom_line(data = lm(sire.2nd.male ~ female : male,    data = dung %>%
+                        mutate(male = factor(male), 
+                               female = factor(female)))%>%
+              augment()%>% 
+              dplyr::select(-sire.2nd.male)%>%
+              rename(sire.2nd.male = .fitted), lty=2,show.legend = FALSE)
+
+qf<- q0 +
+  labs(title = "Alternative Model 6")+ 
+  geom_segment(data = lm(sire.2nd.male ~ male + female:male,    data = dung %>% mutate(male = factor(male), female = factor(female)))%>%
+              augment()%>% 
+              dplyr::select(-sire.2nd.male)%>%
+              rename(sire.2nd.male = .fitted),
+              aes(x = as.numeric(male) - .2, xend = as.numeric(male)+.2, 
+                  y = sire.2nd.male , yend = sire.2nd.male ),
+              lty = 2,show.legend = FALSE)+
+  geom_line(data = lm(sire.2nd.male ~ male + female : male,    data = dung %>%
+                        mutate(male = factor(male), 
+                               female = factor(female)))%>%
+              augment()%>% 
+              dplyr::select(-sire.2nd.male)%>%
+              rename(sire.2nd.male = .fitted), lty=2,show.legend = FALSE)
+
+qg<- q0 +
+  labs(title = "Alternative Model 7")+ 
+  geom_segment(data = lm(sire.2nd.male ~ female + female:male,    data = dung %>% mutate(male = factor(male), female = factor(female)))%>%
+              augment()%>% 
+              dplyr::select(-sire.2nd.male)%>%
+              rename(sire.2nd.male = .fitted),
+              aes(x = as.numeric(male) - .2, xend = as.numeric(male)+.2, 
+                  y = sire.2nd.male , yend = sire.2nd.male ),
+              lty = 2,show.legend = FALSE)+
+  geom_line(data = lm(sire.2nd.male ~ female + female : male,    data = dung %>%
+                        mutate(male = factor(male), 
+                               female = factor(female)))%>%
+              augment()%>% 
+              dplyr::select(-sire.2nd.male)%>%
+              rename(sire.2nd.male = .fitted), lty=2,show.legend = FALSE)
+
+qh<- q0 +
+  labs(title = "Full Alternative Model", subtitle = "Siring depends on male, female, and their interaction")+ 
+  geom_segment(data = lm(sire.2nd.male ~ female * male,    data = dung %>% mutate(male = factor(male), female = factor(female)))%>%
+              augment()%>% 
+              dplyr::select(-sire.2nd.male)%>%
+              rename(sire.2nd.male = .fitted),
+              aes(x = as.numeric(male) - .2, xend = as.numeric(male)+.2, 
+                  y = sire.2nd.male , yend = sire.2nd.male ),
+              lty = 2,show.legend = FALSE)+
+  geom_line(data = lm(sire.2nd.male ~ female * male,    data = dung %>%
+                        mutate(male = factor(male), 
+                               female = factor(female)))%>%
+              augment()%>% 
+              dplyr::select(-sire.2nd.male)%>%
+              rename(sire.2nd.male = .fitted), lty=2,show.legend = FALSE)
+
+grid.arrange( qa +theme(axis.line = element_line()),qh+theme(axis.line = element_line()), 
+  nrow = 1)
+```
+
+### Evaluating assumptions   
+
+Remember that linear models assume 
+
+- **Linearity:** That observations are appropriately modeled by adding up all predictions in our equation.      
+- **Homoscedasticity:** The variance of residuals is independent of the predicted value, $\hat{Y_i}$  is the same for any value of X.    
+- **Independence:** Observations are independent of each other (aside from the predictors in the model).  
+- **Normality:**  That residual values are normally distributed.     
+- **Data are collected without bias**   as usual.   
+
+Taking a look at our diagnostic plots, it looks like data meet test assumptions:
+
+```{r, message=FALSE, warning=FALSE, fig.height=2, fig.width=7}
+autoplot(lm_dung_fmi,nrow = 1, which =c(2,3,5), label = FALSE)
+```
+
+
+### Hypothesis testing in an ANOVA framework: Types of Sums of Squares    
+
+**tl/dr** 
+
+- We need to come up with fair ways to attribute variance in larger linear models.
+    - Type I Sums of Squares (calculated with the `anova()` function) are most appropriate when we want to take a "covariate into account". The order we enter terms into our model can change p and f values with Type I sums of Squares.     
+    - Type II Sums of Squares are most appropriate when we are equally interested in all main effects as interesting hypotheses.    
+    - Type III Sums of Squares are most appropriate when we are equally interested in all main and interaction effects as interesting hypotheses. want to take a "covariate into account".   
+- We can specify which type of sums of squares we want to use with the [`Anova()`](http://finzi.psych.upenn.edu/R/library/car/html/Anova.html) function in the `car` package.    
+- If our study is "balanced" type I and type II sums of squares will give identical answers.  
+- All of these can go a bit weird in different cases, especially with unbalanced designs.   
+
+For our case, a Type III Sum of Squares is probably most approriate.   
+
+#### **Type I Sums of Squares**   {-}
+
+In the previous chapter, we calculated *Type I* sums of squares. Here the order of the variables in our model matters. We putting the variable that worries us but that we don't care about in our model first. We can do the same for a model with an interaction. To calculate Type I sums of squares we   
+
+- Sums of Square  for the first variable,  $SS_A$.       
+     - Build a model with just the first thing  (the covariate, which we'll call thing A).  
+     - Calculate the sums of squares of the difference between predictions from this small model and the grand mean  
+
+- Sums of Square  for the second variable,  $SS_B$.   
+     - Build a model with the first and second thing in our model (which we'll call thing B). 
+     - Calculate the sums of squares of the difference between predictions from this model  and predictions from the small model and call this $SS_B$... 
+     
+- Keep going until you calculate sums of squares like this for all main effects.   
+
+- Sums of Square  for the interaction term,  $SS_{A:B}$.   
+    -Build a model with all main effects (in this case, A and B, if there are only two), and the first interaction, `A:B`.    
+    - Calculate the sums of squares as the difference between predictions of this  model including the interaction, and the model without it and call this $SS_{A:B}$. etc...  (If there are only two variables and their interaction  in the model, this is just $1 - (SS_A+SS_B)$).
+
+We then calculate the F statistic and P etc as per usual. As we saw, the `anova()` function calculates these Type I Sums of Squares
+
+```{r}
+anova(lm_dung_fmi) 
+```
+
+An issue with this approach is that it doesn't make a ton of sense if we are interested in both variables,  and the Sums Of Squares and P-values it gives us different answers depending on the order of variables in our model.  Compare `anova(lm_dung_fmi)` to `anova(lm_dung_mfi)` below:
+
+```{r}
+lm_dung_mfi <- lm(sire.2nd.male ~male * female, data = dung)
+anova(lm_dung_mfi)
+```
+
+In this case the results are very similar, but that is not always the case.  
+
+
+#### **Type II Sums of Squares**  {-}
+
+If we care about the statistical significance of both variables we use "Type II Sums of Squares". Here the order of variables in our model does not matter. The algorithm for calculating Type II Sums of Squares is   
+
+
+- Sums of Squares  for each main effect,  $SS_{X}$. We basically calculate the sums of squares for each variable as if it was the last major effect in a Type I Sums of Square.    
+     - Building a model with all main effects except X, model $no_x$.   
+     - Building a model with all main effects, model $main$.   
+     - Calculate the sums of squares as the squared difference between predictions from the $main$ model and the $no_x$ model, call that $SS_X$.    
+     
+- Repeat for all main effects.   
+
+- After calculating all main effects, take a similar strategy for all interaction effects.  
+
+
+We can calculate any type of sums of squares with the [`Anova()`](http://finzi.psych.upenn.edu/R/library/car/html/Anova.html) function in the `car` package. 
+
+```{r}
+library(car)
+Anova(lm_dung_fmi, type = "II")
+Anova(lm_dung_mfi, type = "II")
+```
+
+Notice anything? Well, all sums of squares, F and p-values are the same as if they were the last entry in Type I sums of squares.
+
+There are two weird things about Type II Sums of squares:  
+
+- They don't sum to total sums of squares.    
+- It's a bit weird to talk about the significance of a main effect without considering an interaction.  
+
+
+####  **Type III Sums of Squares**    {-}  
+
+If we care about an interaction and main effects it makes sense to not leave interactions for last.  In this case, we calculate Type III Sums of Squares for each variable and interaction by comparing the predictions with the full model to predictions with everything but the variable (or interaction) we're interested in. Again we can do this with the [`Anova()`](http://finzi.psych.upenn.edu/R/library/car/html/Anova.html) function in the `car` package. Again, order won't matter.  
+
+
+```{r}
+Anova(lm_dung_fmi, type = "III")
+```
+
+###  Biological coclusions for case study
+
+
+We conclude that female (F = 102.259, df = 1, p = $3\times 10e^{-14}$) and male (F = 16.4, df = 1, p = 0.00016) population of origin, and their interaction (F = 55.2, df =1, p = $6.7 \times 10^{-10}$) all impact the siring success of the second male. Most notably, the interaction between male and female population of origin seemed to matter substantially -- when females and second males where both from the UK siring success was way lower that expected given each main effect. This suggests that sexual conflict in the UK might modulate the competitiveness of second sperm. Future work should address why the siring success of second males from Sweden was not notably impacted by maternal population of origin.  
+
+## Quiz
+
+```{r, echo=FALSE}
+include_app("https://brandvain.shinyapps.io/interactionsandstuff/", height = "800")
+```

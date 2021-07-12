@@ -1,0 +1,415 @@
+# Generalized linear models I: Yes/No {#logit}
+
+```{r, echo = FALSE, warning=FALSE, message=FALSE}
+library(tidyverse)
+library(gridExtra)
+library(DT)
+library(knitr)
+library(blogdown)
+library(beyonce, warn.conflicts=F, quietly=T)
+library(stringr)
+library(tweetrmd)
+library(emo)
+library(tufte)
+library(cowplot)
+library(lubridate)
+library(ggthemes)
+library(kableExtra)
+library(ggforce)
+library(datasauRus)
+library(ggridges)
+library(randomNames)
+library(infer)
+library(tiktokrmd)
+library(ggridges)
+library(colorspace)
+library(ggfortify)
+library(broom)
+library(ggrepel)
+library(emojifont)
+library(car)
+library(magrittr)
+library(plotly)
+library(dagitty)
+library(ggdag)
+options(crayon.enabled = FALSE)   
+```
+
+
+
+
+
+<span style="color: Blue;font-size:22px;">   Motivating scenario:  </span>  <span style="color: Black;font-size:18px;"> We want to model nonlinear data. Here we use yes/no (or proportion) data as an example.  </span>
+
+
+
+
+## Review 
+
+### Linear models and their asumptions   
+
+A statistical model describes the predicted value of a response variable as a function of one or more explanatory variables.
+
+A linear model predicts the response variable by adding up all components of the model. So, In a linear model, we predict the value of a response variable, $\widehat{Y_i}$ knowing that the observed value,  $Y_i$  will deviate from this prediction by some normally distributed "residual" value, $e_i$.   
+
+$$Y_i = \widehat{Y_i} -e_i$$  
+
+We predict Y as a deviation from some constant, a, as a function of a bunch of stuff.
+
+$$\widehat{Y_i} = a + b_1 \times y_{1,i} + b_2 \times y_{2,i}  + \dots$$
+
+#### Assumptions of Linear Models    
+
+Linear models assume   
+
+- Data points are independent.   
+- Data are unbiased.   
+- Error is independent of predictors.   
+- The variance of residuals is independent of predictors.   
+- Error is normally distributed.   
+- Response can be modeled as a linear combination of predictors.   
+
+
+#### When data do not meet assumptions   
+
+If data do not meet assumptions, we can forge ahead (if the test will be robust), permute/bootstrap, transform, or **find a better model**.  
+
+
+#### Common violations 
+
+We know that a lot of real-world data can be modeled by a linear model, and we also know that the linear model is relatively robust to violations of its assumptions. 
+
+Still, there are some relatively violations of assumptions of linear models that are particularly common, especially in biological data.
+
+**How biology breaks assumptions of the linear model <span style="color: LightGrey;">(better approach in parentheses)</span>:**   
+
+- Heteroscedastic residuals <span style="color: LightGrey;">(Use Generalized Least Squares).</span>      
+- Binomial data <span style="color: LightGrey;">(Logistic regression, a generalized linear model for binomially distributed data). </span>  
+- Count Data <span style="color: LightGrey;">(Use a generalized linear model with Poisson, quasi-poison, or negative binomial distributions).</span>   
+- Non-independence from nested designs.  <span style="color: LightGrey;">(Mixed effect models).</span>
+
+
+
+
+
+
+### Likelihood-Based Inference     
+
+In Chapter \@ref(likelihood), we introduced the idea of likelihood-based inference, which we can use to infer parameters, estimate uncertainty, and test null hypotheses for any data, so long as we can write down a model that appropriately models it.  
+
+In Chapter \@ref(likelihood), we used this for our familiar linear models. Here, we'll show the true strength of likelihood-based inference -- its flexibility.   
+
+## Generalized Linear Models    
+
+**G**eneralized **L**inear **M**odel**s** (GLMs) allow us to model non-linear data by modeling data the way it is distributed.  They do so by:   
+
+1. Specifying the distribution family they come from (the random component).     
+2. Finding a "linear predictor" (systematic component).   
+3. Using a link function to translate from linear predictor to the data.  
+
+What does this mean? Let's look at the example below to clarify!    
+
+
+## GLM Example 1: "logistic regression"    
+
+A particularly common type of biological data is yes / no data. Common examples of yes / no data are    
+
+- Alive / Dead     
+- Healthy / Sick    
+- Present / Absent 
+- Mated /  Unmated     
+- etc   
+
+Such data are poorly described by a standard linear model, but can be modeled.  Logistic regression models a yes/no outcome as a function of a continuous predictor (e.g. win/lose, live/die, presence/absence). The **linear predictor** is the familiar regression equation:
+
+$$\widehat{Y_i} = a + b_1 \times y_{1,i} + b_2 \times y_{2,i}  + \dots$$     
+
+**$\widehat{Y_i}$ is not our prediction for the probability of "yes", $\widehat{p_i}$.**   Rather, in a GLM, we use this "linear predictor" through the "link function" to  find our prediction.    
+
+For a logistic regression, the "linear predictor" describes the log odds, which we can convert to the predicted probability of success,  $\widehat{p_i}$ with the *logit* link function. That is,     
+
+$$\widehat{p_i} = \frac{e^{Y_i}}{1+e^{Y_i}}$$   
+So if our link function says that the log-odds, $\widehat{Y_i}$, equals negative one, the probability of "yes" is $\frac{e^{-1}}{1+e^{-1}} = 0.269$.   We can find this in R as
+
+- `exp(-1)/ (1+exp(-1))` = `r (exp(-1)/ (1+exp(-1))) %>% round(digits = 3)`     
+- Or, more simply, with the    [`plogis()`](https://stat.ethz.ch/R-manual/R-devel/library/stats/html/Logistic.html) function. `plogis(-1)` =  `r (plogis(-1)) %>% round(digits = 3)`.   
+
+
+## Logistic Regression Example: Cold fish   
+
+*How does the length of exposure to cold water impact fish mortality? fish survive in cold weather?*   
+
+Pitkow et al (1960) exposed guppies to 2, 8, 12, or 18 minutes in 5 degree Celsius water. The data -- with a value of 1 for `Alive` meaning alive and a value of zero meaning dead --  are presented below
+
+```{r}
+cold.fish <- tibble(Time  = rep(c(2,8,12,18), times = 2),
+                    Alive = rep(c(0,1), each = 4),
+                    n     = c(11, 24, 29, 38, 29, 16, 11, 2)) %>%
+  uncount(weights = n) 
+```
+
+```{r, echo = FALSE}
+cold.fish %>%     
+  rep_sample_n(size = 160) %>% 
+  ungroup()  %>% 
+  dplyr::select(-replicate) %>%
+  DT::datatable(options = list(autoWidth = TRUE,pageLength = 5, lengthMenu = c(5, 25, 50),
+                             columnDefs=list(list(targets=1, class="dt-right"),
+                                             list(width = '20px', targets = 1)
+                                             )))
+```
+
+What to do??
+
+### (Imperfect) option 1: Linear model with zero / one data  
+
+We could build a linear model in which we predict survival as a function of time in cold water.     
+
+
+
+```{r, fig.height = 2, fig.width=5, message=FALSE, warning=FALSE}
+ggplot(cold.fish, aes(x = Time, y = Alive)) + 
+  geom_jitter(size = 2, alpha = .35, height = .05, width = .5)+
+  geom_smooth(method = "lm")+
+  scale_x_continuous(breaks = seq(2,18,6),limits = c(0,20))
+```
+
+```{r}
+lm_cold_fish1 <- lm(Alive ~ Time, data = cold.fish)
+summary.lm(lm_cold_fish1)
+```
+
+We see -- unsurprisingly, that fish  survival strongly and significantly decreases, the longer they are in cold water.  
+
+```{r, fig.height = 2.5, fig.width=9, message=FALSE, warning=FALSE}
+autoplot(lm_cold_fish1 , ncol = 4)
+```
+
+While this isn't terrible, we do so greatest residuals for intermediate predictions, and the small values are too big (above the xy line) and large values are too big.  
+
+So, this isn't the end of the world, but isn't ideal.  
+
+
+### (Imperfect) option 2: Linear model with proportions  
+
+Alternatively, we could convert data to proportions and run a linear model.    
+
+
+```{r, message=FALSE, warning=FALSE}
+cold.fish.summary <- cold.fish %>% 
+    group_by(Time, Alive) %>%
+    summarise(n = n())    %>%
+    mutate(n_tot = sum(n),
+           prop_survive = n /n_tot)  %>%
+    filter(Alive == 1) %>% 
+    ungroup()
+```
+
+```{r, echo = FALSE}
+kable(cold.fish.summary)
+```
+
+```{r}
+lm_cold_fish2 <- lm(prop_survive ~ Time, cold.fish.summary)
+summary.lm(lm_cold_fish2)
+```
+
+
+We see -- unsurprisingly, that fish  survival strongly and significantly decreases (although the p-value is considerably greater than above), the longer they are in cold water.  
+
+
+```{r, fig.height = 2.5, fig.width=9, message=FALSE, warning=FALSE}
+autoplot(lm_cold_fish2, ncol = 4)
+```
+
+In this case the data seem to meet assumptions, but often they will not. In this case, a bigger issue is that we gave up a ton of power -- we went from 160 to four data points.     look ok... 
+
+### (Better) option three -- logistic regression  
+
+A better option is to model the data as they are -- 160 observations of Alive or Dead with forty fish at four different temperatures.   
+
+#### Fitting the model  
+
+In `R`, do this with the [`glm()`](https://stat.ethz.ch/R-manual/R-patched/library/stats/html/glm.html) function, noting that the data are binomially distributed and that we want our link function to be the `logit`.  
+
+There are two equivalent ways to do this.    
+
+- For the initial data as zero / one we type  
+
+```{r}
+cold.fish.glm1 <- glm(prop_survive ~ Time, weights = n_tot, 
+    data = cold.fish.summary, family = binomial(link = "logit"))
+```
+
+- For proportion data we just tell R we want to weight the proportion by the total number of observations for a given X.       
+
+
+
+```{r}
+cold.fish.glm2 <- glm(prop_survive ~ Time, 
+                       weights = n_tot, data = cold.fish.summary, 
+                       family = binomial(link = "logit"))
+```
+
+Regardless, we get the same result  for our estimates (and p-values). As in a linear model, we pay attention to the estimates but ignore the incorrect p-values below, and find the correct values with the `anova` function (see below).  
+
+
+```{r}
+summary.glm(cold.fish.glm1)
+```
+
+#### Making predictions from the *link* function    
+
+How can we take this output and predict the proportion of fish that will survive exposure to 4C water for some time? Say 6 minutes?    
+
+- We first use the linear predictor, to predict the log odds   
+
+$$\widehat{Y_i} = 1.44470 -0.22191  \times Time$$   
+So we predict the log odds of a fish surviving following six minutes of exposure to 4C water to equal $1.44470 - 6 \times 0.22191 = 0.11324$.
+
+This does not mean that a fish has a 0.11324 probability of surviving six minutes of exposure to 4C water -- this is just the log-odds of surviving. 
+We convert this to a survival probability with the `logit` link function.   
+
+$$p_\text{survive six min} = \frac{e^{0.11324}}{1+e^{0.11324}} = 0.528$$   
+
+Or with `plogis()`, `plogis(.11324)` = `r plogis(.11324)`.     
+
+
+This prediction -- that a fish at 4C for six minutes has a 52.8% chance of surviving is in line with our plots while incorrectly interpreting the output of the linear predictor as the predicted proportion is not.   
+
+
+
+
+#### Testing the model  
+
+We formally test the null hypothesis by conducting a likelihood ratio test -- that is, we take two times the difference in log-likelihoods and compare this value to its null sampling distribution (which happens to be a $\chi^2$ distribution with degrees of freedom equal to the difference in the number of parameters estimated for the null and the fitted model).
+
+We can do this with the `anova` function, telling R tht we want our test tb be the `LRT` (we get the same answer if we ask or a `Chisq`).    
+
+```{r}
+anova(cold.fish.glm1, test = "LRT")
+```
+ 
+
+#### Plotting the model   
+ 
+We can add this fit to a plot!!! 
+ 
+**For either the raw data**  
+
+```{r, fig.height = 2, fig.width=5, message=FALSE, warning=FALSE}
+ggplot(cold.fish, aes(x = Time, y = Alive)) + 
+  geom_jitter(size = 2, alpha = .35, height = .05, width = .5)+
+  geom_smooth(method = "glm",method.args = list('binomial'))+
+  scale_x_continuous(breaks = seq(2,18,6),limits = c(0,20))
+```
+ 
+**Or the summary**  
+
+```{r, fig.height = 2, fig.width=5, message=FALSE, warning=FALSE}
+ggplot(cold.fish.summary, aes(x = Time, y = prop_survive, weight = n_tot)) + 
+  geom_point(size = 2)+
+  geom_smooth(method = "glm",method.args = list('binomial'))+
+  scale_x_continuous(breaks = seq(2,18,6),limits = c(0,20))
+```
+
+
+
+### Assumptions of generalized linear models     
+
+GLMs are flexible and allow us to model just about anything. But our models must be appropriate for our data. Specifically, GLMs    assume   
+
+- The data  are independently distributed, conditional on predictors (unless this is modeled).       
+- The residuals   are appropriately modelled by the chosen distribution.     
+- A linear relationship between the transformed response in terms of the link function and the explanatory variables.   
+- Samples aren't too small.   
+
+
+
+
+
+
+## Quiz 
+
+```{r, echo=FALSE}
+include_app("https://brandvain.shinyapps.io/glmibinomial/", height = "800")
+```
+
+
+## Advanced / under the hood.  
+
+### How did we find the maximum likelihood?   
+
+A straightforward but computationally intense way is a grid search.
+Here we look over a bunch of parameter combinations and then find the one with the largest log likelihood. R uses more efficient methods to basically do the same thing.
+
+Here's how we can do this 
+
+1. Propose a bunch of plausible parameter values (aka models)    
+
+```{r}
+models <- crossing(intercept = seq(-2, 2, 0.025),
+                   slope     = seq(-.5,.5, .01)) %>%
+  mutate(model = 1:n())
+```
+
+2. Evaluate the log-liklihood of each model given the data.   
+
+```{r, eval=FALSE}
+fishLogLik <- function(slope, intercept, dat){
+    model_log_lik <- dat %>%
+    mutate(p = plogis(intercept + slope * Time),
+           logLik = dbinom(x = Alive, size = 1, prob = p, log = TRUE)) %>%
+    summarise(sum(logLik)) %>%
+    pull()
+  return(model_log_lik)
+}
+
+models_logLiks <- models %>%
+  nest(params = c(intercept, slope)) %>%
+  mutate(log_lik = purrr::map_dbl(.x = params, ~ fishLogLik(slope = .x$slope,
+                                                   intercept = .x$intercept, 
+                                                   dat = cold.fish)))%>%
+  unnest(cols = c(params)) 
+```
+
+```{r,echo=FALSE, eval=FALSE}
+write_csv(models_logLiks, "data/fish_logLik.csv")
+```
+
+```{r,echo=FALSE, eval=TRUE, message=FALSE, warning=FALSE}
+models_logLiks <- read_csv("data/fish_logLik.csv")
+```
+
+3. Find the MLE as the proposed parameters with the greatest log likelihood   
+
+```{r}
+top_n(models_logLiks, log_lik, n=1)                                                                                                    %>% kable()
+```
+
+Reasuringly, this matches R's answer.   
+
+4. We can also use this output to plot a likelihood surface 
+
+```{r}
+ggplot(models_logLiks, aes(x = slope, y = intercept, fill = log_lik))+
+  geom_tile()+
+  scale_fill_gradientn(colours = terrain.colors(500))+ 
+  geom_text(data = . %>% top_n(log_lik, n=1), aes(label = "* MLE"), 
+            hjust = 0, color = "red")+ 
+  theme_tufte()
+```
+
+
+5. Finally, we can compare the logLikihood of this model (our best) which equals  -82.35143 to the one where we just take the overal mean proportion 
+
+```{r}
+cold.fish %>%
+    mutate(logLik = dbinom(x = Alive, size = 1, 
+                           prob =  summarise(cold.fish, mean(Alive)) %>% pull(),
+                           log = TRUE)) %>%
+    summarise(sum(logLik)) %>%
+  pull()
+```
+
+So `D = 2* (-82.35143 - (-104.7749))` = `r 2* (-82.35143 - (-104.7749))`, and our p-value is `pchisq(q = 44.84694, df = 1, lower.tail = FALSE)` = `r pchisq(q = 44.84694, df = 1, lower.tail = FALSE)`, which is basically our answer above, save minor rounding error!  

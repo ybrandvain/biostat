@@ -1,0 +1,327 @@
+# Mixed models {#mxd}
+
+```{r, echo = FALSE, warning=FALSE, message=FALSE}
+library(tidyverse)
+library(gridExtra)
+library(DT)
+library(knitr)
+library(blogdown)
+library(beyonce, warn.conflicts=F, quietly=T)
+library(stringr)
+library(tweetrmd)
+library(emo)
+library(tufte)
+library(cowplot)
+library(lubridate)
+library(ggthemes)
+library(kableExtra)
+library(ggforce)
+library(datasauRus)
+library(ggridges)
+library(randomNames)
+library(infer)
+library(tiktokrmd)
+library(ggridges)
+library(colorspace)
+library(ggfortify)
+library(broom)
+library(ggrepel)
+library(emojifont)
+library(car)
+library(magrittr)
+library(plotly)
+library(dagitty)
+library(ggdag)
+library(lme4)
+library(lmerTest)
+library(nlme)
+data(Milk, package = "nlme")
+options(crayon.enabled = FALSE)   
+```
+
+
+
+
+
+<span style="color: Blue;font-size:22px;">   Motivating scenario:  </span>  <span style="color: Black;font-size:18px;"> We want to estimate account forthe variability among groups when making inference.  </span>
+
+
+## Review 
+
+### Linear models 
+
+Remember, linear models predict Y as a deviation from some constant, a, as a function of a bunch of stuff.
+
+$$\widehat{Y_i} = a + b_1 \times y_{1,i} + b_2 \times y_{2,i}  + \dots$$
+Among the major assumptions of linear models is the independence of residuals, conditional on predictors.    But in the real world, this assumption is often violated.     
+
+## Multilevel (aka heirarchical) models     
+
+Of course, we can overcome this assumption of independence by modelling the dependence structure of the data.  For example, if results of student's tests are nondependent because they are in a class in a school we can put school and class into our model.  
+
+When we aren't particularly interested in school or class themselves, these are called nuisance parameters.    
+
+When school (or class, or whatever "cluster" we're concerned with) is chosen at random we can model it as a random effect. If not, we can use various other models, including generalized least squares (GLS), which we are not covering right now, but which have similar motivations.  
+
+## Mixed effect models   
+
+How do we test for some fixed effect, like if type of math instruction increases math  scores, in the presence of this nonindependence (like students in the same class learn from the same teacher etc...)?  
+
+In a **mixed effect model**, we model both fixed and random effects!!!!    
+
+
+### Random Intercepts   
+
+With a "random intercept" each cluster gets its own intercept, which it drawn from some distribution. This on its own is much like the example in Chapter \@ref(rndefx).    
+
+If we assume a random intercept only, we assume that each cluster draws an intercept from some distribution, but that clusters have the same slope (save what is specified in the fixed effect).    
+
+
+### Random Slopes   
+
+
+With a "random slope" each cluster gets its own slope, which it drawn from some distribution. 
+
+If we assume a random slope only, we assume that each cluster draws a slope from some distribution, but that cluster have the same intercepts (save what is specified in the fixed effect).  
+
+### Random Slopes and Random Intercepts    
+
+We can, in theory model both random slopes and random intercepts. But sometimes these are hard to estimate together, so be careful.  
+
+
+### Visualizing Random Intercepts and Random Slopes
+ 
+I find it pretty hard to explain random slopes and intercepts in words, but that pictures really help! 
+
+Read and scroll through the example below  (from http://mfviz.com/hierarchical-models/), as it is the best description I've come across. 
+ 
+```{r, echo=FALSE, out.width="100%"}
+include_app("http://mfviz.com/hierarchical-models/",height = "650")
+```
+
+## Mixed model: Random intercept example       
+
+Selenium, is a bi-product of burning coal. Could Selenium bioaccumulate in fish, suchb that fish from lakes with more selenium have more selenium in them?  
+
+Lets look at data (download [here](https://drive.google.com/uc?export=download&id=1UAkdZYLJPWRuFrq9Dc4StxfHCGW_43Ye)) from 98 fish from nine lakes, with 1 to 34 fish per lake.   
+
+
+
+
+### Ignoring nonindependence is inapprorpiate      
+
+What if we just ignored lake and assumed each fish was independent???   
+
+```{r, message=FALSE, warning=FALSE, fig.height=3, fig.width=6}
+selenium     <- read_csv("https://drive.google.com/uc?export=download&id=1UAkdZYLJPWRuFrq9Dc4StxfHCGW_43Ye")
+selenium_lm1 <- lm(Log_fish_Se ~  Log_Water_Se, data = selenium)
+
+summary(selenium_lm1)
+anova(selenium_lm1)
+
+ggplot(selenium, aes(x = Log_Water_Se, y = Log_fish_Se, label = Lake)) +
+  geom_point(aes(color = Lake), alpha = .5, size = 3) +
+  geom_smooth(method = "lm")
+```
+
+
+
+
+That would be a big mistake -- as each fish is not independent. There could be something else about the lake associated with levels of Selenium in fish that is not in our model. This seems likely, as we see below, that residuals differ substantially by lake.  
+
+```{r, message=FALSE, warning = FALSE, fig.height=2, fig.width=7}
+bind_cols( selenium , 
+           augment(selenium_lm1)  %>%    dplyr::select(.resid))%>%
+  ggplot(aes(x = Lake, y = .resid, color = Lake)) +
+  geom_jitter(width = .2, size = 3, alpha =.6, show.legend = FALSE)+
+  geom_hline(yintercept = 0, color = "red")+
+  stat_summary(data = . %>% group_by(Lake) %>% mutate(n = n()) %>% dplyr::filter(n>1), color = "black")
+```
+
+**So why is this so bad?** It's because we keep pretending each fish is independent when it is not. So, our certainty is WAY bigger than it deserves to be. This means that our p-value is WAY smaller than it deserves to be.  
+
+
+### We can't model lake as a fixed effect   
+
+
+And even if we could it would be wrong.   
+
+Putting lake into our model as a fixed effect would essentially take the average of Fish Selenium content for each lake. Since each lake has only one Selenium content, we then have nothing to model. 
+
+```{r}
+lm(Log_fish_Se ~  Lake + Log_Water_Se, data = selenium) 
+```
+
+But even when this is not the case, this is not the appropriate modelling strategy.  
+
+
+
+### Taking averages is a less wrong thing       
+
+What if we just took the average selenium content over all fish for every lake, and then did our stats?  
+
+```{r, message=FALSE, warning = FALSE, fig.height=4, fig.width=6}
+selenium_avg <- selenium %>% 
+  group_by(Lake, Log_Water_Se) %>%
+  summarise(mean_log_fish_Se = mean(Log_fish_Se), n = n()) 
+
+selenium_lm2 <- lm(mean_log_fish_Se ~  Log_Water_Se, data = selenium_avg)
+summary(selenium_lm2)
+anova(selenium_lm2)
+
+ggplot(selenium_avg, aes(x = Log_Water_Se, y = mean_log_fish_Se, label = Lake)) +
+  geom_point(aes(size = n)) +
+  geom_text_repel(aes(color = Lake), show.legend = FALSE) +
+  geom_smooth(method = "lm",se = FALSE)
+```
+
+This approach isn't too bad, but there are some shortcomings --     
+
+1.  It takes all means as equally informative, even though some come from large and others from large samples.    
+2. It ignores variability within each lake,    
+3. It surrenders so much of our hard-won data.    
+
+
+### Accounting for Lake as a Random Effect is our best option  
+
+Rather, we can model Lake as a random effect -- this allows us to model the non-independence of observations within a Lake, while using all of the data.    
+
+
+```{r}
+selenium_lme <- lmer(Log_fish_Se ~   (1|Lake) + Log_Water_Se , data = selenium)
+summary(selenium_lme)
+```
+
+Thus we fail to reject the null, and conclude that there is not sufficient evidence to support the idea that more selenium in lakes is associated with more selenium in fish.  
+
+#### Extracting estimates and uncertainty   
+
+Alhough we do have model estimates, degrees of freedom and standard deviations above, if ca still be hard to consider and commuincate uncertainty. The ggpredict function in the ggeffects package can help!   
+
+
+```{r, message=FALSE, warning=FALSE, fig.height=3, fig.width=5}
+library(ggeffects)
+gg_color_hue <- function(n) {hues = seq(15, 375, length = n + 1); hcl(h = hues, l = 65, c = 100)[1:n]}
+
+selenium_predictions <- ggpredict(selenium_lme, terms = "Log_Water_Se")
+selenium_predictions
+
+plot(selenium_predictions)+
+  geom_point(data = selenium, aes(x = Log_Water_Se , y= Log_fish_Se, color = Lake), alpha = .4, size = 3)+
+  scale_color_manual(values = gg_color_hue(9))
+```
+
+
+
+#### Evaluating assumptions   
+
+We can now see that by modeling Lake as a random effect, the residuals are now independent. 
+
+
+```{r, message=FALSE, warning = FALSE, fig.height=2.5, fig.width=7}
+bind_cols( selenium , 
+           broom.mixed::augment(selenium_lme)  %>%    dplyr::select(.resid))%>%
+  ggplot(aes(x = Lake, y = .resid, color = Lake)) +
+  geom_jitter(width = .2, size = 3, alpha =.6, show.legend = FALSE)+
+  geom_hline(yintercept = 0, color = "red")+
+  stat_summary(data = . %>% group_by(Lake) %>% mutate(n = n()) %>% dplyr::filter(n>1),color = "black")
+```
+
+
+**Major assumptions of linear mixed effect models are**   
+
+- Data are collected without bias    
+- Clausters are random    
+- Data cna be modelled as a linear function of predictors     
+- Variance of the reiduals is indpednet of predicted values,   
+- Residuals are normally distributed,   
+
+Let's look into the last two for these data. Because we hate autoplot, and it can't handle random effects outplut, let's make out own diangnostic plots.  
+
+```{r, fig.height=2.5, warning=FALSE, message=FALSE}
+selenium_qq <- broom.mixed::augment(selenium_lme) %>% 
+  ggplot(aes(sample = .resid))+ 
+  geom_qq()+
+  geom_qq_line()
+
+selenium_std_resid  <- broom.mixed::augment(selenium_lme) %>% 
+  mutate(sqrt_abs_std_resid = sqrt(abs(.resid / sd(.resid)) )) %>%
+  ggplot(aes(x = .fitted, y = sqrt_abs_std_resid)) + 
+  geom_point() 
+
+plot_grid(selenium_qq, selenium_std_resid, ncol = 2)
+```
+
+
+These don't look great tbh. We would need to think harder if we where doing a legitimate analysis.   
+
+
+## Example II: Loblolly Pine Growth
+
+Let's try to model the growth rate of loblolly pines!   
+
+First I looked at the data (a), and thought a square root transfrom would be a better linear model (b), expecially if I began my model after threee years of growth (c).
+
+```{r, fig.height=3.5, fig.width=8.5}
+Loblolly <- mutate(Loblolly, Seed = as.character(Seed))
+a <- ggplot(Loblolly, aes(x = age, y = height, group = Seed, color = Seed))+ geom_line()
+b <- ggplot(Loblolly, aes(x = sqrt(age), y = height, group = Seed, color = Seed))+ geom_line()
+c <- ggplot(Loblolly %>% filter(age > 3), aes(x = sqrt(age), y = height, group = Seed, color = Seed))+ geom_line()
+top  <- plot_grid(a+theme(legend.position = "none"),     
+                  b+theme(legend.position = "none"),  
+                  c+theme(legend.position = "none") , 
+                  labels = c("a","b","c"), ncol = 3)
+legend<- get_legend(a+ guides(color = guide_legend(nrow=2)) + theme(legend.position = "bottom", legend.direction = "horizontal") ) 
+plot_grid(top, legend, ncol =1, rel_heights = c(8,2))
+```
+
+
+### Random Slopes
+
+```{r, fig.height=3.5, fig.width=5}
+loblolly_rand_slope <- lmer(height ~ age + (0+age|Seed), data = filter(Loblolly, age>3))
+summary(loblolly_rand_slope)
+broom.mixed::augment(loblolly_rand_slope) %>% mutate(Seed = as.character(Seed))  %>%
+  ggplot(aes(x = age, y = .fitted, color = Seed)) + 
+  geom_line() + theme(legend.position = "none")
+```
+
+
+### Random Intercepts
+
+```{r, fig.height=3.5, fig.width=5}
+loblolly_rand_intercept <- lmer(height ~ age + (1|Seed), data = filter(Loblolly, age>3))
+summary(loblolly_rand_intercept)
+broom.mixed::augment(loblolly_rand_intercept) %>% mutate(Seed = as.character(Seed))  %>%
+  ggplot(aes(x = age, y = .fitted, color = Seed)) + 
+  geom_line() + theme(legend.position = "none")
+```
+
+
+## Additional related topics     
+
+Sadly our term is coming to an end, as we are just beggining to explore these more complex, flexible, and realistic models.   In this brief section, I will show you a few fun directions for more complex models. If you are interested in these problems, I  highly recommend John Fieberg's fantastic course --  FW8051 Statistics for Ecologists.      
+
+### Generalized Least Squares  
+
+We can still run into issues of heteroscedasticity and hierarchical model structure with non-random groups. For such cases, we can use generalized least squares.  In R, we can do this with the [`gls()`](https://stat.ethz.ch/R-manual/R-devel/library/nlme/html/gls.html) function in the [`nlme` package](https://cran.r-project.org/web/packages/nlme/index.html).    
+
+
+
+### More complex covariance structures    
+
+We have considered a simple random effect where individuals are in one group or another. Sometimes the world i more complicated -- for example if we have random families, individuals within the family are not equally related. We therefore want to specify more realistic covariances of residuals. In R, we can do this with the [`lme()`](https://stat.ethz.ch/R-manual/R-devel/library/nlme/html/lme.html) function in the [`nlme` package](https://cran.r-project.org/web/packages/nlme/index.html).    
+
+### Generalized Linear Mixed Effect Models    
+
+In Chapters \@ref(logit) and \@ref(posregression) we saw that we could generalize a linear model to nonlinear distributions. We can do the same for mixed effects models. We can do this with the [`glmer()`](https://search.r-project.org/CRAN/refmans/lme4/html/glmer.html) function in `lme4`. These can be a bit tricky, so proceed with caution.   
+
+
+
+
+## Quiz 
+
+```{r, echo=FALSE}
+include_app("https://brandvain.shinyapps.io/mixed/", height = "700")
+```
+

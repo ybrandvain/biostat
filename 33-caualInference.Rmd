@@ -1,0 +1,414 @@
+# Causal Inference {#causality}
+
+```{r, echo = FALSE, warning=FALSE, message=FALSE}
+library(tidyverse)
+library(gridExtra)
+library(DT)
+library(knitr)
+library(blogdown)
+library(beyonce, warn.conflicts=F, quietly=T)
+library(stringr)
+library(tweetrmd)
+library(emo)
+library(tufte)
+library(cowplot)
+library(lubridate)
+library(ggthemes)
+library(kableExtra)
+library(ggforce)
+library(datasauRus)
+library(ggridges)
+library(randomNames)
+library(infer)
+library(tiktokrmd)
+library(ggridges)
+library(colorspace)
+library(ggfortify)
+library(broom)
+library(ggrepel)
+library(emojifont)
+library(car)
+library(magrittr)
+library(plotly)
+library(dagitty)
+library(ggdag)
+options(crayon.enabled = FALSE)   
+```
+
+
+
+
+
+<span style="color: Blue;font-size:22px;">   We want to (know what we can) learn about causation from observations:  </span>  <span style="color: Black;font-size:18px;">  We know "correlation does not necessarily imply causation", and that experiments are our best way to learn about causes. But we also understand that there is some use in observation, and we want to know how we can evaluate causal claims in observational studies.  </span>
+
+
+```{block2, type='rmdnote'}
+**Required reading / Viewing:**  
+  
+Calling bullshit Chapter 4. Causality. [download here](https://drive.google.com/uc?export=download&id=1lwXFsCiOifHsQmnlD3bjYekZC_tJXLGD).   
+```
+
+
+
+
+## What is a cause?    
+
+Like so much of statistics, understanding causation requires an healthy dose of our imagination. 
+
+Specifically imagine multiple worlds. For example, we can imagine a world in which there was some treatment (e.g. we drank coffee, we got a vaccine, we raised taxes etc) and one in which that treatment was absent (e.g. we didn’t have coffee, we didn't raise taxes etc), and we then follow some response variable of interest. We say that the treatment is a cause of the outcome if changing it will change the outcome, on average.    <span style="color: LightGrey;"> Note for quantitative treatments, we can imagine a bunch of worlds where the treatments was modified by some quantitative value. </span>
+
+
+In causal inference, considering the outcome if we had changed a treatment is called *counterfactual thinking*, and it is critical to our ability to think about causes.  
+
+
+## DAGs, confounds, and experiments  
+
+Say we wanted to know if smoking causes cancer.  
+
+
+```{r simplecause, fig.cap = "We could represent this causal claim with the simplest causal graph we can imagine. This is our first formal introduction to a Directed Acyclic Graph (herefater DAG). This is *Directed* because **WE** are pointing a causal arrow from smoking to cancer. It is acyclic because causality in these models only flows in one direction, and its a graph because we are looking at it. These DAGs are the backbone of causal thinking because they allow us to lay our causal models out there for the world to see. Here we will largely use DAGs to consider potential causal paths, but these can be used for mathematical and statistical analyses.", echo=FALSE, fig.width=2.5, fig.height=2.5  ,out.extra='style="float:right; padding:10px"'}
+dag.1 <- dagitty("dag{smoke -> cancer}")
+ggdag_canonical(dag.1, layout = "circle",node_size = 12,label_size = 10,text_size = 2.5)+theme_tufte()+
+  theme(axis.text = element_blank(), axis.title = element_blank(), axis.ticks = element_blank(), axis.line = element_line(color = "lightgrey"), axis.line.x.top = element_line(color = "lightgrey"), axis.line.y.right =  element_line(color = "lightgrey"))
+```
+
+
+
+
+
+
+### Confounds     
+
+
+```{r smokeconfound, fig.cap="R.A. Fisher -- a pipe enthusiast, notorious asshole, eugenicist, and the father of modern statistics and population genetics was unhappy with this DAG. He argued that a **confound** could underlie the strong statistical association between smoking and lung cancer. Specifically, Fisher proposed that the propensity to smoke and to develop lung cancer could be causally unrelated, if both were driven by similar genetic factors.  Fisher's causal model is presented in th DAG to the right -- here genes point to cancer and to smoking, but no arrow connects smoking to lung cancer.", echo=FALSE, fig.width=2.75, fig.height=2.75  ,out.extra='style="float:right; padding:10px"'}
+dag.2 <- dagitty("dag{smoke <- genes -> cancer}")
+ggdag_canonical(dag.2, layout = "circle",node_size = 12,label_size = 10,text_size = 2.5)+theme_tufte()+
+  theme(axis.text = element_blank(), axis.title = element_blank(), axis.ticks = element_blank(), axis.line = element_line(color = "lightgrey"), axis.line.x.top = element_line(color = "lightgrey"), axis.line.y.right =  element_line(color = "lightgrey"))
+```
+
+
+
+
+
+
+
+
+In the specifics of this case, Fisher turned out to be quite wrong -- genes do influence the probability of smoking and genes do influence the probability of lung cancer, but smoking has a much stronger influence  on the probability of getting lung cancer than does genetics. 
+
+### Randomized Controlled  Experiments   
+
+
+This is why, despite their limitations (Ch. \@ref(design)), randomized control experiments are our best to learn about causation -- we randomly place participant in these alternative realities that we imagine and look at the outcome of alternative treatments. That is, we bring our imaginary worlds to life.  
+
+So to distinguish between the claim that smoking causes cancer and Fisher's claim that genetics is a  confound and that smoking does not cause cancer, he could randomly assign some people to smoke and some to not. Of course, this is not feasible for both ethical and logistical reasons, so we need some way to work through this.  This is our goal today!
+
+
+### DAGs  
+
+I've introduced two DAGs so far.    
+
+- Figure \@ref(fig:simplecause) is a causal model of smoking causing lung cancer. Note this does it mean that nothing else causes lung cancer, or that everyone who smokes will get lung cancer, or that no one who doesn't smoke will get lung cancer. Rather, it means that if we copied each person, ad had one version of them smoke and the other not, there would be more cases of lung cancer in the smoking clones than the nonsmoking clones. 
+
+- Figure \@ref(fig:smokeconfound) presents Fisher's argument that smoking does not cause cancer and that rather, both smoking and cancer are influenced by a common cause -- genetics.  
+
+These are not the only plausible causal models for an association between smoking and cancer. I present three other possibilities in Figure \@ref(fig:allthesmoke).   
+
+- A **pipe**  is presented in Figure \@ref(fig:allthesmoke)a. That is -- genes cause smoking and smoking causes cancer. Empirically and statistically, this is a hard model to evaluate because changing genes would "cause" cancer in an experiment, and "controlling for genetics" by including it in a linear model would hide the effect of smoking. The right thing to do is to ignore the genetic component -- but that feels wrong and how do we justify it?   One way to get at this s to "match" on genetics and then compare outcomes for cancer. A [2017 study](https://thorax.bmj.com/content/72/11/1021.short) compared the incidence of lung cancer between monozygotic twins for which one smoked and one did not, and found a higher incidence of cancer in the smoking twin [@hjelmborg2017].     
+- A **collider** is presented in Figure  \@ref(fig:allthesmoke)b, as both genes and smoking cause cancer (they "collide"). Here there are two "paths" between smoking and cancer. 1. The *front door* causal path -- smoking causes cancer, and 2.  The *back door* non causal path in connecting smoking to cancer via the confounding variable, genetics.   Here the challenge is to appropriately partition and attribute causes.    
+- A more complex and realistic model including the effects of the environment on cancer and smoking is presented in \@ref(fig:allthesmoke)c. Noe that in this model genes do not cause the environment and the environment does not cause genes.   
+
+
+
+
+```{r allthesmoke, fig.cap = "Three plausible DAGs concerning the relationship between smoking and cancer. **a** A *pipe* -- Genes cause smoking, and smoking causes cancer. **b** A *collider* -- genes cause cancer and smoking, and smoking causes cancer. **c** Complex reality -- Environmental factors cause smoking and cancer, and genetics cause smoking and cancer, while smoking too causes cancer.", echo=FALSE, fig.width=8, fig.height=2.5}
+dag.3 <- dagitty("dag{cancer <- smoke <- genes}")
+a<-ggdag_canonical(dag.3, layout = "circle",node_size = 12,label_size = 10,text_size = 2.5)+theme_tufte()+
+  theme(axis.text = element_blank(), axis.title = element_blank(), axis.ticks = element_blank(), axis.line = element_line(color = "lightgrey"), axis.line.x.top = element_line(color = "lightgrey"), axis.line.y.right =  element_line(color = "lightgrey"))
+
+dag.4 <- dagitty("dag{cancer <- smoke <- genes -> cancer}")
+b<-ggdag_canonical(dag.4, layout = "circle",node_size = 12,label_size = 10,text_size = 2.5)+theme_tufte()+
+  theme(axis.text = element_blank(), axis.title = element_blank(), axis.ticks = element_blank(), axis.line = element_line(color = "lightgrey"), axis.line.x.top = element_line(color = "lightgrey"), axis.line.y.right =  element_line(color = "lightgrey"))
+
+dag.5 <- dagitty("dag{smoke <- environ -> cancer <- smoke <- genes -> cancer}")
+c<- ggdag_canonical(dag.5, layout = "circle",node_size = 12,label_size = 10,text_size = 2.5)+theme_tufte()+
+  theme(axis.text = element_blank(), axis.title = element_blank(), axis.ticks = element_blank(), axis.line = element_line(color = "lightgrey"), axis.line.x.top = element_line(color = "lightgrey"), axis.line.y.right =  element_line(color = "lightgrey"))
+
+cowplot::plot_grid(a,b,c, ncol=3,labels = c("a","b","c"))
+```
+
+
+```{block2, type='rmdwarning'}
+**Collider bias:**  Colliders can have funny consequences when we condition  on an outcome. ay in the world, there is no association between smoking and a genetic propensity to get lung cancer for reasons unrelated to smoking.  If we only looked at lung cancer patients, it would appear that there is a negative correlation between smoking and a genetic risk for cancer unrelated to smoking because we do not see non-smokers with low genetic risk for lung cancer. This is known as "selection bias", "M bias", or "collider bias".   
+```
+
+
+## When correlation is (not) good enough
+
+So we are going to think through causation -- but we might wonder when we need to know causes.   
+
+- **We don't need to understand causation to make predictions under the status quo.** If I just want to make good predictions, I can build a good multiple regression model, and make predictions from it, and we will be just fine. If I want to buy good corn -- I can go to the farm stand that reliably sells yummy corn, I don't care if the corn is yummy because of the soil, the light environment, or the farmers playing Taylor Swift every morning to get the corn excited. Similarly, if I was selling insurance, I would just need to reliably predict who would get lung cancer, I wouldn't need to know why.  
+- **We need to understand causation when we want to intervene (or make causal claims)**. If I want to grow my own yummy corn, I would want to know what about the farmers practice made the corn yummy. I wouldn't need to worry about fertilizing my soil if it turned out that pumping some Taylor swift tunes was all I needed to do to make yummy corn.   Similarly, if I was giving public health advice I would need to know that smoking caused cancer to credibly suggest that people quit smoking to reduce their chance of developing lung cancer.  selling insurance, I would just need to reliably predict who would get lung cancer, I wouldn't need to know why.  
+
+
+
+
+## Multiple regression,  and causal inference  
+
+So far we have considered how we draw and think about causal models. This is incredibly useful -- drawing a causal model makes our assumptions and reasoning clear. 
+
+But what can we do with these plots, and how can they help us do statistics? It turns out they can be pretty useful!  To work through this I will simulate fake data under different causal models and run different linear regressions on the simulated data to see what happens.    
+
+### Imaginary scenario   
+
+In evolution, fitness is the metric we care about most. While it is nearly impossble to measure and define, we often can measure things related to it, like the number of children that an organism has. For the purposes of this example let's say that is good enough.
+
+So, say we are studying a fish and want to see if being big (in length) increases fitness (measured as the number of eggs produced). To make things more interesting, let's say that fish live environements whose quality we can measure. For the purpoes of this example, let's say that we can reliably and correctly estimate all these values without bias, and that all have normally distributed residuals etc..   
+
+
+
+
+#### Causal model 1: The confound    
+
+
+```{r fishconfound, echo=FALSE, fig.width=2.75, fig.height=2.75}
+dag.fish <- dagitty("dag{eggs <- env. -> length}")
+ggdag_canonical(dag.fish, layout = "circle",node_size = 12,label_size = 10,text_size = 2.5)+theme_tufte()+
+  theme(axis.text = element_blank(), axis.title = element_blank(), axis.ticks = element_blank(), axis.line = element_line(color = "lightgrey"), axis.line.x.top = element_line(color = "lightgrey"), axis.line.y.right =  element_line(color = "lightgrey"))
+```
+
+
+Let's start with a simple confound -- say a good environment makes fish bigger and increases their fitness, but being bigger itself has no impact on fitness.   First let's simulate
+
+
+```{r}
+n_fish          <- 100
+confounded_fish <- tibble(env_quality = rnorm(n = n_fish, mean = 50, sd = 5), #simulating the environment
+                          fish_length = rnorm(n = n_fish, mean = env_quality, sd = 2),
+                          fish_eggs   = rnorm(n = n_fish, mean = env_quality/2, sd = 6) %>% round()) #
+```
+
+Now we know that  fish length does not cause fish to lay more eggs -- as we did not models this. Nonetheless, a plot and a statistical test show a strong association between length and eggs if we do not include if we do not include environmental quality in our model.  
+
+```{r, fig.height=2.5, fig.width=3, message=FALSE,warning=FALSE}
+confound_plot <- ggplot(confounded_fish, aes(x = fish_length, y = fish_eggs)) +
+  geom_point()+
+  geom_smooth(method = "lm")+ 
+  labs("Confound", subtitle = "# eggs increases with length\nwithout a causal relationship.")
+
+confound_plot
+```
+
+**Our statistical analysis will not show cause**
+
+We can build a simple linear model predicting the number of fish eggs as a function of fish length. We can see that the prediction is good, and makes sense -- egg number reliably increases with fish length. But we know this is not a causal relationship (because we didn't have this cause in our simulation).   
+
+```{r}
+lm(fish_eggs ~ fish_length, confounded_fish) %>%  summary()
+lm(fish_eggs ~ fish_length, confounded_fish) %>%  anova()  
+```
+
+**Adding the confound into our model**  
+
+So, let's build a model including the confound environmental quality. 
+
+```{r}
+fish_lm_w_confound <- lm(fish_eggs~ env_quality + fish_length, confounded_fish)  
+```
+
+Looking at the estimates from the model  we see that the answers don't make a ton of sense 
+
+```{r}
+fish_lm_w_confound %>% coef() %>% round(digits = 2)
+```
+
+In this case, an ANOVA with type one sums of squares give reasonable p-values, while an ANOVA with type II sums of squares shows that neither environment nor length is a significant predictor of egg number. This is weird.  
+
+
+```{r}
+fish_lm_w_confound %>% anova()            
+fish_lm_w_confound %>% Anova(type = "II")
+```
+
+**What to do?**
+
+First let's look at all the relationships in our data 
+
+```{r, fig.width=9, fig.height=2.5, echo=FALSE, message=FALSE, warning=FALSE}
+causal_plot <- ggplot(confounded_fish, aes(x = env_quality, y = fish_eggs)) +
+  geom_point()+
+  geom_smooth(method = "lm")+ 
+  labs("Truth", subtitle = "Better environments\nincrease fitness")
+
+the_confound <- ggplot(confounded_fish, aes(x = env_quality, y = fish_length)) +
+  geom_point()+
+  geom_smooth(method = "lm")+ 
+  labs("Truth", subtitle = "The non-causal asssociation is driven\nby the effect of env quality on length")
+
+cowplot::plot_grid(confound_plot, causal_plot, the_confound , ncol = 3, labels = c("a","b","c"))
+```
+
+
+
+The right thing to do in this case is to just build a model with the environmental quality.  
+
+```{r}
+lm(fish_eggs ~ env_quality , confounded_fish) %>% summary()
+
+lm(fish_eggs ~ env_quality , confounded_fish) %>% anova()
+```
+
+
+
+```{block2, type='rmdwarning'}
+**Multicolinearity:**  This example also shows a statistical problem of *multicolinearity* -- that is our predictors are correlated. This makes building and interpreting a model challenging. 
+```
+
+
+#### Causal model 2: The pipe   
+
+
+```{r fishpipe, echo=FALSE, fig.width=2.75, fig.height=2.75}
+dag.fish.pipe <- dagitty("dag{env. -> length -> eggs}")
+ggdag_canonical(dag.fish.pipe, layout = "circle",node_size = 12,label_size = 10,text_size = 2.5)+theme_tufte()+
+  theme(axis.text = element_blank(), axis.title = element_blank(), axis.ticks = element_blank(), axis.line = element_line(color = "lightgrey"), axis.line.x.top = element_line(color = "lightgrey"), axis.line.y.right =  element_line(color = "lightgrey"))
+```
+
+
+So now let's look at a *pipe* in which the environment causes fish length and fish length causes fitness, but environment itself has  has no impact on fitness.   First let's simulate
+
+
+```{r}
+pipe_fish <- tibble(env_quality = rnorm(n = n_fish, mean = 50, sd = 5), #simulating the environment
+                          fish_length = rnorm(n = n_fish, mean = env_quality, sd = 2),
+                          fish_eggs   = rnorm(n = n_fish, mean = fish_length/2, sd = 5) %>% round()) #
+```
+
+Now we know that environmental quality  does not directly cause fish to lay more eggs -- as we did not models this. Nonetheless, a plot and a statistical test show a strong association between quality and eggs if we do not include if we do not include fish length in our model.  
+
+```{r, fig.height=2.5, fig.width=3, message=FALSE,warning=FALSE}
+pipe_plot <- ggplot(pipe_fish, aes(x = env_quality, y = fish_eggs)) +
+  geom_point()+
+  geom_smooth(method = "lm")+ 
+  labs( subtitle = "# eggs increases with env quality\nalthough the causal relationship is indirect.")
+
+pipe_plot
+```
+
+**Our statistical analysis will not show cause**
+
+We can build a simple linear model predicting the number of fish eggs as a function of environmental quality. We can see that the prediction is good, and makes sense -- egg number reliably increases with environmental quality. But we know this is not a causal relationship (because we didn't have this cause in our simulation).   
+
+```{r}
+lm(fish_eggs ~ env_quality, pipe_fish) %>%  summary()
+lm(fish_eggs ~ env_quality, pipe_fish) %>%  anova() 
+```
+
+**Adding the immediate cause into our model**  
+
+So, let's build a model including the immediate cause, fish length. 
+
+```{r}
+fish_lm_w_cause <- lm(fish_eggs~ fish_length + env_quality, pipe_fish)  
+```
+
+Looking at the estimates from the model  we see that the answers don't make a ton of sense 
+
+```{r}
+fish_lm_w_cause %>% coef() %>% round(digits = 2)
+```
+
+The stats here again come out a bit funny. A type
+
+
+```{r}
+lm(fish_eggs~ fish_length + env_quality, pipe_fish)  %>% anova()
+lm(fish_eggs~ env_quality + fish_length, pipe_fish)  %>% anova()
+lm(fish_eggs~ fish_length + env_quality, pipe_fish)  %>% Anova(type = "II")
+```
+
+**What to do?**
+
+First let's look at all the relationships in our data 
+
+```{r, fig.width=9, fig.height=2.5, echo=FALSE, message=FALSE, warning=FALSE}
+direct_causal_plot <- ggplot(pipe_fish, aes(x = fish_length, y = fish_eggs)) +
+  geom_point()+
+  geom_smooth(method = "lm")+ 
+  labs("Truth", subtitle = "Big fish\nincrease fitness")
+
+indirect_path <- ggplot(pipe_fish, aes(x = fish_length, y = env_quality)) +
+  geom_point()+
+  geom_smooth(method = "lm")+ 
+  labs("Truth", subtitle = "The indirect causal path is driven\nby the effect of env quality on length")
+
+cowplot::plot_grid(pipe_plot, causal_plot, indirect_path, ncol = 3, labels = c("a","b","c"))
+```
+
+
+
+The right thing to do in this case is to just build a model with the fish length.  
+
+```{r}
+lm(fish_eggs ~ fish_length, pipe_fish) %>% summary()
+lm(fish_eggs ~ fish_length, pipe_fish) %>% anova()
+```
+
+
+
+#### Causal model 3: The collider 
+
+
+```{r fishcollide, echo=FALSE, fig.width=2.75, fig.height=2.75}
+dag.fish.collide <- dagitty("dag{eggs <- env. -> length -> eggs}")
+ggdag_canonical(dag.fish.collide, layout = "circle",node_size = 12,label_size = 10,text_size = 2.5)+theme_tufte()+
+  theme(axis.text = element_blank(), axis.title = element_blank(), axis.ticks = element_blank(), axis.line = element_line(color = "lightgrey"), axis.line.x.top = element_line(color = "lightgrey"), axis.line.y.right =  element_line(color = "lightgrey"))
+```
+
+
+So now let's look at a *collider* in which the environment causes fitness and fish length,  and fish length causes fitness, but environment itself has  has no impact on fitness.   First let's simulate
+
+
+```{r}
+collide_fish <- tibble(env_quality = rnorm(n = n_fish, mean = 50, sd = 5), #simulating the environment
+                  fish_length = rnorm(n = n_fish, mean = env_quality, sd = 2),
+                  fish_eggs   = rnorm(n = n_fish, mean = (env_quality/4+ fish_length*3/4)/2, sd = 7) %>% round()) #
+```
+
+Now we know that environmental quality increases fish length and both environmental quality and fish length directly cause fish to lay more eggs. 
+
+  
+But our models have a bunch of trouble figuring this out. Again, a type one sums of squares puts most of the "blame" on the first thing in the model. 
+
+```{r}
+lm(fish_eggs ~ env_quality + fish_length, collide_fish ) %>%  summary()
+lm(fish_eggs ~ env_quality + fish_length, collide_fish ) %>%  anova() 
+lm(fish_eggs ~ fish_length + env_quality, collide_fish ) %>%  anova() 
+lm(fish_eggs ~ env_quality + fish_length, collide_fish ) %>%  Anova(type = "II") 
+```
+
+
+## Additional reading
+
+```{r bscause, fig.cap="BE SURE TO READ CHAPTER 4 of CALLING BULLSHIT. [link](https://drive.google.com/uc?export=download&id=1lwXFsCiOifHsQmnlD3bjYekZC_tJXLGD). ",echo=FALSE}
+include_graphics("images/calling_bs4.jpeg") 
+```
+
+## Wrap up    
+
+The examples above show the complexity in deciphering causes without experiments. But they also show us the light about how we can infer causation, because causal diagrams can point to testable hypotheses. 
+
+If we can't do experiments, causal diagrams offer us a glimpse into how we can infer causation. 
+
+Perhaps the best way to do this is by matching -- if we can match subjects that are identical for all causal paths except the one we are testing, we can then test for a statistical association, ad make a causal claim we can believe in.
+
+The field of causal inference is developing rapidly. If you want to hear more, the popular book, *The Book of Why* [@pearl2018] is a good place to start. 
+
+
+## Quiz  
+
+
+```{r, echo=FALSE}
+include_app("https://brandvain.shinyapps.io/causality/",height = "800")
+```
+
+

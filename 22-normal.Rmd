@@ -85,7 +85,7 @@ bind_rows( tibble(x = x_range, mean = 0,        sd = 2,
                    y = dnorm(x_range,mean = mean , sd = sd)),
             tibble(x = x_range, mean = 0,        sd = .4,
                    y = dnorm(x_range,mean = mean , sd = sd)))%>%
-    mutate(mean = recode(factor(mean),
+    mutate(mean = dplyr::recode(factor(mean),
     "0" = "mu == 0",
     "5" = "mu == 5"
   ))%>%

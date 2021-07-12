@@ -407,7 +407,7 @@ This data set contains 100,000 values -- each one is an estimate of the correlat
 
 ```{r, message=FALSE, warning=FALSE}
 crickets_cor <- crickets %>% 
-  summarize(obs_cor = cor(spermViability, lysozyme)) %>%
+  summarise(obs_cor = cor(spermViability, lysozyme)) %>%
   pull()
           
           

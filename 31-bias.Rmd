@@ -1,0 +1,116 @@
+# Bias and bad science {#bias}
+
+```{r, echo = FALSE, warning=FALSE, message=FALSE}
+library(tidyverse)
+library(gridExtra)
+library(DT)
+library(knitr)
+library(blogdown)
+library(beyonce, warn.conflicts=F, quietly=T)
+library(stringr)
+library(tweetrmd)
+library(emo)
+library(tufte)
+library(cowplot)
+library(lubridate)
+library(ggthemes)
+library(kableExtra)
+library(ggforce)
+library(datasauRus)
+library(ggridges)
+library(randomNames)
+library(infer)
+library(tiktokrmd)
+library(ggridges)
+library(colorspace)
+library(ggfortify)
+library(broom)
+library(ggrepel)
+library(emojifont)
+library(car)
+library(magrittr)
+options(crayon.enabled = FALSE)   
+html_tag_audio <- function(file, type = c("mp3")) {
+  type <- match.arg(type)
+  htmltools::tags$audio(
+    controls = "",
+    htmltools::tags$source(
+      src = file,
+      type = glue::glue("audio/{type}", type = type)
+    )
+  )
+}
+```
+
+
+
+
+
+<span style="color: Blue;font-size:22px;">   Motivating scenarios:  </span>  <span style="color: Black;font-size:18px;">   We want to be critical consumers of statical claims.</span>
+
+**Learning goals: By the end of this chapter you should be able to**    
+
+- Recognize how motivated reasoning can mislead statistics.      
+- Recognize when people are studying a question with an incorrect lense / focus.    
+- Articulate how societal bias can be reflected in sampling bias, confounded studies and the design of machine learning algorithms.
+
+
+
+
+```{block2, type='rmdnote'}
+**Required reading / Viewing:**  
+  
+Black pills. [link](https://drive.google.com/file/d/16zqgQ4DcxwIx2aNygj6f6yi_2YaL1MC7/view?usp=sharing). From Superior [@saini2019].    
+
+The era of blind faith in big data must end [link](https://www.ted.com/talks/cathy_o_neil_the_era_of_blind_faith_in_big_data_must_end) by Cathy ONeil.    
+
+How To Stop Artificial Intelligence From Marginalizing Communities? [link](https://www.youtube.com/watch?v=PWCtoVt1CJM) by  Timnit Gebru. 
+```
+
+
+## Review / Setup   
+
+- So much of stats aims to learn the TRUTH.    
+
+- A major goal of stats is to learn causation.   
+
+- Confounds and bias limit our abilities to make causal claims.
+
+- Rejecting the null model means our null model poorly describes the observations.  
+
+- Stats has a lot of math and computing, but it's hard to math and compute your way out of bias or bad experimental design.  
+
+##  The dark origin of stats   
+
+Statistics was largely founded by people interests in the Eugenics project - A racist program with the goal of "improving the race".  Read more about this history [here](https://nautil.us/issue/92/frontiers/how-eugenics-shaped-statistics) and watch this roundtable aboout past present and future concerns [here](https://harvard.zoom.us/rec/play/dbEAcmuVwfMQphLu385x-Wxc7A2Gnl41Jpl0l0AU5_AWbIUzfnEzXW80l0u8jhnlMFqKIeUvco87dtpu.S1C6VcfNXG2g2RfB?continueMode=true&_x_zm_rtaid=qFgBoRBrQZ-u7FBpMR7SNw.1617219168392.f13bda726c8d3a9bc067e433f276488b&_x_zm_rhtaid=11) if interested. 
+
+##  Poor statistical conclusions motivated by race are common
+
+Required reading Read Chapter 11 of Superior
+ [here](https://drive.google.com/file/d/16zqgQ4DcxwIx2aNygj6f6yi_2YaL1MC7/view?usp=sharing)
+
+```{r, echo=FALSE}
+include_graphics("images/superior.webp")
+
+```
+
+Sadly, this is very poorly taught in medical schools [Optional reading](https://www.nejm.org/doi/pdf/10.1056/NEJMms2025768?articleTools=true)
+
+
+##  Modern machine learning offers new opportunities for amplifying bias 
+
+Machine learning aims to classify and predict based on some quantitative metrics.  This can solve or amplify issues of bias and confounds.  Unfortunately, it seems like we're heading for the later. Watch these two videos on the topic.
+
+
+```{r, algor,fig.cap = "Watch this  [video](https://www.ted.com/talks/cathy_o_neil_the_era_of_blind_faith_in_big_data_must_end) on algorithmic bias by Cathy ONeil", echo=FALSE, out.extra= 'allowfullscreen'}
+include_url("https://embed.ted.com/talks/cathy_o_neil_the_era_of_blind_faith_in_big_data_must_end")
+```
+
+```{r, timnit,fig.cap = "Watch this  [video](https://www.youtube.com/watch?v=PWCtoVt1CJM) on How To Stop Artificial Intelligence From Marginalizing Communities? by  Timnit Gebru", echo=FALSE, out.extra= 'allowfullscreen'}
+include_url("https://www.youtube.com/embed/PWCtoVt1CJM")
+```
+
+## Quiz  
+
+Reflection questions on [canvas](https://canvas.umn.edu/courses/225135/quizzes/428280)   
+

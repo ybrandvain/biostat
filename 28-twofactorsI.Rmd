@@ -202,8 +202,9 @@ One way to think about this is to just look at our simple linear model which sho
 
 
 ```{r}
-broom::tidy(linear_term)
+broom::tidy(linear_term)                                                                                      %>% mutate_at(.vars = c("estimate"), round, digits = 4 ) %>%mutate_at(.vars = c("std.error"), round, digits = 3 ) %>% mutate_at(.vars = c("statistic"), round, digits = 4 )%>% mutate_at(.vars = c("p.value"), round, digits = 5 ) %>%kable()
 ```
+
 
 
 **Note** The `summary.lm()` output still usefully provides our estimates and uncertinaty in them -- so don't ignore it! 
@@ -438,7 +439,7 @@ We enter the model into R as follows
 fish_dat <- read_csv("https://whitlockschluter3e.zoology.ubc.ca/Data/chapter18/chap18e2ZooplanktonDepredation.csv") %>%
   mutate(treatment = fct_relevel(treatment, c("control", "low", "high")))
 wrong_fish_lm <- lm(diversity ~ block + treatment, data = fish_dat)
-broom::tidy(wrong_fish_lm)
+broom::tidy(wrong_fish_lm)                                                                                       %>% mutate_at(.vars = c("estimate"), round, digits = 3 ) %>%mutate_at(.vars = c("std.error"), round, digits = 3 ) %>% mutate_at(.vars = c("statistic"), round, digits = 3 )%>% mutate_at(.vars = c("p.value"), round, digits = 7 ) %>%kable()
 ```
 
 **NOTE** Uhhohh. Something went wrong here. Why is there only one value for `block`, when there are five? It's because R thought bock was a number and ran a regression. Let's clarify this for R by mutating black to be a factor.  
@@ -446,7 +447,7 @@ broom::tidy(wrong_fish_lm)
 ```{r}
 fish_dat <- mutate(fish_dat, block = factor(block)) 
 fish_lm   <- lm(diversity ~ block + treatment, data = fish_dat)
-broom::tidy(fish_lm)
+broom::tidy(fish_lm)                                                                                          %>% mutate_at(.vars = c("estimate"), round, digits = 3 ) %>%mutate_at(.vars = c("std.error"), round, digits = 3 ) %>% mutate_at(.vars = c("statistic"), round, digits = 3 )%>% mutate_at(.vars = c("p.value"), round, digits = 6 ) %>%kable() 
 ```
 
 We take these estimates and uncertainty about them seriously, but fully ignore the t and p-values, as above. From here we predict diversity in   
@@ -600,7 +601,7 @@ combine_models %>%
             ms_error  = ss_error  / df_error,
             #
             F_treat   = ms_treat / ms_error,
-            p_bmass2   = pf(q = F_treat, df1 = df_treat, df2 = df_error, lower.tail = FALSE))                                                                  # %>% mutate_all(round,digits = 4) %>%DT::datatable( options = list( scrollX='400px'))
+            p_bmass2   = pf(q = F_treat, df1 = df_treat, df2 = df_error, lower.tail = FALSE))                                                                  %>% mutate_all(round,digits = 4) %>%DT::datatable( options = list( scrollX='400px'))
 ```
 
 
@@ -612,7 +613,7 @@ Instead of using the `aov()` function and piping the output to `TukeyHSD()`, her
 
 In the code below, I say I want to look at all pairwise comparisons between treatments, using the Tukey-Kramer method from Chapter \@ref(anova).  
 
-```{r}
+```{r, message=FALSE, warning=FALSE}
 library(multcomp)
 glht(full_model, linfct = mcp(treatment = "Tukey")) %>%
   summary()
@@ -623,3 +624,6 @@ We conclude that diversity in both low and high predation differ significantly f
 
 ## Quiz
 
+```{r, echo=FALSE}
+include_app("https://brandvain.shinyapps.io/twofactreg/", height = "800")
+```

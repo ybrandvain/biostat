@@ -272,7 +272,7 @@ There are a few tidyverse tricks we can use to find proportions.
 ```{r, message=FALSE, warning=FALSE}
 ball_dist_exclusive %>% 
     group_by(balls, .drop = FALSE) %>%
-    summarise(count = n(), proportion = count / n_balls)
+    dplyr::summarise(count = n(), proportion = count / n_balls)
 ```
 
 Or we can count these ourselves by.
@@ -282,7 +282,7 @@ Or we can count these ourselves by.
 
 ```{r, message=FALSE, warning=FALSE}
 ball_dist_exclusive %>% 
-    summarise(n_A = sum(balls == "A") ,
+    dplyr::summarise(n_A = sum(balls == "A") ,
               n_B = sum(balls == "B"),
               n_C = sum(balls == "C"))
 ```
@@ -317,7 +317,7 @@ Here we could adapt our old code and use the OR `|` operator
 
 ```{r}
 ball_dist_exclusive %>% 
-  summarise(n_A_or_B = sum(balls == "A" | balls == "B"), 
+  dplyr::summarise(n_A_or_B = sum(balls == "A" | balls == "B"), 
             p_A_or_B = n_A_or_B / n_balls)
 ```
 
@@ -326,7 +326,7 @@ Alternatively, because <span style="color:#EDA158;">A</span>, <span style="color
 
 ```{r}
 ball_dist_exclusive %>% 
-  summarise(p_A_or_B = 1- sum(balls == "C") / n_balls)
+  dplyr::summarise(p_A_or_B = 1- sum(balls == "C") / n_balls)
 ```
 
 
@@ -389,7 +389,7 @@ DT::datatable(head(ball_sampling_dist_exclusive, n = 1000),
 ```{r}
 ball_sampling_dist_exclusive <- ball_sampling_dist_exclusive %>% 
   group_by(replicate, balls, .drop=FALSE) %>% # make sure to keep zeros
-  summarise(count = n(),.groups = "drop")  # count number of balls of each color each replicate
+  dplyr::summarise(count = n(),.groups = "drop")  # count number of balls of each color each replicate
 ```
 
 **Let's have a look at the result**
@@ -427,7 +427,7 @@ We do so as follows:
 ```{r}
 ball_sampling_dist_exclusive %>% 
   group_by(balls) %>%
-  summarize(se = sd(count))
+  dplyr::summarise(se = sd(count))
 ```
 
 
@@ -499,7 +499,7 @@ nonexclusive1 <- tibble(A = sample(c("A","not A"),
 ```{r}
 nonexclusive1 %>%
   group_by(A,B)%>%
-  summarise(count = n(), .groups = "drop") # lose all groupings after sumarising
+  dplyr::summarise(count = n(), .groups = "drop") # lose all groupings after sumarising
 ```
 
 **A plot**   

@@ -1,0 +1,94 @@
+# Linear model project {#linmod}
+
+```{r, echo = FALSE, warning=FALSE, message=FALSE}
+library(tidyverse)
+library(gridExtra)
+library(DT)
+library(knitr)
+library(blogdown)
+library(beyonce, warn.conflicts=F, quietly=T)
+library(stringr)
+library(tweetrmd)
+library(emo)
+library(tufte)
+library(cowplot)
+library(lubridate)
+library(ggthemes)
+library(kableExtra)
+library(ggforce)
+library(datasauRus)
+library(ggridges)
+library(randomNames)
+library(infer)
+library(tiktokrmd)
+library(ggridges)
+library(colorspace)
+library(ggfortify)
+library(broom)
+library(ggrepel)
+library(emojifont)
+library(car)
+library(magrittr)
+library(plotly)
+library(dagitty)
+library(ggdag)
+options(crayon.enabled = FALSE)   
+```
+
+
+
+
+
+<span style="color: Blue;font-size:22px;">   We are building and evaluating our own linear models:  </span>  <span style="color: Black;font-size:18px;"> We want to responsibly analyze a data set.  </span>
+
+
+
+
+## What is an appropriate data set  for this project?    
+
+An appropriate data set for   this project will   
+
+1. Be interesting to you   
+2. Roughly meret assumptions of a linear model. This fit need not be perfect - just good enugh that you can your analysis is smewhat meaningfull (you can discus shprtcomings etc in the text).  
+
+If your previous dataset is inapprorpaite or ou're bored of it, you can look at https://datadryad.org/ for some! Below I share some which might work for you.
+
+- Predatory birds and ants partition caterpillar prey by body size and diet breadth [paper](https://besjournals.onlinelibrary.wiley.com/doi/full/10.1111/1365-2656.12727), [dryad link](https://datadryad.org/stash/dataset/doi:10.5061/dryad.9k6g8)   
+
+- Assessing the ecosystem-level consequences of a small-scale artisanal kelp fishery within the context of climate-change. [paper](Assessing the ecosystem-level consequences of a small-scale artisanal kelp fishery within the context of climate-change), [dryad](https://datadryad.org/stash/dataset/doi:10.5061/dryad.9j346)    
+
+- Functional extinction of a desert rodent: implications for seed fate and vegetation dynamics. [paper](https://onlinelibrary.wiley.com/doi/full/10.1111/ecog.01648), [dryad](https://datadryad.org/stash/dataset/doi:10.5061/dryad.p45p4).   
+
+- Migration and stress during reproduction govern telomere dynamics in a seabird. [paper](https://royalsocietypublishing.org/doi/pdf/10.1098/rsbl.2013.0889), [data](https://drive.google.com/file/d/1CuqLP-gr9OPTzSNvE489-MQ-W0v7ogkh/view?usp=sharing).   
+- Roles of the ClC chloride channel CLH-1 in food-associated salt chemotaxis behavior of C. elegans.  [paper](https://elifesciences.org/articles/55701), [dryad](https://datadryad.org/stash/dataset/doi:10.5061/dryad.4tmpg4f8c).     
+
+- Pinus ponderosa alters nitrogen dynamics and diminishes the climate footprint in natural ecosystems of Patagonia. [paper](https://besjournals.onlinelibrary.wiley.com/doi/epdf/10.1111/1365-2745.12228), [dryad](https://datadryad.org/stash/dataset/doi:10.5061/dryad.gd905).  
+
+- Brood-tending males in a biparental fish suffer high paternity losses but rarely cuckold. [paper](https://onlinelibrary.wiley.com/doi/epdf/10.1111/mec.14857), [dryad](https://datadryad.org/stash/dataset/doi:10.5061/dryad.1hs12ng).    
+
+- Changes in key traits versus depth and latitude suggest energy-efficient locomotion, opportunistic feeding and light lead to adaptive morphologies of marine fishes. [paper](https://datadryad.org/stash/dataset/doi:10.5061/dryad.cc2fqz62n), [dryad](https://datadryad.org/stash/dataset/doi:10.5061/dryad.cc2fqz62n).     
+
+- Females drive asymmetrical introgression from rare to common species in Darwin's tree finches. [paper](https://onlinelibrary.wiley.com/doi/full/10.1111/jeb.13167), [dryad](https://datadryad.org/stash/dataset/doi:10.5061/dryad.mc534).     
+
+- Ecosystem carbon density and allocation across a chronosequence of longleaf pine forests. [paper](https://drive.google.com/file/d/14qwr9Xfw9qBGRCsl0aO5OJcmJf7eZbfE/view?usp=sharing), [dryad](https://datadryad.org/stash/dataset/doi:10.5061/dryad.760b3).     
+
+- Negative plant-phyllosphere feedbacks in native Asteraceae hosts – a novel extension of the plant-soil feedback framework. [paper](https://drive.google.com/file/d/1l0SO5Z2I4BwP-XltrNZnXUu4mNfYHwf3/view?usp=sharing), [dryad](https://datadryad.org/stash/dataset/doi:10.5061/dryad.85641).     
+
+- Comparison of dogs and humans in visual scanning of social interaction. [paper](https://royalsocietypublishing.org/doi/pdf/10.1098/rsos.150341), [dryad](https://datadryad.org/stash/dataset/doi:10.5061/dryad.9rn92).  
+
+-  Costs and Tradeoffs of Resistance and Tolerance to Belowground Herbivory in Potato. [paper](https://journals.plos.org/plosone/article?id=10.1371/journal.pone.0169083), [dryad](https://datadryad.org/stash/dataset/doi:10.5061/dryad.869f2).    
+
+- Temperature dependent effects of cutaneous bacteria on a frog's tolerance of fungal infection. [paper](https://www.frontiersin.org/articles/10.3389/fmicb.2018.00410/full) [dryad](https://datadryad.org/stash/dataset/doi:10.5061/dryad.82gj124).    
+
+- Kin discrimination via odour in the cooperatively breeding banded mongoose [paper](https://royalsocietypublishing.org/doi/pdf/10.1098/rsos.171798), [dryad](https://datadryad.org/stash/dataset/doi:10.5061/dryad.vt1qd42).      
+
+- Diagnostic and prognostic value of the cerebrospinal fluid concentration of immunoglobulin free light chains in clinically isolated syndrome with conversion to multiple sclerosis. [paper](https://journals.plos.org/plosone/article?id=10.1371/journal.pone.0143375), [dryad](https://datadryad.org/stash/dataset/doi:10.5061/dryad.464vm).     
+
+- Duration of propagule pressure affects non-native plant species abundances. [paper](https://bsapubs.onlinelibrary.wiley.com/doi/full/10.1002/ajb2.1026), [dryad](https://datadryad.org/stash/dataset/doi:10.5061/dryad.r3140).    
+
+
+- Genetic conflict with a parasitic nematode disrupts the legume-rhizobia mutualism. [paper](https://onlinelibrary.wiley.com/doi/full/10.1002/evl3.51), [dryad](https://datadryad.org/stash/dataset/doi:10.5061/dryad.3323617).     
+  
+- Large and fast human pyramidal neurons associate with intelligence. [paper](https://elifesciences.org/articles/41714), [dryad](https://datadryad.org/stash/dataset/doi:10.5061/dryad.83dv5j7).      
+
+- A high quality pedigree and genetic markers both reveal inbreeding depression for quality but not survival in a cooperative mammal [paper](https://drive.google.com/file/d/1LfKMsqC3I22Hedwk_1J4OfrrcQTvW8xB/view?usp=sharing), [dryad](https://datadryad.org/stash/dataset/doi:10.5061/dryad.bq868sh).  

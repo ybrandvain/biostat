@@ -527,7 +527,7 @@ include_app("https://brandvain.shinyapps.io/tdist/")
 
 We calculate the likelihoods and do likelihood-based inference for samples from a normal the exact same way as we did previously. 
 
-Because this all relies on pretending we are using population parameters. So we calcualte the sd as the distance of each data point from the proposed mean, and divide by `n` rather than `n-1`.
+Because this all relies on pretending we are using population parameters. So we calculate the sd as the distance of each data point from the proposed mean, and divide by `n` rather than `n-1`.
 
 
 

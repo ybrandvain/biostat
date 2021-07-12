@@ -244,7 +244,7 @@ a <- ggplot(data = sample.dist, aes(x = estimate)) +
 unremarkable_teststat <- 0.2
 exciting_teststat <- 0.5
 my.ps <- sample.dist %>% 
-  summarize(lower.area.2 = round(mean( estimate <= -unremarkable_teststat), digits = 3),
+  dplyr::summarise(lower.area.2 = round(mean( estimate <= -unremarkable_teststat), digits = 3),
             upper.area.2 =  round(mean( estimate >= unremarkable_teststat), digits = 3), 
             p.val.2 = lower.area.2 + upper.area.2,
             lower.area.7 = round(mean( estimate <= -exciting_teststat ), digits = 3),

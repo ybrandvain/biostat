@@ -8,6 +8,7 @@ library(blogdown)
 library(tweetrmd)
 library(tufte)
 library(emo)
+library(data.table)
 options(crayon.enabled = FALSE)   
 ```
 
@@ -59,8 +60,11 @@ toad_data <- tibble(             # This makes the data
   height     = c(2,3,2)
 ) 
 
-toad_data                        # This shows the data
+toad_data  %>% kable()                       # This shows the data
 ```
+
+
+
 
 ## The pipe `%>%` operator  
 
@@ -78,7 +82,7 @@ The pipe operator, [`%>%`](https://magrittr.tidyverse.org/reference/pipe.html), 
 
 
 
-```{r}
+```{r, eval=FALSE}
 sorted_bufo_bufo <- toad_data     %>% # initial data
   filter(species == "Bufo bufo")  %>% # only Bufo bufo
   mutate(BMI = height / weight)   %>% # calculate BMI
@@ -86,6 +90,17 @@ sorted_bufo_bufo <- toad_data     %>% # initial data
   dplyr::select(-species)             # remove species
 
 sorted_bufo_bufo
+```
+
+```{r, echo=FALSE}
+sorted_bufo_bufo <- toad_data     %>% # initial data
+  filter(species == "Bufo bufo")  %>% # only Bufo bufo
+  mutate(BMI = height / weight)   %>% # calculate BMI
+  arrange(BMI)                    %>% # sort by BMI
+  dplyr::select(-species)             # remove species
+
+sorted_bufo_bufo %>%
+  kable()
 ```
 
 ### Why did I introduce piping in a separate class?   
@@ -135,14 +150,14 @@ grades <- tibble(
   grade     = c(70, 63, 97, 85), 
 )
 
-grades
+grades %>% kable()
 ```
 
 
 
 Say we had student's grades (above), and we wanted to curve it so the highest score was a hundred, by finding the highest grade on each exam, dividing scores by this grad, and multiplying by 100. We could do this by typing   
 
-```{r}
+```{r, eval=FALSE}
 grades                             %>% 
   group_by(exam)                   %>%
   mutate(high_score = max(grade))  %>%
@@ -150,15 +165,32 @@ grades                             %>%
   mutate(curved_grade = 100 * grade / high_score)
 ```
 
+```{r, echo=FALSE}
+grades                             %>% 
+  group_by(exam)                   %>%
+  mutate(high_score = max(grade))  %>%
+  ungroup()                        %>%
+  mutate(curved_grade = 100 * grade / high_score) %>% kable()
+```
+
+
 ## Summaries in R
 
 The [`summarise()`](https://dplyr.tidyverse.org/reference/summarise) function in R reduces a data set to summaries that you ask it for. So, we can use tell R to summarize these data as follows.
 
-```{r, warning=FALSE, message=FALSE}
+```{r, warning=FALSE, message=FALSE, eval=FALSE}
 grades                                %>%
   group_by(exam)                      %>%
   summarise(high_score = max(grade))
 ```
+
+```{r, warning=FALSE, message=FALSE, echo = FALSE}
+grades                                %>%
+  group_by(exam)                      %>%
+  summarise(high_score = max(grade))  %>%
+  kable()
+```
+
 
 Note that we lost all the other information as we summarized, only retaining our groups name(s) and the summarised value(s).  
 
@@ -193,12 +225,24 @@ Before making these plots, we'll use the [`mutate()`]() function
 to $log_{10}$  transform `brainwt` and `bodywt`. For this data set, this makes patterns easier to see. Later we’ll see when this is a good or bad idea and how to do this while we are plotting, but let's hold off on that for now.
 
 
-```{r}
+```{r, eval=FALSE}
 msleep <- msleep %>%
   mutate(log10_brainwt = log10(brainwt), 
          log10_bodywt  = log10(bodywt))
-
 ```
+
+```{r, echo=FALSE}
+msleep <- msleep %>%
+  mutate(log10_brainwt = log10(brainwt), 
+         log10_bodywt  = log10(bodywt)) 
+DT::datatable(msleep %>% mutate(sleep_cycle  = round(sleep_cycle, digits =3) , 
+                                log10_bodywt = round(log10_bodywt, digits =3),  
+                                log10_brainwt = round(log10_brainwt, digits = 3),
+                                ),
+              options = list(pageLength = 5, dom = 'tip', scrollX='400px'))
+```
+
+
 
 #### Mapping aesthetics to variables  {-} 
 
@@ -207,7 +251,7 @@ So first we need to think of the variables we hope to map onto an aesthetic. Her
 
 ```{r, fig.height=1, fig.cap ="Uhh ohhh"}
 msleep_plot1 <- ggplot(data = msleep, aes(x = log10_brainwt)) # save plot
-plot(msleep_plot1)                                             #
+plot(msleep_plot1)                                             
 ```
 
 So, that didn’t go as expected :( — there just a blank grey background. But look more closely, what do you notice?      

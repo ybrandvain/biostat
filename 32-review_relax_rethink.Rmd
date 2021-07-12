@@ -1,0 +1,182 @@
+# Reflect Review and Relax {#break}
+
+```{r, echo = FALSE, warning=FALSE, message=FALSE}
+library(tidyverse)
+library(gridExtra)
+library(DT)
+library(knitr)
+library(blogdown)
+library(beyonce, warn.conflicts=F, quietly=T)
+library(stringr)
+library(tweetrmd)
+library(emo)
+library(tufte)
+library(cowplot)
+library(lubridate)
+library(ggthemes)
+library(kableExtra)
+library(ggforce)
+library(datasauRus)
+library(ggridges)
+library(randomNames)
+library(infer)
+library(tiktokrmd)
+library(ggridges)
+library(colorspace)
+library(ggfortify)
+library(broom)
+library(ggrepel)
+library(emojifont)
+library(car)
+library(magrittr)
+library(plotly)
+options(crayon.enabled = FALSE)   
+```
+
+
+
+
+
+<span style="color: Blue;font-size:22px;">   Motivating scenarios:  </span>  <span style="color: Black;font-size:18px;">   We are taking stock of where we are in the term. Thinking about stats and science, and making sure we understand the material to date.</span>
+
+```{block2, type='rmdnote'}
+**Required reading / Viewing:**  
+  
+The Science of Doubt. [link](https://youtu.be/cESuNcx28_I?t=680). By Michael Whitlock.    
+```
+
+
+## Review / Setup   
+
+- So much of stats aims to learn the TRUTH.    
+
+- We focus so much on our data and how to measure uncertainty around estimates and (in)compatibility of data with a null model. We will review and solidify this, but     
+- Recognize that so much beyond sampling error can mislead us.    
+
+##  How science goes wrong     
+
+Watch the video below. Whe you do, consider these types of errors that accompanny science. You should be able to think about htese and as good questions about them.
+
+- Fraud.  
+- Wrong models.     
+- Experimental design error.    
+- Communication error.  
+- Statistician error.    
+- Harking.      
+- Coding error.    
+- Technical Error.  
+- Publication bias.   
+
+
+You should have something to say about   
+
+- The "replication crisis", and 
+- If/why preregistration of studies is a good idea.    
+
+```{r, whitlock,fig.cap = "Watch this hour long  [video](https://www.youtube.com/watch?v=PWCtoVt1CJM) on *The science of Doubt* by Michael Whitlock.", echo=FALSE, out.extra= 'allowfullscreen'}
+include_url("https://www.youtube.com/embed/cESuNcx28_I?start=680")
+```
+
+**A brief word on publication bias** Scientists are overworked and have too much to do. They get more rewards for publishing statistically significant results, so those are usually higher on the to do list. This results in the *file drawer effect* in which non-significant results are less likely to be submitted for publication.
+
+
+I simulate this below, and the have a web app (basically this code dressed up in sliders) for you to use to explore this.  
+
+```{r pubbias, fig.cap="Testing the null that the mean equals zero, when we know the true mean is 0.2.", message=FALSE, warning=FALSE}
+# Set it up
+sample_sizes      <- c(2,4,6,8,12,16,24,32,48,64,96,128,192,250, 384,500,768, 1000)
+replicates        <- 10000
+total_experiments <- length(sample_sizes) * replicates
+exp_id            <- factor(1:total_experiments)
+mu                <- .2
+sigma             <- 1
+  
+# Simulate
+sim_dat <- tibble(exp_id      =   factor(1:total_experiments) ,
+       sample_size = rep(sample_sizes, each = replicates)) %>%
+  uncount(weights = sample_size, .remove = FALSE)          %>%
+  mutate(sim_val  = rnorm(n = n(), mean = mu, sd = sigma))  
+
+# Summarize and hypothesis test
+sim_summary <- sim_dat %>%
+  group_by(exp_id) %>%
+  summarise(n = n(),
+            mean_val = mean(sim_val),
+            se       = sd(sim_val) / sqrt(n),
+            t        = mean_val / se,
+            p_val    = 2 * pt(q = abs(t), df = n-1, lower.tail = FALSE),
+            reject   = p_val < 0.05) %>%
+  group_by(n) %>%
+  mutate(power = mean(reject))
+
+# plot
+ sim_plot<- ggplot(sim_summary,  aes(x = power, y = mean_val,label = n))+
+            stat_summary(aes(color = reject),
+                         geom = "text", size =3,
+                         position = position_nudge(y = .02, x = -.015),
+                         show.legend = FALSE) +
+            stat_summary(aes(color = reject),geom = "point",
+                         show.legend = FALSE)            +
+            stat_summary(aes(color = reject), geom = "line")+
+            stat_summary(geom = "line", color = "black")  +
+            annotate(x = .5, y = mu+.02, geom = "text",label = "mean of all sims" , size = 2)  +
+            theme_light()+
+            labs(title = "Significant results are biased. Numbers show n")
+        ggplotly(sim_plot)
+```
+
+Interact with the app below (basically this code with widgets allowing you to) to see how this biases our estimates.
+
+
+```{r, echo=FALSE}
+include_app("https://brandvain.shinyapps.io/publication_bias/", height = "800")
+```
+
+
+```{block2, type='rmdnote'}
+**I find this stuff fascinating**  If you want more, here are some good resources.    
+
+Videos from calling bullshit -- largely redundant with video above): 7.2 [Science is amazing, but...](https://www.youtube.com/watch?v=EONB0_RyVKU),  7.3 
+[Reproducibility](https://www.youtube.com/watch?v=6VySTivCvlg), 7.4 [A Replication Crisis](https://www.youtube.com/watch?v=3hyMXhw2syM), 7.5  [Publication Bias](https://www.youtube.com/watch?v=BenytbfaMMI), and 7.6 [Science is not Bullshit](https://www.youtube.com/watch?v=4CzWsPJ9Pms).  
+
+- **The replication crisis**    
+     - *Estimating the reproducibility of psychological science* [@repcris2015]   [link](https://drive.google.com/file/d/11NB7VMJDxUTODlj6s8V432AbSJIAe4WB/view), 
+     - *A glass half full interpretation of the replicability of psychological* [@leek2015]    [link](https://arxiv.org/pdf/1509.08968.pdf),    
+     - *The Persistence of Underpowered Studies in Psychological Research: Causes, Consequences, and Remedies* [@maxwell2004] [link](http://statmodeling.stat.columbia.edu/wp-content/uploads/2017/07/maxwell2004.pdf).   
+
+- **P-hacking** *The Extent and Consequences of P-Hacking in Science*  [@head2015] [link](https://journals.plos.org/plosbiology/article?id=10.1371/journal.pbio.1002106).   
+
+- *The garden of forking paths: Why multiple comparisons can be a problem, even when there is no "fishing expedition" or "p-hacking" and the research hypothesis was posited ahead of time∗ [link](http://www.stat.columbia.edu/~gelman/research/unpublished/p_hacking.pdf).
+```
+
+##  Review   
+
+You should be pretty comfortable with the ideas of   
+
+- Parameters vs Estimates    
+- Sampling and what can go wrong   
+- Null hypothesis significance testing   
+- Common test statistics    
+    - F   
+    - t   
+- Calculating Sums of Squares      
+- Interpreting stats output like that below   
+
+```{r, message=FALSE, warning=FALSE}
+ToothGrowth <- mutate(ToothGrowth, dose = factor(dose))
+tooth_lm <- lm(len ~ supp * dose, data = ToothGrowth)
+
+
+summary(tooth_lm)   
+anova(tooth_lm)
+Anova(tooth_lm, type = "II")   
+```
+
+
+
+
+
+## Quiz  
+
+Reflection questions on [canvas]
+

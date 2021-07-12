@@ -479,7 +479,7 @@ This makes sense a we used a mean squares error in the two sanova -- the very de
 ```{r, message=FALSE, warning=FALSE}
 sqrl %>%
   group_by(ambient_temp) %>%
-  summarize(variance = var(body_temp))                                                                                                                                                          %>% kable(digits = 4)
+  summarise(variance = var(body_temp))                                                                                                                                                          %>% kable(digits = 4)
 ```
 
 Because all these variances are within a factor of five,  we say that we're not severely violating the equal variance assumption. Like the two-ample t-test, the ANOVA is robust to minor violations of equal variance within groups.

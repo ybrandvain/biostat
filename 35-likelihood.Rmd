@@ -1,0 +1,442 @@
+# Likelihood based inference {#likelihood}
+
+```{r, echo = FALSE, warning=FALSE, message=FALSE}
+library(tidyverse)
+library(gridExtra)
+library(DT)
+library(knitr)
+library(blogdown)
+library(beyonce, warn.conflicts=F, quietly=T)
+library(stringr)
+library(tweetrmd)
+library(emo)
+library(tufte)
+library(cowplot)
+library(lubridate)
+library(ggthemes)
+library(kableExtra)
+library(ggforce)
+library(datasauRus)
+library(ggridges)
+library(randomNames)
+library(infer)
+library(tiktokrmd)
+library(ggridges)
+library(colorspace)
+library(ggfortify)
+library(broom)
+library(ggrepel)
+library(emojifont)
+library(car)
+library(magrittr)
+library(plotly)
+library(dagitty)
+library(ggdag)
+options(crayon.enabled = FALSE)   
+```
+
+
+
+
+
+<span style="color: Blue;font-size:22px;">   Motivating scenario:  </span>  <span style="color: Black;font-size:18px;"> We want to make inferences on data from any type of null model.  </span>
+
+
+
+
+## Likelihood Based Inference     
+
+We have focused extensively on the normal distribution in our linear modeling. This makes sense, many things are approximately normally, but definitely not everything. We have also assumed independence -- this is a more dicey because we usually only have independence in really carefully done experiments -- but whatever.   
+
+The good news is that we can break free from the assumptions of linear models and build and make inference under any model we can appropriately describe by an equation under likelihood-based inference!    We can even model things like phylogenies or genome sequences or whatever.   
+
+
+
+### Remember probabilities? 
+
+Remember, a probability is the proportion of times a model would produce the result we are considering. When we think about probabilities, we think about one model, and consider all the potential outcome. For a given model, all the probabilities (or probability densities) will sum (or integrate) to one.  
+
+### Likelihoods     
+
+The mathematical calculation for a likelihood is the EXACT SAME as the calculation of a probability.  
+
+
+
+The big difference is our orientation --- in a likelihood, we think of the outcome as fixed, and consider the different models that could have generated this outcome.   So we think of a likelihood as a conditional probability. 
+
+$$P(Data | Model) = \mathscr{L}(Model | Data)$$
+
+```{r, echo=FALSE, out.width="65%"}
+include_graphics("images/likVprob.jpeg")
+```
+
+### Log liklihoods  
+
+If data are independent, we can calculate the likelihood of all of our data by taking the product of each individual likelihood. This is great, but inroduces some challenges 
+
+
+- Multiplying a lot of probabilities can make a really small probability. In fact these numbers can get so small that computers lose track of them.   
+- They are not great for math.   
+
+So we take the log of each likelihood and sum them all, because adding in log space is like multiplying in linear space -- e.g. `0.5 * 0.2 =  0.1.` and `log(0.5) + log(0.2) = -2.302585` and $e^{-2.302585} = 0.1$.  
+
+So we almost always deal with log likelihoods instead of likelihoods.   
+
+
+
+## Log Likelihood of $\mu$ 
+
+How can we calculate likelihoods for a parameter of a normal distribution?  Here's how!  
+
+Say we had a sample with values `0.01`, `0.07`, and `2.2`, and we knew the population standard deviation equaled one, but we didn't know the population mean. We could find the likelihood of a proposed mean by multiplying the probability of each observation, given the proposed mean. So the likelihood of $\mu = 0 | \sigma = 1, \text{ and } Data = \{0.01, 0.07, 2.2\}$ is     
+
+```{r}
+dnorm(x = 0.01, mean = 0, sd = 1) * dnorm(x = 0.07, mean = 0, sd = 1) * dnorm(x = 2.20, mean = 0, sd = 1)
+```
+
+A more compact way to write this is `dnorm(x = c(0.01, 0.07, 2.20), mean = 0, sd = 1) %>% prod()`. Remember we multiply because all observations are independent.  
+
+For both mathematical  and logistical (computers have trouble with very small numbers)  reasons, it is usually better to work wit log likelihoods than linear likelihoods. Because multiplying on linear scale is like adding on log scale, the log likelihood for this case is `dnorm(x = c(0.01, 0.07, 2.20), mean = 0, sd = 1, log = TRUE) %>% sum()` = `r dnorm(x = c(0.01, 0.07, 2.20), mean = 0, sd = 1, log = TRUE) %>% sum()`.  Reassuringly, `log(0.00563186)` = `r log(0.00563186)`.  
+
+### The likelihood profile
+
+We can consider a bunch of other plausible parameter values and calculate the (log) likelihood of the data for all of these "models". This is called a likelihood profile. We can find a likelihood profile as  
+
+
+```{r, fig.height=2, fig.width=3, message=FALSE}
+obs            <- c(0.01, 0.07, 2.2)
+proposed.means <- seq(-1, 2, .001) 
+tibble(proposed_means = rep(proposed.means , each = length(obs)),
+       observations   = rep(obs, times = length(proposed.means)),
+       log_liks       = dnorm(x = observations, mean = proposed_means, sd = 1, log = TRUE)) %>%
+  group_by(proposed_means) %>%
+  summarise(logLik = sum(log_liks)) %>%
+  ggplot(aes(x = proposed_means, y = logLik))+
+  geom_line()
+```
+
+
+### Maximum likelihood estimate  
+
+How can we use this for inference? Well, one estimate of our parameter is to the one that "maximizes the likelihood" of our data (e.g. the x value corresponding to the largest value in the figure above).   
+
+Note that this is NOT the parameter value with the best chance of being right (that's a Bayesian question), but rather this is the parameter that, if true, would have the greatest chance of generating our data.    
+
+
+
+
+```{r, echo=FALSE}
+tweet_embed("https://twitter.com/DocEdge85/status/1376663103111229444")
+```
+
+
+We can find the maximum likelihood estimate  as
+
+```{r warning=FALSE, message=FALSE}
+tibble(proposed_means = rep(proposed.means , each = length(obs)),
+       observations   = rep(obs, times = length(proposed.means)),
+       log_liks       = dnorm(x = observations, mean = proposed_means, sd = 1, log = TRUE)) %>%
+  group_by(proposed_means) %>%
+  summarise(logLik = sum(log_liks)) %>%
+  filter(logLik == max(logLik)) %>%
+  pull(proposed_means)
+```
+
+Which equals the mean of our observations `mean(c(0.01, 0.07, 2.2))` = `r mean(c(0.01, 0.07, 2.2))`. More broadly, for normally distributed data,  the maximum likelihood estimate of a population mean is the sample mean.
+
+
+## Likelihood based inference: Uncertainty and hypothesis testing.   
+
+We calculate the likelihoods and do likelihood-based inference for samples from a normal the exact same way as we did previously. 
+
+Because this all relies on pretending we are using population parameters. So we calculate the sd as the distance of each data point from the proposed mean, and divide by `n` rather than `n-1`.
+
+
+
+
+
+
+### Example 1: Are species moving uphill
+
+Remember in Chapter \@ref(t), we looked at data from, @Chen2011 who tested the idea that organisms move to higher elevation as the climate warms. To test this, they collected data from 31 species, plotted below  (Fig \@ref(fig:elevaL)).
+
+
+```{r elevaL, fig.cap="Change in the elevation of 31 species. Data from @Chen2011.", fig.height=2,fig.width=4, message=FALSE, warning=FALSE}
+range_shift_file <- "https://whitlockschluter3e.zoology.ubc.ca/Data/chapter11/chap11q01RangeShiftsWithClimateChange.csv"
+range_shift <- read_csv(range_shift_file) %>%
+  mutate(x = "", uphill = elevationalRangeShift > 0)
+
+ggplot(range_shift, aes(x = x, y = elevationalRangeShift))+
+  geom_jitter(aes(color = uphill), width = .05, height = 0, size = 2, alpha = .7)+
+  geom_hline(yintercept = 0, lty= 2)+
+  stat_summary(fun.data = "mean_cl_normal") + 
+  theme(axis.title.x = element_blank())
+```
+
+We then conducted a one sample t-test against of the null hypothesis that there has been zero net change on average. 
+
+```{r}
+lm(elevationalRangeShift ~ 1, data = range_shift) %>%
+  summary()
+```
+
+#### Calculate log likelihoods for each model   
+ 
+First we grab our observations, write down our proposed means -- lets say from negative one hundred to two hundred in increments of .01. 
+
+```{r warning=FALSE, message=FALSE}
+observations   <-  pull(range_shift, elevationalRangeShift)
+proposed_means <- seq(-100,200,.01)
+```
+
+
+
+1. Copy our data as many times as we have parameter guesses   
+2. Calculate the population variance for each proposed parameter value,  
+3. Calculate for each guess log likelihood of each observation at each proposed parameter value   
+
+
+```{r}
+lnLik_uphill_calc <- tibble(obs = rep(observations, each = length(proposed_means)), # Copy observations a bunch of times
+                        mu  = rep(proposed_means, times = length(observations)),# Copy parameter guesses a bunch of times
+                        sqr_dev = (obs - mu)^2 )%>%
+  group_by(mu) %>%
+  mutate(var = sum((obs - mu)^2 ) / n(), #  Calculate the population variance for each proposed parameter value
+         lnLik = dnorm(x = obs, mean = mu, sd = sqrt(var), log = TRUE)) #Calculate for each guess log likelihood of each observation at each proposed parameter value   
+
+```
+
+```{r logliks1B, fig.cap = "log likelihoods of each data point for 100 proposed means (a subst of those investigated above)" , echo=FALSE}
+DT::datatable(lnLik_uphill_calc %>% filter( mu %%1==0) %>% dplyr::select(-sqr_dev),
+              options = list(autoWidth = TRUE,pageLength = 5, lengthMenu = c(5, 25, 50),
+                             columnDefs=list(list(targets=1, class="dt-right"),
+                                             list(width = '20px', targets = 1)
+                                             )))%>%
+  formatRound(columns = c( 'var', 'lnLik'))
+```
+
+Find the likelihood of each proposed mean by adding in log scale (i.e. multiplying in linear scale because these are all independent) the probability of each observation given the proposed parameter value.
+
+```{r likprofX, fig.cap = "likelihood profile for proposed mean elevational shift in species examined by data from @Chen2011", message=FALSE, warning=FALSE, fig.height=2, fig.width=3}
+lnLik_uphill <- lnLik_uphill_calc %>%
+  summarise(lnLik = sum(lnLik))
+
+ggplot(lnLik_uphill, aes(x = mu, y = lnLik))+
+  geom_line()
+```
+
+#### Maximium likelihood / Confidence intervals / Hypothesis testing    
+
+We can use the likelihood profile (Fig \@ref(fig:likprofX)) to do standard things, like  
+
+- Make a good guess of the parameter, 
+- Find confidence intervals around this guess,   
+- Test null hypotheses that this guess differs from the value proposed under the null      
+
+First lets find our guess -- called the **maximum likelihood estimator (MLE)**  
+
+```{r}
+MLE <- lnLik_uphill %>%
+  filter(lnLik == max(lnLik))                                                                                                                ; data.frame(MLE)
+```
+
+Reassuringly, this MLE matches the simple calculation of the mean `mean(observations)` = `r mean(observations) %>% round(digits = 2)`.   
+
+**NOTE** The model from the `lm()` function will be the MLE. So we can use this to caucalte it's likelihood. 
+
+Either "by hand" from the model's output
+
+```{r}
+lm(elevationalRangeShift ~ 1, data = range_shift) %>%
+    augment() %>%
+    mutate(sd = sqrt(sum(.resid^2) / n()),
+           logLiks = dnorm(x = .resid, mean = 0 , sd = sd, log = TRUE)) %>%
+    summarise(log_lik = sum(logLiks))                                                                                                   %>% data.frame()
+```
+
+Or with the `logLik()` function.
+
+```{r}
+lm(elevationalRangeShift ~ 1, data = range_shift) %>%
+  logLik()
+  
+```
+##### **Uncertainty**   {-}   
+
+*We need one more trick to use the likelihood profile to estimate uncertainty*   
+
+log likelihoods are roughly $\chi^2$ distributed with degrees of freedom equal to the number of parameters we're inferring (here, just one -- corresponding to the mean). So for 95% confidence intervals are everything within `qchisq(p = .95, df =1) /2` = `r round(qchisq(p = .95, df =1) /2, digits = 2)` log likelihood units of the MLE
+
+```{r}
+CI <- lnLik_uphill %>%
+  mutate(dist_from_MLE =  max(lnLik) - lnLik) %>%
+  filter(dist_from_MLE < qchisq(p = .95, df =1) /2) %>%
+  summarise(lower_95CI = min(mu),
+            upper_95CI = max(mu))                                                                                               ; data.frame(CI)
+```
+
+#####  **Hypothesis testing by the likelihood ratio test**  {-}
+
+We can find a p-value and test the null hypothesis by comparing the likelihood of our MLE ($log\mathscr{L}(MLE|D)$) to the likelihood of the null model ($log\mathscr{L}(H_0|D)$). We call this a likelihood ratio test, because we divide the likelihood of the MLE by the likelihood of the null -- but we're doing this in logs, so we subtract rather than divide.  
+
+- $log\mathscr{L}(MLE|D)$   = Sum the log-likelihood of each observation under the MLE = `pull(MLE, lnLik)` = `r pull(MLE, lnLik) %>% round(digits =3)`.  
+
+- $log\mathscr{L}(H_0|D)$   = Sum the log-likelihood of each observation under the null = `lnLik_uphill%>% filter(mu == 0 ) %>% pull(lnLik)` = `r lnLik_uphill%>% filter(mu == 0 ) %>% pull(lnLik) %>% round(digits =3)`.  
+
+We then calculate $D$ which is simply two times this difference in lof likelihoods, and calcualte a p-value with it by noting that $D$ is $\chi^2$ distributed with degrees of freedom equal to the number of parameters we're inferring (here, just one -- corresponding to the mean). 
+
+```{r}
+D      <- 2 *  (pull(MLE, lnLik) -   lnLik_uphill%>% filter(mu == 0 ) %>% pull(lnLik)  )
+p_val  <- pchisq(q = D, df = 1, lower.tail = FALSE)
+c(D = D, p_val = p_val)
+```
+
+
+## Bayesian inference  
+
+We often can are about how probable our model is given the data, not the opposite. We can use likelihoods to solve this!!! Remember Bayes' theorem:  $(Model|Data) = \frac{P(Data|Model) \times P(Model)}{P(Data)}$. Taking this apart  
+
+-   $(Model|Data)$ is called the posterior probability -- the probability of our model after we know the data.   
+- $P(Data|Model) = \mathscr{L}(Model|Data)$. This is the likelihood we just calculated.   
+- $P(Model)$ is called the **prior probability**. This is the probability our model is true before we have data. We almost never know this, so we make something up that sounds reasonable...   
+- $P(Data)$. The probability of our data, called the evidence. We find this  through the law of total probability.  
+
+
+Today, we'll arbitrarily pick a prior probability. This is a bad thing to do -- out Bayesian inferences are only meaningful to the extent that a meaningfully interpret the posterior, and this relies on a reasonable prior. But we're doing it as an example:   -- say our prior is that this is normally distributed around 0 with a standard deviation of 30. 
+
+```{r}
+bayes_uphill <- lnLik_uphill %>%
+  mutate(lik   = exp(lnLik),
+         prior = dnorm(x = mu, mean = 0, sd = 30) / sum(dnorm(x = mu, mean = 0, sd = 30) ),
+         evidence  = sum(lik * prior),
+         posterior =  (lik *  prior) / evidence) 
+```
+
+```{r, echo=FALSE}
+DT::datatable(bayes_uphill %>% filter(mu%%1==0),
+              options = list(autoWidth = TRUE,pageLength = 5, lengthMenu = c(5, 25, 50)))%>%
+  formatSignif(columns = c('lnLik', 'lik', 'prior', 'evidence', 'posterior'), digits = 3)
+```
+
+```{r, echo=FALSE, fig.height=2, fig.width=4}
+bayes_uphill %>% 
+  dplyr::select(mu, prior, posterior) %>% 
+  pivot_longer(cols = c('prior','posterior'), names_to = "prob",values_to = "probability") %>% 
+  ggplot(aes(x = mu, y = probability, color = prob)) + 
+  geom_line()+
+  labs(title = 'Comparing prior and posterior')
+```
+
+**We can grab interesting thing from the posterior distribution.** 
+
+- For example we can find the maximum a posteriori (MAP) estimate as  
+
+```{r}
+bayes_uphill %>%
+  filter(posterior == max(posterior))                                                                                                  %>% data.frame()
+```
+
+Note that this MAP estimate does not equal our MLE as it is pulled away from it by our prior.   
+
+- We can grab the 95% credible interval. Unlike the 95% confidence intervals, the 95% credible interval  has a 95% chance of containing the true parameter (if our prior is correct).  
+
+```{r}
+bayes_uphill %>%
+  mutate(cumProb = cumsum(posterior)) %>%
+  filter(cumProb > 0.025 & cumProb < 0.975)%>%
+  summarise(lower_95cred = min(mu),
+            upper_95cred = max(mu))                                                                                                %>% data.frame()
+```
+
+
+### Prior sensitivity  
+
+In a good world  our priors are well calibrated.  
+In a better world, the evidence in the data is so strong, that our priors don't matter. 
+
+A good thing to do is to compare our posterior distributions across different prior models. The plot below shows that if our prior is very tight, we have trouble moving the posterior away from it.  Another way to say this, is that if your prior believe is strong, it would take loads of evidence to gr you to change it.
+
+
+
+
+```{r, echo=FALSE, fig.height=5, fig.width=4}
+bind_rows(
+bayes_uphill1 <- lnLik_uphill %>%
+  mutate(lik   = exp(lnLik),
+         prior = dnorm(x = mu, mean = 0, sd = 30),
+         prior = prior/ sum(prior),
+         evidence  = sum(lik * prior),
+         posterior =  (lik *  prior) / evidence,
+         prior_model  = "N(0, 30^2)") ,
+lnLik_uphill %>%
+  mutate(lik   = exp(lnLik),
+         prior = dnorm(x = mu, mean = 0, sd = 5),
+         prior = prior/ sum(prior),
+         evidence  = sum(lik * prior),
+         posterior =  (lik *  prior) / evidence,
+         prior_model  = "N(30, 1^2)") ,
+lnLik_uphill %>%
+  mutate(lik   = exp(lnLik),
+         prior = dunif(x = mu, min = -100, max = 200),
+         prior = prior/ sum(prior),
+         evidence  = sum(lik * prior),
+         posterior =  (lik *  prior) / evidence,
+         prior_model  = "U(-100, 200)") ) %>%
+    dplyr::select(mu, prior, posterior, prior_model) %>% 
+  pivot_longer(cols = c('prior','posterior'), names_to = "prob",values_to = "probability") %>% 
+  mutate(prior_model = fct_relevel(prior_model, "N(30, 1^2)", after = 0))%>%
+  ggplot(aes(x = mu, y = probability, color = prob)) + 
+  geom_line()+
+  labs(title = 'Comparing across priors')+
+  facet_wrap(~prior_model, ncol = 1)
+```
+
+
+**MCMC / STAN / brms**
+
+With more complex models, we usually can't use the math above to solve Bayesian problems. Rather we use computer ticks -- most notably the Markov Chain Monte Carlo [MCMC](https://en.wikipedia.org/wiki/Markov_chain_Monte_Carlo) to approximate the posterior distribution. 
+
+The programming here can be tedious so there are many programs -- notable [WINBUGS](https://www.mrc-bsu.cam.ac.uk/software/bugs/the-bugs-project-winbugs/), [JAGS](https://mcmc-jags.sourceforge.io/) and [STAN](https://mc-stan.org/) -- that make the computation easier. But even those can be a lot of work. **Here I use the R package [brms](https://paul-buerkner.github.io/brms/), which runs stan for us, to do an MCMC and do Bayesian stats.**  I suggest [looking into this](https://paul-buerkner.github.io/brms/) if you want to get stared, and learning STAN for more serious analyses
+
+
+```{r, echo=FALSE, eval=FALSE,message=FALSE, warning=FALSE}
+library(brms)
+change.fit <- brm(elevationalRangeShift ~ 1, 
+	data   = range_shift,
+	family = gaussian(),
+	prior  = set_prior("normal(0, 30)", 
+                      class = "Intercept"),
+	chains = 4,
+	iter   = 5000)
+save(change.fit,file = "data/elevation_brm.Robj")
+```
+
+```{r, message=FALSE, warning=FALSE, eval=FALSE}
+library(brms)
+change.fit <- brm(elevationalRangeShift ~ 1, 
+	data   = range_shift,
+	family = gaussian(),
+	prior  = set_prior("normal(0, 30)", 
+                      class = "Intercept"),
+	chains = 4,
+	iter   = 5000)
+
+change.fit$fit
+```
+
+
+
+```{r, echo=FALSE}
+tribble(
+~term,     ~mean, ~se_mean,   ~sd,    ~"2.5%",     ~"25%",     ~"50%",     ~"75%",   ~"97.5%", ~n_eff, ~Rhat,
+"b_Intercept"  , 37.82,    0.06, 5.69,   26.56,   34.11,   37.86,   41.59,   48.82,  7863,    1,
+"sigma"  ,       31.70,    0.05, 4.25,   24.84,   28.68,   31.24,   34.20,   41.34,  6444,    1,
+"lp__"  ,      -156.70,    0.02, 1.04, -159.48, -157.09, -156.38, -155.97, -155.70 , 4340,    1)                                                                                                                        %>% mutate_if(is.numeric,round,digits = 4) %>%DT::datatable( options = list( scrollX='400px'))
+```
+
+
+## Quiz 
+
+```{r, echo=FALSE}
+include_app("https://brandvain.shinyapps.io/liklhood/", height = "800")
+```
